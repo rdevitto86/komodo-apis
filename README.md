@@ -3,25 +3,33 @@ A collection of Golang services used to support the Komodo Solutions customer-fa
 
 
 ## Authentication Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x
 
 ## User Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x
 
 ## Merchandise Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x
 
 ## Order Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x
 
 ## Finance Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x
 
 ## CustomerSupport Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Java Version: x.x.x
 
 ## Administration Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Java Version: x.x.x
 
 ## Analytics Service
-> Version: 0.1 (alpha)
+> App Version: 0.1 (alpha) </br>
+> Java Version: x.x.x
