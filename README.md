@@ -22,3 +22,6 @@ A collection of Golang services used to support the Komodo Solutions customer-fa
 
 ## Administration Service
 > Version: 0.1 (alpha)
+
+## Analytics Service
+> Version: 0.1 (alpha)
