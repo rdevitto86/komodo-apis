@@ -9,8 +9,9 @@ A collection of web services used to support the Komodo Future Solutions, LLC. c
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - login </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - logoff </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateUser </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateCapitcha </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateSession </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateTwoFactor </br>
+
 
 ## User Service
 > Release Version: 0.1 (alpha) </br>
@@ -19,6 +20,7 @@ A collection of web services used to support the Komodo Future Solutions, LLC. c
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getUserInfo </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateUserInfo </br>
+
 
 ## Merchandise Service
 > Release Version: 0.1 (alpha) </br>
@@ -31,6 +33,7 @@ A collection of web services used to support the Komodo Future Solutions, LLC. c
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceDetails </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceDetails </br> 
 
+
 ## Order Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x
@@ -41,6 +44,7 @@ A collection of web services used to support the Komodo Future Solutions, LLC. c
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateOrder </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - cancelOrder </br>
 
+
 ## Finance Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x
@@ -50,11 +54,13 @@ A collection of web services used to support the Komodo Future Solutions, LLC. c
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getInvoiceDetails </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updatePaymentInfo </br>
 
+
 ## Administration Service
 > Release Version: 0.1 (alpha) </br>
 > Java Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
+
 
 ## CustomerSupport Service
 > Release Version: 0.1 (alpha) </br>
