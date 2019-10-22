@@ -1,5 +1,5 @@
-# Komodo Future Solutions Web-Service Repo
-A collection of web services used to support applications under Future Solutions, Inc. 
+# Komodo Future Solutions Web-Service Repository
+A collection of web services used to support various web/mobile applications
 
 
 ## Authentication Service
