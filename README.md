@@ -57,7 +57,7 @@ A collection of web services used to support various web/mobile applications
 
 ## Administration Service
 > Release Version: 0.1 (alpha) </br>
-> Express.js Version: x.x.x
+> Express.js Version: x.x.x </br>
 > Node.js Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
@@ -65,7 +65,7 @@ A collection of web services used to support various web/mobile applications
 
 ## CustomerSupport Service
 > Release Version: 0.1 (alpha) </br>
-> Express.js Version: x.x.x
+> Express.js Version: x.x.x </br>
 > Node.js Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
