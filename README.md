@@ -57,14 +57,14 @@ A collection of web services used to support various web/mobile applications
 
 ## Administration Service
 > Release Version: 0.1 (alpha) </br>
-> Java Version: x.x.x
+> Node.js Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 
 
 ## CustomerSupport Service
 > Release Version: 0.1 (alpha) </br>
-> Java Version: x.x.x
+> Node.js Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitFeedback </br>
@@ -76,7 +76,7 @@ A collection of web services used to support various web/mobile applications
 
 ## Analytics Service
 > Release Version: 0.1 (alpha) </br>
-> Java Version: x.x.x
+> Python Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordClickEvent </br>
