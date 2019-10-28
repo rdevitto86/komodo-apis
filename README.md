@@ -105,8 +105,9 @@ A collection of web services used to support various web/mobile applications
 
 
 ## Third-Party Services
-> Azure Bot Service (Chat bots)
-> Azure Analytics Service (Logging/Analytics)
-> Azure IoT (Robotics/Automation)
-> MailChimp or ActiveCampaign (Marketing) [TEMP]
-> Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP]
+> Azure Bot Service (Chat bots) </br>
+> Azure Analytics Service (Logging/Analytics) </br>
+> Azure IoT (Robotics/Automation) </br>
+> MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
+> Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
+
