@@ -76,6 +76,19 @@ A collection of web services used to support various web/mobile applications
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - unsubscribeUser </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendMarketingEmail </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendMarketingText </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateDeeplinkURL </br>
+
+
+## News (Blog) Service
+> Release Version: 0.1 (alpha) </br>
+> Express.js Version: x.x.x </br>
+> Node.js Version: x.x.x
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getArticle </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getAllArticles </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - postArticle </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteArticle </br>
 
 
 ## Customer-Support Service
@@ -95,7 +108,17 @@ A collection of web services used to support various web/mobile applications
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - startCustSupptChat </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
 
-## Administration Service
+
+## Analytics Service
+> Release Version: 0.1 (alpha) </br>
+> Express.js Version: x.x.x </br>
+> Node.js Version: x.x.x
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
+
+
+## Administration Service [Internal]
 > Release Version: 0.1 (alpha) </br>
 > Express.js Version: x.x.x </br>
 > Node.js Version: x.x.x
