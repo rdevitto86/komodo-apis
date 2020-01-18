@@ -68,8 +68,8 @@ A collection of web services used to support various web/mobile applications
 
 ## Marketing Service
 > Release Version: 0.1 (alpha) </br>
-> Express.js Version: x.x.x </br>
-> Node.js Version: x.x.x
+> Node Version: x.x.x </br>
+> Express Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateUserMarketingPreferences </br>
@@ -81,8 +81,8 @@ A collection of web services used to support various web/mobile applications
 
 ## News (Blog) Service
 > Release Version: 0.1 (alpha) </br>
-> Express.js Version: x.x.x </br>
-> Node.js Version: x.x.x
+> Node Version: x.x.x
+> Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getArticle </br>
@@ -93,8 +93,8 @@ A collection of web services used to support various web/mobile applications
 
 ## Customer-Support Service
 > Release Version: 0.1 (alpha) </br>
-> Express.js Version: x.x.x </br>
-> Node.js Version: x.x.x
+> Node Version: x.x.x </br>
+> Express Version: x.x.x
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitFeedback </br>
@@ -111,8 +111,8 @@ A collection of web services used to support various web/mobile applications
 
 ## Analytics Service
 > Release Version: 0.1 (alpha) </br>
-> Express.js Version: x.x.x </br>
-> Node.js Version: x.x.x
+> Node Version: x.x.x
+> Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
@@ -120,8 +120,8 @@ A collection of web services used to support various web/mobile applications
 
 ## Administration Service [Internal]
 > Release Version: 0.1 (alpha) </br>
-> Express.js Version: x.x.x </br>
-> Node.js Version: x.x.x
+> Node Version: x.x.x
+> Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 [TODO]
