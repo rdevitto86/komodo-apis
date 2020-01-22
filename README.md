@@ -16,7 +16,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## User Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x
+> Golang Version: x.x.x  </br>
 > [?] GraphQL Version: x.x.x </br>
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
@@ -29,7 +29,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Merchandise Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x
+> Golang Version: x.x.x  </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductCollection </br>
@@ -43,7 +43,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Order Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x
+> Golang Version: x.x.x  </br>
 > [?] GraphQL Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
@@ -58,7 +58,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Finance Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x
+> Golang Version: x.x.x  </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitPayment </br>
@@ -71,7 +71,7 @@ A collection of web-service operations used to support various web/mobile applic
 ## Marketing Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
-> Express Version: x.x.x
+> Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateUserMarketingPreferences </br>
@@ -83,7 +83,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## News (Blog) Service
 > Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x
+> Node Version: x.x.x  </br>
 > Express Version: x.x.x </br>
 > [?] GraphQL Version: x.x.x </br>
 
@@ -114,7 +114,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Analytics Service
 > Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x
+> Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
@@ -123,7 +123,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Resource Delegation Service 
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMAppDesktop </br>
@@ -132,7 +132,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Administration Service [Internal]
 > Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x
+> Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
