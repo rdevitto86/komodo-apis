@@ -137,18 +137,19 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeHLSUnit </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportTemperature </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceTemperatureChange </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMoisture </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceMoistureChange </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportLampBrightness </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceBrightnessChange </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportWateringTime </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceWateringChange </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportFeedingTime </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceFeedingChange </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideTemperature </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideMoisture </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideLampBrightness </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideWateringSchedule </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideFeedingSchedule </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideSleepSchedule </br>
 
 
-## Operational Analytics Service [Internal]
+## Internal Operations Analytics Service [Internal]
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
@@ -172,4 +173,3 @@ A collection of web-service operations used to support various web/mobile applic
 > Azure IoT (Robotics/Automation) </br>
 > MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
 > Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
-
