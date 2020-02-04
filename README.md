@@ -34,6 +34,16 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductCollection </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductDetails </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getReviews </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getRating </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
+
+
+## ContractedServices Service
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceCollection </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceDetails </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getReviews </br>
@@ -112,7 +122,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
 
 
-## Analytics Service
+## BusinessOps Analytics Service [Internal]
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
@@ -121,13 +131,22 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
 
 
-## Resource Delegation Service 
+## WebApp Analytics Service
+> Release Version: 0.1 (alpha) </br>
+> Node Version: x.x.x </br>
+> Express Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
+
+
+## WebApp Delegator Service 
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMAppDesktop </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMAppMobile </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMDesktop </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMMobile </br>
 
 
 ## Administration Service [Internal]
