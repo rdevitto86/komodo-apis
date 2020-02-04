@@ -1,6 +1,14 @@
 # Komodo Future Solutions Web-Service Repository
 A collection of web-service operations used to support various web/mobile applications
 
+## WebApp Delegator Service 
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMDesktop </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMMobile </br>
+
 
 ## Authentication Service
 > Release Version: 0.1 (alpha) </br>
@@ -122,7 +130,25 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
 
 
-## Operational Data-Analytics Service [Internal]
+## Hydroponic Life Support (HLS) Service [Internal]
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x  </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeHLSUnit </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportTemperature </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceTemperatureChange </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMoisture </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceMoistureChange </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportLampBrightness </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceBrightnessChange </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportWateringTime </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceWateringChange </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportFeedingTime </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forceFeedingChange </br>
+
+
+## Operational Analytics Service [Internal]
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
@@ -138,24 +164,6 @@ A collection of web-service operations used to support various web/mobile applic
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
-
-
-## WebApp Delegator Service 
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMDesktop </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMMobile </br>
-
-
-## Administration Service [Internal]
-> Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x </br>
-> Express Version: x.x.x </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-[TODO]
 
 
 ## Third-Party Services
