@@ -130,17 +130,27 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
 
 
-## Hydroponic Life Support (HLS) Service [Internal]
+## Hydroponic Support Unit (HSU) Service [Internal]
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x  </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeHLSUnit </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeHSU </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - unSubscribeHSU </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getLatestHSUConfig </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportTemperature </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMoisture </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportLampBrightness </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportWateringTime </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportFeedingTime </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMechnicalFailure </br>
+
+
+## Hydroponics Administration Service [Internal]
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x  </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideTemperature </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideMoisture </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideLampBrightness </br>
