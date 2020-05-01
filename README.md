@@ -10,10 +10,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMDesktop </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMMobile </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getCachedResource </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handleGET </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handlePOST </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handlePUT </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handleDELETE </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequest </br>
 
 ## Authentication Service
 > Release Version: 0.1 (alpha) </br>
