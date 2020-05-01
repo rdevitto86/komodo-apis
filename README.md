@@ -1,14 +1,18 @@
 # Komodo Future Solutions Web-Service Repository
 A collection of web-service operations used to support various web/mobile applications
 
-## WebApp Delegator Service 
+## "Web Gate" Reverse Proxy Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMDesktop </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - serveECOMMobile </br>
-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMDesktop </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMMobile </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getCachedResource </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handleGET </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handlePOST </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handlePUT </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - handleDELETE </br>
 
 ## Authentication Service
 > Release Version: 0.1 (alpha) </br>
