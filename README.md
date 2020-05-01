@@ -3,7 +3,8 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## "Web Gate" Reverse Proxy Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMDesktop </br>
