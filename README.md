@@ -10,11 +10,15 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMDesktop </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMMobile </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getCachedResource </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequest </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestGET </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestPOST </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestPUT </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestDELETE </br>
 
 ## Authentication Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - login </br>
@@ -26,8 +30,9 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## User Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x  </br>
-> [?] GraphQL Version: x.x.x </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
+> GraphQL Version: x.x.x [TBD][?] </br>
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - createUser </br>
@@ -39,7 +44,8 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Merchandise Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x  </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductCollection </br>
@@ -51,7 +57,8 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## ContractedServices Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceCollection </br>
@@ -63,8 +70,9 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Order Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x  </br>
-> [?] GraphQL Version: x.x.x </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
+> GraphQL Version: x.x.x [TBD][?] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - createOrder </br>
@@ -78,7 +86,8 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Finance Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x  </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitPayment </br>
@@ -105,7 +114,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x  </br>
 > Express Version: x.x.x </br>
-> [?] GraphQL Version: x.x.x </br>
+> GraphQL Version: x.x.x [TBD][?] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getArticle </br>
@@ -134,7 +143,9 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Hydroponic Support Unit (HSU) Service [Internal]
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x  </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
+> Node Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeHSU </br>
@@ -150,7 +161,9 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Hydroponics Administration Service [Internal]
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x  </br>
+> Golang Version: x.x.x [TBD] </br>
+> Rust Version: x.x.x [TBD] </br>
+> Node Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideTemperature </br>
