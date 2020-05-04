@@ -1,24 +1,22 @@
 # Komodo Future Solutions Web-Service Repository
 A collection of web-service operations used to support various web/mobile applications
 
-## "Web Gate" Reverse Proxy Service
+## "Web Gate" Reverse Proxy
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMDesktop </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMMobile </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getCachedResource </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestGET </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestPOST </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestPUT </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - forwardRequestDELETE </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processGET </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processPOST </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processPUT </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processDELETE </br>
 
 ## Authentication Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - login </br>
@@ -31,7 +29,6 @@ A collection of web-service operations used to support various web/mobile applic
 ## User Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
 > GraphQL Version: x.x.x [TBD][?] </br>
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
@@ -45,7 +42,6 @@ A collection of web-service operations used to support various web/mobile applic
 ## Merchandise Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductCollection </br>
@@ -55,10 +51,9 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
 
 
-## ContractedServices Service
+## Contracted-Upgrades Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceCollection </br>
@@ -71,8 +66,6 @@ A collection of web-service operations used to support various web/mobile applic
 ## Order Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
-> GraphQL Version: x.x.x [TBD][?] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - createOrder </br>
@@ -87,7 +80,6 @@ A collection of web-service operations used to support various web/mobile applic
 ## Finance Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitPayment </br>
@@ -141,49 +133,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
 
 
-## Hydroponic Support Unit (HSU) Service [Internal]
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
-> Node Version: x.x.x [TBD] </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeHSU </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - unSubscribeHSU </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getLatestHSUConfig </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportTemperature </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMoisture </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportLampBrightness </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportWateringTime </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportFeedingTime </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMechnicalFailure </br>
-
-
-## Hydroponics Administration Service [Internal]
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
-> Rust Version: x.x.x [TBD] </br>
-> Node Version: x.x.x [TBD] </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideTemperature </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideMoisture </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideLampBrightness </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideWateringSchedule </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideFeedingSchedule </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - overrideSleepSchedule </br>
-
-
-## Internal Operations Analytics Service [Internal]
-> Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x </br>
-> Express Version: x.x.x </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
-
-
-## WebApp Analytics Service
+## Web Analytics Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
@@ -198,3 +148,34 @@ A collection of web-service operations used to support various web/mobile applic
 > Azure IoT (Robotics/Automation) </br>
 > MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
 > Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
+
+
+## Hydroponic Distributed Control Service [Internal + External]
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x [TBD] </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribe </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - unsubscribe </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getDefaultConfig </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getCustomConfig </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - setDeviceConfig </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getMinTemperature </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getMaxTemperature </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getMoistureLevel </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getLampBrightness </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getWaterSchedule </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getFeedSchedule </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getSleepSchedule </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMechnicalFailure </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportSensorFailure </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportStasisFailure </br>
+
+
+## Hydroponic Analytics Service [Internal]
+> Release Version: 0.1 (alpha) </br>
+> Node Version: x.x.x </br>
+> Express Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
