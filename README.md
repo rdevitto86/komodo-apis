@@ -3,7 +3,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## "Web Gate" Reverse Proxy
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMDesktop </br>
@@ -16,7 +16,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Authentication Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - login </br>
@@ -28,7 +28,7 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## User Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
+> Golang Version: x.x.x </br>
 > GraphQL Version: x.x.x [TBD][?] </br>
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
@@ -39,9 +39,21 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteUser </br>
 
 
+## Upgrade Service
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getUpgradeCollection </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getUpgradeDetails </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getReviews </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getRating </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
+
+
 ## Merchandise Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductCollection </br>
@@ -51,41 +63,38 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
 
 
-## Contracted-Upgrades Service
+## Scheduling Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceCollection </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getServiceDetails </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getReviews </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getRating </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
-
-
-## Order Service
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - createOrder </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getOrderList </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateOrder </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - cancelOrder </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getAvailableTimes </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - scheduleService </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateScheduledService </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - cancelScheduledService </br>
 
 
+## Invoice Service
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - createInvoice </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getInvoices </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateInvoice </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteInvoice </br>
+
+
 ## Finance Service
 > Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitPayment </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getInvoiceDetails </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updatePaymentInfo </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendPaymentReminder </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - schedulePayment </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - cancelPayment </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeReminders </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - unsubscribeReminders </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - refundPayment </br>
 
 
@@ -95,14 +104,14 @@ A collection of web-service operations used to support various web/mobile applic
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateUserMarketingPreferences </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - unsubscribeUser </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribeUser </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateMarketingPreferences </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendMarketingEmail </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendMarketingText </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateDeeplinkURL </br>
 
 
-## News (Blog) Service
+## Corprate Media (News & Blog) Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x  </br>
 > Express Version: x.x.x </br>
@@ -115,7 +124,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteArticle </br>
 
 
-## Customer-Support Service
+## Customer Support Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
@@ -133,21 +142,13 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
 
 
-## Web Analytics Service
+## WebApp Metrics Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
-
-
-## Third-Party Services
-> Azure Bot Service (Chat bots) </br>
-> Azure Analytics Service (Logging/Analytics) </br>
-> Azure IoT (Robotics/Automation) </br>
-> MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
-> Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
 
 
 ## Hydroponic Distributed Control Service [Internal + External]
@@ -172,10 +173,18 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportStasisFailure </br>
 
 
-## Hydroponic Analytics Service [Internal]
+## Hydroponic Metrics Service [Internal]
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
+
+
+## Third-Party Services
+> Azure Bot Service (Chat bots) </br>
+> Azure Analytics Service (Logging/Analytics) </br>
+> Azure IoT (Robotics/Automation) </br>
+> MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
+> Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
