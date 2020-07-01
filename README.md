@@ -1,18 +1,19 @@
-# Komodo Future Solutions Web-Service Repository
+# Komodo Futurescapes Micro-Service Repository
 A collection of web-service operations used to support various web/mobile applications
 
-## "Web Gate" Reverse Proxy
+## Reverse Proxy Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMDesktop </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getECOMMobile </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getCachedResource </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processGET </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processPOST </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processPUT </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - processDELETE </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getDesktopView </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getMobileView </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getResource </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - routeGET </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - routePOST </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - routePUT </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - routeDELETE </br>
+
 
 ## Authentication Service
 > Release Version: 0.1 (alpha) </br>
@@ -23,23 +24,22 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - logoff </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateOTP </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateEmail </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateMobile </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateNumber </br>
 
 
 ## User Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
-> GraphQL Version: x.x.x [TBD][?] </br>
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - createUser </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getUserInfo </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateUserInfo </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateUserPreferences </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getInfo </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updateInfo </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - updatePreferences </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteUser </br>
 
 
-## Upgrade Service
+## Enhancement Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -51,7 +51,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
 
 
-## Merchandise Service
+## Upgrade Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -111,7 +111,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateDeeplinkURL </br>
 
 
-## Corprate Media (News & Blog) Service
+## News Media Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x  </br>
 > Express Version: x.x.x </br>
@@ -140,6 +140,14 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - startBotChat </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - startCustSupptChat </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
+
+
+## Media Service
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getResource </br>
 
 
 ## WebApp Metrics Service
