@@ -2,7 +2,7 @@
 
 // imports
 const express = require('express');
-const path = require('path');
+// const path = require('path');
 
 // express server config
 const service = express();
@@ -18,13 +18,16 @@ service.get('/api/test', (req, res) => res.json({
     },
 }));
 
+// service.use(express.static(path.join(__dirname, 'public')));
+
 service.use((req, res, next) => {
     const apiPath = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
     console.log(`[INFO] ${apiPath}`);
     next();
 });
 
-// static env variables
+// server port
 const PORT = process.env.PORT || 5000;
 
+//set server port
 service.listen(PORT, () => console.log(`server started using port ${PORT}`));
