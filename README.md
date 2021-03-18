@@ -1,7 +1,7 @@
 # Komodo Futurescapes Micro-Service Repository
 A collection of web-service operations used to support various web/mobile applications
 
-## Reverse Proxy Service
+## Gateway Routing API**
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -15,7 +15,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - routeDELETE </br>
 
 
-## Authentication Service
+## Security API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -27,7 +27,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateNumber </br>
 
 
-## User Service
+## User API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
  
@@ -39,7 +39,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteUser </br>
 
 
-## Enhancement Service
+## Catalog API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -49,13 +49,6 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getReviews </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getRating </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
-
-
-## Upgrade Service
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductCollection </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getProductDetails </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getReviews </br>
@@ -63,7 +56,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - submitRating </br>
 
 
-## Scheduling Service
+## Scheduling API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -74,7 +67,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - cancelScheduledService </br>
 
 
-## Invoice Service
+## Order API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -85,7 +78,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteInvoice </br>
 
 
-## Finance Service
+## Finance API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -98,7 +91,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - refundPayment </br>
 
 
-## Marketing Service
+## Marketing API
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
@@ -111,7 +104,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - validateDeeplinkURL </br>
 
 
-## News Media Service
+## Customer Relations API
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x  </br>
 > Express Version: x.x.x </br>
@@ -124,7 +117,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - deleteArticle </br>
 
 
-## Customer Support Service
+## Customer Support API
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
@@ -142,7 +135,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - sendChatMessage </br>
 
 
-## Media Service
+## Internal Resource API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
@@ -150,38 +143,7 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getResource </br>
 
 
-## WebApp Metrics Service
-> Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x </br>
-> Express Version: x.x.x </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - recordEvent </br>
-
-
-## Hydroponic Distributed Control Service [Internal + External]
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x [TBD] </br>
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - subscribe </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - unsubscribe </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getDefaultConfig </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getCustomConfig </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - setDeviceConfig </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getMinTemperature </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getMaxTemperature </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getMoistureLevel </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getLampBrightness </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getWaterSchedule </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getFeedSchedule </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - getSleepSchedule </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportMechnicalFailure </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportSensorFailure </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - reportStasisFailure </br>
-
-
-## Hydroponic Metrics Service [Internal]
+## Metrics API
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
