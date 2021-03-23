@@ -6,7 +6,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/gateway-router/{version}/...
+> https://someazurelink/gateway-router-exp-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /route </br>
@@ -17,7 +17,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/gateway-cache/{version}/cache...
+> https://someazurelink/gateway-rendering-prc-api/{version}/...
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /desktop </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /mobile </br>
@@ -28,7 +28,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-security-api/{version}/...
+> https://someazurelink/web-security-prc-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /auth/login </br>
@@ -43,7 +43,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/catalog-api/{version}/...
+> https://someazurelink/catalog-item-prc-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /product/{catalogID} </br>
@@ -59,7 +59,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/catalog-search-api/{version}/...
+> https://someazurelink/catalog-search-prc-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /search?category={category}&keyword={keyword} </br>
@@ -70,24 +70,25 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-caching-api/{version}/cache/...
+> https://someazurelink/catalog-caching-sys-api/{version}/cache/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /item/{key} </br>
 
 
-## User Details API
+## User Management API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/user-details-api/{version}/user/...
+> https://someazurelink/user-mgmt-sys-api/{version}/user/...
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /create </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /details </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /update </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /delete </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /user/create </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /user/details </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:    /users?firstName={firstName}&lastName={lastName}&role={roleType}&geoloc={region} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /user/update </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /user/delete </br>
 
 
 ## Order Details API
@@ -95,7 +96,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/order-details-api/{version}/order/...
+> https://someazurelink/order-details-sys-api/{version}/order/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /create </br>
@@ -110,7 +111,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/order-scheduling-api/{version}/schedule/...
+> https://someazurelink/order-scheduling-sys-api/{version}/schedule/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /delivery </br>
@@ -120,12 +121,12 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /cancel </br>
 
 
-## Finance API
+## Financial Payment API
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/finance-api/{version}/payment/...
+> https://someazurelink/financial-payment-prc-api/{version}/payment/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /submit </br>
@@ -136,13 +137,13 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /reminders </br>
 
 
-## Marketing API
+## Customer Marketing API
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/marketing-api/{version}/...
+> https://someazurelink/cust-marketing-sys-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /subscribe </br>
@@ -158,7 +159,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-relations-api/{version}/...
+> https://someazurelink/cust-relations-sys-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:    /article/{articleID} </br>
@@ -173,7 +174,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-support-api/{version}/...
+> https://someazurelink/cust-support-prc-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /ticket/list </br>
@@ -194,7 +195,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-support-cache-api/{version}/cache/...
+> https://someazurelink/cust-support-cache-sys-api/{version}/cache/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /topic/{key} </br>
@@ -205,7 +206,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-resource-api/{version}/...
+> https://someazurelink/web-resource-sys-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /resource </br>
@@ -216,7 +217,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-asset-api/{version}/...
+> https://someazurelink/web-asset-sys-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: resource/{type}/{ID} </br>
@@ -227,7 +228,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-config-api/{version}/config/...
+> https://someazurelink/web-config-sys-api/{version}/config/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /app </br>
@@ -236,11 +237,10 @@ A collection of web-service operations used to support various web/mobile applic
 
 ## Web Metrics API
 > Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x </br>
-> Express Version: x.x.x </br>
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-metrics-api/{version}/...
+> https://someazurelink/web-metrics-sys-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /record </br>
@@ -249,10 +249,10 @@ A collection of web-service operations used to support various web/mobile applic
 ## Cache Cleaner Utility API
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
-> Express Version: x.x.x </br>
+> Express Version: x.x.x ??? </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/util/cache-cleaner/{version}/...
+> https://someazurelink/cache-cleaner-sys-api/{version}/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /start </br>
@@ -266,3 +266,7 @@ A collection of web-service operations used to support various web/mobile applic
 > Azure IoT (Robotics/Automation) </br>
 > MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
 > Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
+
+
+## Resources
+> https://lucid.app/lucidchart/invitations/accept/4f240be9-e7e3-47e5-8d0e-9044688a704a 
