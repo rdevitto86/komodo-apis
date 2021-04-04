@@ -1,34 +1,39 @@
-# Komodo Futurescapes Micro-Service Repository
-A collection of web-service operations used to support various web/mobile applications
+# Komodo Futurescapes Microservice Repository
+A collection of microservices used to support various web/mobile applications
 
-## Gateway Router API**
+## Gateway Router Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/gateway-router-exp-api/{version}/...
+> https://someazurelink/api/exp/gateway-router/v1å/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /route </br>
 
 
-## Gateway Caching API**
+## Gateway Caching Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/gateway-rendering-prc-api/{version}/...
+> https://someazurelink/cache/gateway-cache/v1/...
 
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /desktop </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /desktop/{key} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /desktop/{key} </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /mobile </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /mobile/{key} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /mobile/{key} </br>
 
 
-## Web Security API
+## Web Security Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-security-prc-api/{version}/...
+> https://someazurelink/api/security/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /auth/login </br>
@@ -38,50 +43,41 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /validate/phone </br>
 
 
-## Catalog Item API
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
+## Catalog Search Service
+> Release Version: 0.1 (beta) </br>
+> Golang Version: 1.16 </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/catalog-item-prc-api/{version}/...
+> localhost:8080/api/catalog-search/v0.1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /product/{catalogID} </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /service/{catalogID} </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /category?id={catID} </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /ratings/{catalogID} </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /reviews/{catalogID} </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /submitRating </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /search?category={categoryID}&keyword={keyword} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /category/{id} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /item/{id} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /item/{itemID}/review/{reviewID} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /item/{itemID}/reviews </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /item/{itemID}/submit/review </br>
 
 
-## Catalog Search API
+## Catalog Caching Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/catalog-search-prc-api/{version}/...
+> https://someazurelink/cache/catalog-cache/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /search?category={category}&keyword={keyword} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: / </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /{key} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /{key} </br>
 
 
-## Catalog Caching API
+## User Management Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/catalog-caching-sys-api/{version}/cache/...
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /item/{key} </br>
-
-
-## User Management API
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
-
-&nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/user-mgmt-sys-api/{version}/user/...
+> https://someazurelink/api/user-mgmt/v1/...
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /user/create </br>
@@ -91,42 +87,42 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /user/delete </br>
 
 
-## Order Details API
+## Order Details Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/order-details-sys-api/{version}/order/...
+> https://someazurelink/api/order-details/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /create </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /details </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /list </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /update </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /delete </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /order/{id}/details </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - PUT:    /order/{id}//update </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /order/{id}/delete </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /history </br>
 
 
-## Order Scheduling API
+## Order Scheduling Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/order-scheduling-sys-api/{version}/schedule/...
+> https://someazurelink/api/order-scheduling/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /delivery </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /arrival </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /availibility </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /update </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /cancel </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: schedule/delivery </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: schedule/arrival </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: schedule/availibility </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: schedule/update </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: schedule/cancel </br>
 
 
-## Financial Payment API
+## Customer Payment Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/financial-payment-prc-api/{version}/payment/...
+> https://someazurelink/api/cust-payment/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /submit </br>
@@ -137,13 +133,13 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /reminders </br>
 
 
-## Customer Marketing API
+## Customer Marketing Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-marketing-sys-api/{version}/...
+> https://someazurelink/api/cust-marketing/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /subscribe </br>
@@ -153,13 +149,13 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /validate/deeplink </br>
 
 
-## Customer Relations API
+## Customer Outreach (News) Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x  </br>
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-relations-sys-api/{version}/...
+> https://someazurelink/api/cust-relations/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:    /article/{articleID} </br>
@@ -168,13 +164,12 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /article </br>
 
 
-## Customer Support API
+## Customer Support Service
 > Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x </br>
-> Express Version: x.x.x </br>
+> Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-support-prc-api/{version}/...
+> https://someazurelink/api/cust-support/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /ticket/list </br>
@@ -189,46 +184,70 @@ A collection of web-service operations used to support various web/mobile applic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /chat/post </br>
 
 
-## Customer Support Caching API
-> Release Version: 0.1 (alpha) </br>
-> Node Version: x.x.x </br>
-> Express Version: x.x.x </br>
-
-&nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cust-support-cache-sys-api/{version}/cache/...
-
-&nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /topic/{key} </br>
-
-
-## Web Resource API
+## Customer Support Caching Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-resource-sys-api/{version}/...
+> https://someazurelink/cache/cust-support-cache/v1/...
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - PUT: / </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /{key} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /{key} </br>
+
+
+## HR Careers Service
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **Host Domain:**
+> https://someazurelink/api/hr-careers/v1/...
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: TODO </br>
+
+
+## HR Job Listing Search Service
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **Host Domain:**
+> https://someazurelink/api/hr-listing-search/v1/...
+
+&nbsp;&nbsp;&nbsp; **API Operations:** </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /listing/{id} </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /listing/keyword?={keyword}&dept={dept}&loc={loc}&type={type}&date={date}&exp={exp}&remote={remote} </br>
+
+
+## Serverside Rendering Service (Rendering Engine)
+> Release Version: 0.1 (alpha) </br>
+> Golang Version: x.x.x </br>
+
+&nbsp;&nbsp;&nbsp; **Host Domain:**
+> https://someazurelink/api/render-engine/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /resource </br>
 
 
-## Web Asset API
+## Web Asset Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-asset-sys-api/{version}/...
+> https://someazurelink/api/assets/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: resource/{type}/{ID} </br>
 
 
-## Web Configuration API
+## Web Configuration Service
 > Release Version: 0.1 (alpha) </br>
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-config-sys-api/{version}/config/...
+> https://someazurelink/api/config/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /app </br>
@@ -240,19 +259,19 @@ A collection of web-service operations used to support various web/mobile applic
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/web-metrics-sys-api/{version}/...
+> https://someazurelink/api/metrics/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /record </br>
 
 
-## Cache Cleaner Utility API
+## Cache Cleaner Utility Service
 > Release Version: 0.1 (alpha) </br>
 > Node Version: x.x.x </br>
 > Express Version: x.x.x ??? </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cache-cleaner-sys-api/{version}/...
+> https://someazurelink/util/cache-cleaner/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /start </br>
@@ -263,6 +282,7 @@ A collection of web-service operations used to support various web/mobile applic
 ## Third-Party Services
 > Azure Bot Service (Chat bots) </br>
 > Azure Analytics Service (Logging/Analytics) </br>
+> Some sort of resume analysis tool
 > Azure IoT (Robotics/Automation) </br>
 > MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
 > Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
