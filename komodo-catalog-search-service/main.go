@@ -1,5 +1,7 @@
 package main
 
+// TODO - add mongo or cosmo DB connector
+
 import (
 	"fmt"
 	"log"
@@ -146,6 +148,7 @@ func submitReview(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{ "status": 200 }`))
 }
 
+// TODO - look into creating repo/library for error handling (import for all apis)
 // handles 404 exceptions
 func notFound(w http.ResponseWriter, r *http.Request) {
 	log.Println("[ERROR] unable to find resource with given URI param(s)")
@@ -159,27 +162,16 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 	}`))
 }
 
-// handles 400 exceptions
-func badRequest(w http.ResponseWriter, r *http.Request) {
-	log.Println("[ERROR] malformed request received")
-	log.Printf("[ERROR]\n- %s: %s\n- Headers: %+v\n- Body: %+v\n\n", r.Method, r.URL, r.Header, r.Body)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte(`{
-		"status": 400,
-		"message": "malformed request received"
-	}`))
-}
-
 // manages api request routing
 func main() {
+	// TODO - handle api environment properties
+	// TODO - handle reverse proxy / gateway requests
 	router := mux.NewRouter()
 	api := router.PathPrefix("/api/catalog-search/v0.1").Subrouter()
 
 	// 404 handlers
-	api.HandleFunc("", badRequest)
-	api.HandleFunc("/", badRequest)
+	api.HandleFunc("", notFound)
+	api.HandleFunc("/", notFound)
 	api.HandleFunc("/category", notFound)
 	api.HandleFunc("/item", notFound)
 	api.HandleFunc("/item/{itemID}/review", notFound)
@@ -195,8 +187,12 @@ func main() {
 	// POST handlers
 	api.HandleFunc("/item/{itemID}/submit/review", submitReview).Methods(http.MethodPost)
 
+	// TODO - handle dyanmic port numbering for environments
+	// creates api router + listener on the specified port. Kills process if exception thrown.
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
+
+// TODO - manage client/secret strings for DB and API requests
 
 // // helper function that fetches item stored in the catalog DB
 // func _fetchFromDB() {

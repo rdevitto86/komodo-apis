@@ -6,7 +6,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/exp/gateway-router/v1å/...
+> https://api.{env}.somecloudurl.com/gateway-router/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /route </br>
@@ -17,7 +17,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cache/gateway-cache/v1/...
+> https://api.{env}.somecloudurl.com/cache/gateway-cache/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /desktop </br>
@@ -33,7 +33,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/security/v1/...
+> https://api.{env}.somecloudurl.com/security/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /auth/login </br>
@@ -48,7 +48,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: 1.16 </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> localhost:8080/api/catalog-search/v0.1/...
+> https://api.{env}.somecloudurl.com:443/catalog-search/v0.1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:  /search?category={categoryID}&keyword={keyword} </br>
@@ -60,14 +60,14 @@ A collection of microservices used to support various web/mobile applications
 
 
 ## Catalog Caching Service
-> Release Version: 0.1 (alpha) </br>
-> Golang Version: x.x.x </br>
+> Release Version: 0.1 (beta) </br>
+> Golang Version: 1.16 </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cache/catalog-cache/v1/...
+> https://api.{env}.somecloudurl.com:443/cache/catalog-cache/v0.1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: / </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /{key} </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /{key} </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - DELETE: /{key} </br>
 
@@ -77,7 +77,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/user-mgmt/v1/...
+> https://api.{env}.somecloudurl.com/user-mgmt/v1/...
  
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /user/create </br>
@@ -92,7 +92,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/order-details/v1/...
+> https://api.{env}.somecloudurl.com/order-details/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /create </br>
@@ -107,7 +107,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/order-scheduling/v1/...
+> https://api.{env}.somecloudurl.com/order-scheduling/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: schedule/delivery </br>
@@ -122,7 +122,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/cust-payment/v1/...
+> https://api.{env}.somecloudurl.com/cust-payment/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /submit </br>
@@ -139,7 +139,7 @@ A collection of microservices used to support various web/mobile applications
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/cust-marketing/v1/...
+> https://api.{env}.somecloudurl.com/cust-marketing/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /subscribe </br>
@@ -155,7 +155,7 @@ A collection of microservices used to support various web/mobile applications
 > Express Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/cust-relations/v1/...
+> https://api.{env}.somecloudurl.com/cust-relations/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET:    /article/{articleID} </br>
@@ -169,7 +169,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/cust-support/v1/...
+> https://api.{env}.somecloudurl.com/cust-support/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST:   /ticket/list </br>
@@ -189,7 +189,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/cache/cust-support-cache/v1/...
+> https://api.{env}.somecloudurl.com/cache/cust-support-cache/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - PUT: / </br>
@@ -202,7 +202,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/hr-careers/v1/...
+> https://api.{env}.somecloudurl.com/hr-careers/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: TODO </br>
@@ -213,7 +213,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/hr-listing-search/v1/...
+> https://api.{env}.somecloudurl.com/hr-listing-search/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: /listing/{id} </br>
@@ -225,7 +225,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/render-engine/v1/...
+> https://api.{env}.somecloudurl.com/render-engine/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /resource </br>
@@ -236,7 +236,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/assets/v1/...
+> https://api.{env}.somecloudurl.com/assets/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - GET: resource/{type}/{ID} </br>
@@ -247,7 +247,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/config/v1/...
+> https://api.{env}.somecloudurl.com/config/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /app </br>
@@ -259,7 +259,7 @@ A collection of microservices used to support various web/mobile applications
 > Golang Version: x.x.x </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/api/metrics/v1/...
+> https://api.{env}.somecloudurl.com/metrics/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /record </br>
@@ -271,7 +271,7 @@ A collection of microservices used to support various web/mobile applications
 > Express Version: x.x.x ??? </br>
 
 &nbsp;&nbsp;&nbsp; **Host Domain:**
-> https://someazurelink/util/cache-cleaner/v1/...
+> https://api.{env}.somecloudurl.com/util/cache-cleaner/v1/...
 
 &nbsp;&nbsp;&nbsp; **API Operations:** </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - POST: /start </br>
@@ -284,8 +284,8 @@ A collection of microservices used to support various web/mobile applications
 > Azure Analytics Service (Logging/Analytics) </br>
 > Some sort of resume analysis tool
 > Azure IoT (Robotics/Automation) </br>
-> MailChimp or ActiveCampaign (Marketing) [TEMP] </br>
-> Freshbooks or Xero (Finances/Accounting/Invoices) [TEMP] </br>
+> MailChimp or ActiveCampaign (Marketing) </br>
+> Freshbooks or Xero (Finances/Accounting/Invoices) </br>
 
 
 ## Resources
