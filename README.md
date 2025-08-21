@@ -100,8 +100,6 @@ Each service uses the same template:
 - **Run**  
 - **Misc** (Language/Stack, Port, Data Stores, Key Operations, Docs, Health)  
 
-Replace `👈 fill me in` as you implement.
-
 ---
 
 ### komodo-address-api
@@ -111,7 +109,7 @@ Validates, normalizes, and geocodes shipping/billing addresses.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7001  
+- **Port:** DEV: 7001 | PROD: 8080
 - **Data Stores:** Postgres, Redis
 - **Key Ops:** Validate, Normalize, Geocode  
 - **Docs/Health:** `/docs`, `/health`
@@ -125,7 +123,7 @@ Provides LLM generated servicing via self-service chat
 
 **Misc**  
 - **Language/Stack:** Python + FastAPI
-- **Port:** 7002  
+- **Port:** 8080  
 - **Upstreams:** LLM provider(s)
 - **Key Ops:** Message
 - **Docs/Health:** `/docs`, `/health`
@@ -139,7 +137,7 @@ Generates product/order/user summaries (LLMs).
 
 **Misc**  
 - **Language/Stack:** Python + FastAPI
-- **Port:** 7022  
+- **Port:** 8080  
 - **Upstreams:** LLM provider(s)  
 - **Key Ops:** Summaries, Models listing  
 - **Docs/Health:** `/docs`, `/health`
@@ -153,7 +151,7 @@ Captures user interactions for real-time personalization.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7003  
+- **Port:** 8080  
 - **Data:** Kafka/Redpanda  
 - **Key Ops:** Events ingestion, Stats query  
 - **Docs/Health:** `/docs`, `/health`
@@ -167,7 +165,7 @@ Ingests application logs and exposes query endpoints.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7004  
+- **Port:** 8080  
 - **Data:** Loki/Elastic  
 - **Key Ops:** Ingest, Query logs  
 - **Docs/Health:** `/docs`, `/health`
@@ -181,7 +179,7 @@ Metrics/trace ingestion + query proxy.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7005  
+- **Port:** 8080  
 - **Data:** Prometheus, Jaeger/Tempo  
 - **Key Ops:** Metrics, Traces, Dashboards  
 - **Docs/Health:** `/docs`, `/health`
@@ -195,7 +193,7 @@ Authentication, authorization, MFA, etc.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7017  
+- **Port:** 8080  
 - **Key Ops:** Signup, Login, Token refresh, Password reset  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -208,7 +206,7 @@ Products, variants, categories, pricing, inventory.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7006  
+- **Port:** 8080  
 - **Data:** Postgres, Redis, S3  
 - **Key Ops:** Products CRUD, Inventory, Categories  
 - **Docs/Health:** `/docs`, `/health`
@@ -222,7 +220,7 @@ User entitlements and feature toggles
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7007  
+- **Port:** 8080  
 - **Key Ops:** Entitlements, Toggles
 - **Docs/Health:** `/docs`, `/health`
 
@@ -235,7 +233,7 @@ Knowledge base and FAQ retrieval.
 
 **Misc**  
 - **Language/Stack:** Node + Fastify + Prisma
-- **Port:** 7008  
+- **Port:** 8080  
 - **Data:** Postgres + OpenSearch
 - **Key Ops:** Search, Ingest, Articles  
 - **Docs/Health:** `/docs`, `/health`
@@ -249,7 +247,7 @@ Cart and checkout orchestration.
 
 **Misc**  
 - **Language/Stack:** Golang 
-- **Port:** 7009  
+- **Port:** 8080  
 - **Key Ops:** Cart, Checkout, Orders, Tax  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -262,7 +260,7 @@ Promotions and coupon rules.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7010  
+- **Port:** 8080  
 - **Key Ops:** Evaluate, Manage rules  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -275,7 +273,7 @@ Delivery and pickup scheduling.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7011  
+- **Port:** 8080  
 - **Key Ops:** Slots, Reserve, Cancel reservation  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -288,7 +286,7 @@ Payment methods, intents, and provider abstraction.
 
 **Misc**  
 - **Language/Stack:** Node + Fastify
-- **Port:** 7012  
+- **Port:** 8080  
 - **Key Ops:** Payment intents, Confirm, Webhooks  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -301,7 +299,7 @@ Catalog search, autocomplete, ranking.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7013  
+- **Port:** 8080  
 - **Data:** OpenSearch/Meilisearch  
 - **Key Ops:** Search, Suggest, Reindex  
 - **Docs/Health:** `/docs`, `/health`
@@ -315,7 +313,7 @@ Provides customer–agent chat integration for the e-commerce platform. Handles 
 
 **Misc**  
 - **Language/Stack:** Node + Fastify
-- **Port:** 7021  
+- **Port:** 8080  
 - **Data:** OpenSearch/Meilisearch, Redis (session state)
 - **Key Ops:** Message, Terminate 
 - **Docs/Health:** `/docs`, `/health`
@@ -329,7 +327,7 @@ Server-side rendering for storefront.
 
 **Misc**  
 - **Language/Stack:** Node + Next.js
-- **Port:** 7014  
+- **Port:** 8080  
 - **Key Ops:** Pages, Products, Categories  
 - **Docs/Health:** `/health`
 
@@ -342,7 +340,7 @@ User profiles, addresses, preferences.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 7016  
+- **Port:** 8080  
 - **Key Ops:** User CRUD, Addresses  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -355,7 +353,7 @@ Email/SMS campaigns and subscriptions.
 
 **Misc**  
 - **Language/Stack:** Node + Fastify
-- **Port:** 7018  
+- **Port:** 8080  
 - **Key Ops:** Subscribe, Campaigns, Consent  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -368,7 +366,7 @@ Personalized recommendations.
 
 **Misc**  
 - **Language/Stack:** Node + Fastify
-- **Port:** 7019  
+- **Port:** 8080  
 - **Data:** Feature store + ML models  
 - **Key Ops:** Recommendations, Model reload  
 - **Docs/Health:** `/docs`, `/health`
@@ -382,7 +380,7 @@ Product reviews, ratings, moderation.
 
 **Misc**  
 - **Language/Stack:** Node + Fastify
-- **Port:** 7020  
+- **Port:** 8080  
 - **Key Ops:** Reviews, Ratings, Moderation  
 - **Docs/Health:** `/docs`, `/health`
 
