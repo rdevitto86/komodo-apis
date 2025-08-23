@@ -30,7 +30,7 @@ func Method(m string, h func(http.ResponseWriter, *http.Request)) http.HandlerFu
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != m {
 			w.Header().Set("Allow", m)
-			WriteJSON(w, http.StatusMethodNotAllowed, errorObj("method not allowed"))
+			WriteJSON(w, http.StatusMethodNotAllowed, ErrorObj("method not allowed"))
 			return
 		}
 		h(w, r)

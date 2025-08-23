@@ -83,6 +83,13 @@ Validate an address.
 }
 ```
 
+**cURL:**
+```bash
+curl -i -X POST http://localhost:7001/validate \
+  -H "Content-Type: application/json" \
+  -d '{"street":"123 Main St","city":"Chicago","state":"IL","postalCode":"60601"}'
+```
+
 ### POST /normalize
 Normalize an address.
 **Request:**
@@ -96,6 +103,13 @@ Normalize an address.
 {
   "normalized_address": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA"
 }
+```
+
+**cURL:**
+```bash
+curl -i -X POST http://localhost:7001/normalize \
+  -H "Content-Type: application/json" \
+  -d '{"street":"123 main street ","city":" chicago ","state":"il","postalCode":"60601"}'
 ```
 
 ### POST /geocode
@@ -112,6 +126,13 @@ Geocode an address.
   "latitude": 37.4224764,
   "longitude": -122.0842499
 }
+```
+
+**cURL:**
+```bash
+curl -i -X POST http://localhost:7001/geocode \
+  -H "Content-Type: application/json" \
+  -d '{"street":"123 Main St","city":"Chicago","state":"IL","postalCode":"60601"}'
 ```
 
 ## Configuration
@@ -148,6 +169,11 @@ Check the health status of the API.
 {
   "status": "healthy"
 }
+```
+
+**cURL:**
+```bash
+curl -i http://localhost:7001/health
 ```
 
 ## License

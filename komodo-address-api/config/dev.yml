@@ -1,0 +1,40 @@
+# Server configuration
+server:
+  port: 7001
+  read_timeout: 10s
+  write_timeout: 15s
+  idle_timeout: 60s
+
+# Logging configuration
+logging:
+  level: debug
+  format: json
+
+# Database configuration
+database:
+  host: localhost
+  port: 5432
+  user: dev_user
+  password: dev_password
+  name: komodo_dev
+  sslmode: disable
+
+# Geocoding service configuration
+geocoding:
+  provider: google
+  google_api_key: YOUR_GOOGLE_MAPS_API_KEY
+  nominatim_base_url: https://nominatim.openstreetmap.org
+
+# External API configuration
+external_apis:
+  some_service:
+    base_url: https://api.someservice.com
+    api_key: YOUR_API_KEY
+
+# Feature flags
+features:
+  enable_some_feature: true
+  enable_another_feature: false
+
+auth_service:
+  validate_token_url: https://auth-service.example.com/validate

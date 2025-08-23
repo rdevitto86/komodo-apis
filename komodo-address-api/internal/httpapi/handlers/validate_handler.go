@@ -1,7 +1,8 @@
-package httpapi
+package handlers
 
 import (
 	"komodo-address-api/internal/address"
+	"komodo-address-api/internal/httpapi"
 	"net/http"
 )
 
@@ -11,10 +12,10 @@ type ValidateResponse struct {
 }
 
 func HandleValidate(w http.ResponseWriter, r *http.Request) {
-	addr, err := ParseAddress(r)
+	addr, err := httpapi.ParseAddress(r)
 
 	if err != nil {
-		WriteJSON(w, http.StatusBadRequest, errorObj(err.Error()))
+		httpapi.WriteJSON(w, http.StatusBadRequest, httpapi.ErrorObj(err.Error()))
 		return
 	}
 
@@ -23,9 +24,9 @@ func HandleValidate(w http.ResponseWriter, r *http.Request) {
 
 	if len(errs) > 0 {
 		resp.Errors = errs
-		WriteJSON(w, http.StatusUnprocessableEntity, resp)
+		httpapi.WriteJSON(w, http.StatusUnprocessableEntity, resp)
 		return
 	}
 
-	WriteJSON(w, http.StatusOK, resp)
+	httpapi.WriteJSON(w, http.StatusOK, resp)
 }

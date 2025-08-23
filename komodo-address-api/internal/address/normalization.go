@@ -6,55 +6,46 @@ import (
 	"strings"
 )
 
+// Precompiled regex for ZIP code normalization
+var zipDigits = regexp.MustCompile(`[^0-9]`)
+
+// Constants for country codes
+const (
+	DefaultCountry = "US"
+)
+
+// NormalizeAddress cleans and standardizes an address.
 func NormalizeAddress(a Address) Address {
+	// Helper to clean and trim strings
 	clean := func(s string) string {
-		s = strings.TrimSpace(s)
-		s = strings.Join(strings.Fields(s), " ") // collapse whitespace
-		return s
+		return strings.Join(strings.Fields(strings.TrimSpace(s)), " ")
 	}
 
+	// Helper to capitalize words while preserving specific acronyms
 	capWords := func(s string) string {
-		s = strings.ToLower(clean(s))
-		parts := strings.Split(s, " ")
-	
-		for i, p := range parts {
-			if len(p) == 0 {
-				continue
-			}
-
-			// Honor common prefixes/suffixes/acronyms
-			switch strings.ToUpper(p) {
+		words := strings.Fields(strings.ToLower(clean(s)))
+		for i, word := range words {
+			switch strings.ToUpper(word) {
 			case "NE", "NW", "SE", "SW", "N", "S", "E", "W", "US":
-				parts[i] = strings.ToUpper(p)
+				words[i] = strings.ToUpper(word)
 			default:
-				runes := []rune(p)
-				runes[0] = []rune(strings.ToUpper(string(runes[0])))[0]
-				parts[i] = string(runes)
+				words[i] = strings.Title(word) // Capitalize first letter
 			}
 		}
-		return strings.Join(parts, " ")
+		return strings.Join(words, " ")
 	}
 
+	// Normalize country
 	country := strings.ToUpper(clean(a.Country))
-
 	if country == "" {
-		country = "US"
+		country = DefaultCountry
 	}
 
+	// Normalize state and postal code
 	state := strings.ToUpper(clean(a.State))
-	postal := strings.ToUpper(clean(a.PostalCode))
-	zipDigits := regexp.MustCompile(`[^0-9]`) // For US ZIP+4: keep 5 or 9 digits with hyphen format
+	postal := normalizePostalCode(clean(a.PostalCode), country)
 
-	if country == "US" || country == "USA" || country == "UNITED STATES" {
-		d := zipDigits.ReplaceAllString(postal, "")
-	
-		if len(d) >= 9 {
-			postal = fmt.Sprintf("%s-%s", d[:5], d[5:9])
-		} else if len(d) >= 5 {
-			postal = d[:5]
-		}
-	}
-
+	// Return normalized address
 	return Address{
 		Street1:    capWords(a.Street1),
 		Street2:    capWords(a.Street2),
@@ -63,4 +54,18 @@ func NormalizeAddress(a Address) Address {
 		PostalCode: postal,
 		Country:    country,
 	}
+}
+
+// normalizePostalCode standardizes postal codes based on the country.
+func normalizePostalCode(postal, country string) string {
+	// Handle US ZIP codes
+	if country == "US" || country == "USA" || country == "UNITED STATES" {
+		digits := zipDigits.ReplaceAllString(postal, "")
+		if len(digits) >= 9 {
+			return fmt.Sprintf("%s-%s", digits[:5], digits[5:9])
+		} else if len(digits) >= 5 {
+			return digits[:5]
+		}
+	}
+	return postal
 }
