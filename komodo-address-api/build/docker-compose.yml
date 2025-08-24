@@ -5,7 +5,7 @@ services:
     image: komodo-address-api:dev
     container_name: komodo-address-api
     ports:
-      - "7001:7001"       # local dev port mapping
+      - "7010:7010"       # local dev port mapping
     environment:
       PORT: "7010"
       GEOCODER: "mock"

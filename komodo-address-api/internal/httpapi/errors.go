@@ -1,32 +1,67 @@
 package httpapi
 
-import "net/http"
+import (
+	"net/http"
+)
 
-func ErrorObj(msg string) map[string]string {
-	return map[string]string{"error": msg}
+type Error struct {
+	Code    int
+	Message string
+}
+
+var (
+	ErrBadRequest     = &Error{Code: http.StatusBadRequest, Message: "bad request"}
+	ErrUnauthorized   = &Error{Code: http.StatusUnauthorized, Message: "unauthorized"}
+	ErrForbidden      = &Error{Code: http.StatusForbidden, Message: "access forbidden"}
+	ErrNotFound       = &Error{Code: http.StatusNotFound, Message: "resource not found"}
+	ErrMethodNotAllowed = &Error{Code: http.StatusMethodNotAllowed, Message: "method not allowed"}
+	ErrUnprocessableEntity = &Error{Code: http.StatusUnprocessableEntity, Message: "unprocessable entity"}
+	ErrTooManyRequests = &Error{Code: http.StatusTooManyRequests, Message: "too many requests"}
+	ErrInternalServer = &Error{Code: http.StatusInternalServerError, Message: "internal server error"}
+	ErrBadGateway      = &Error{Code: http.StatusBadGateway, Message: "bad gateway"}
+)
+
+func ToJSON(err *Error) (int, map[string]string) {
+  return err.Code, map[string]string{"error": err.Message}
+}
+
+func (e *Error) Error() string {
+  return e.Message
 }
 
 // Predefined error responses for common HTTP status codes
-func Error500() (int, map[string]string) {
-	return http.StatusInternalServerError, ErrorObj("internal server error")
+func Error400(msg string) *Error {
+	return &Error{Code: http.StatusBadRequest, Message: msg}
 }
 
-func Error404() (int, map[string]string) {
-	return http.StatusNotFound, ErrorObj("resource not found")
+func Error401(msg string) *Error {
+	return &Error{Code: http.StatusUnauthorized, Message: msg}
 }
 
-func Error403() (int, map[string]string) {
-	return http.StatusForbidden, ErrorObj("access forbidden")
+func Error403(msg string) *Error {
+	return &Error{Code: http.StatusForbidden, Message: msg}
 }
 
-func Error401() (int, map[string]string) {
-	return http.StatusUnauthorized, ErrorObj("unauthorized")
+func Error404(msg string) *Error {
+	return &Error{Code: http.StatusNotFound, Message: msg}
 }
 
-func Error400() (int, map[string]string) {
-	return http.StatusBadRequest, ErrorObj("bad request")
+func Error405(msg string) *Error {
+	return &Error{Code: http.StatusMethodNotAllowed, Message: msg}
 }
 
-func Error422(msg string) (int, map[string]string) {
-	return http.StatusUnprocessableEntity, ErrorObj(msg)
+func Error422(msg string) *Error {
+  return &Error{Code: http.StatusUnprocessableEntity, Message: msg}
+}
+
+func Error429(msg string) *Error {
+	return &Error{Code: http.StatusTooManyRequests, Message: msg}
+}
+
+func Error500(msg string) *Error {
+	return &Error{Code: http.StatusInternalServerError, Message: msg}
+}
+
+func Error502(msg string) *Error {
+	return &Error{Code: http.StatusBadGateway, Message: msg}
 }

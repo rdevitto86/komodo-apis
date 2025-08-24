@@ -9,5 +9,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/komodo ./cmd/komodo-a
 # ---------- runtime ----------
 FROM gcr.io/distroless/base-debian12
 COPY --from=build /bin/komodo /komodo
-EXPOSE 7001
+EXPOSE 7010
 ENTRYPOINT ["/komodo"]

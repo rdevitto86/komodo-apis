@@ -9,8 +9,8 @@ type healthResponse struct {
     Status string `json:"status"`
 }
 
-func HandleHealth(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(healthResponse{Status: "ok"})
+func HandleHealth(writer http.ResponseWriter, req *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(healthResponse{Status: "ok"})
 }

@@ -7,32 +7,33 @@ import (
 	"net/http"
 )
 
-func WriteJSON(w http.ResponseWriter, status int, v any) {
+func WriteJSON(w http.ResponseWriter, status int, val any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
-	_ = encodingjson.NewEncoder(w).Encode(v)
+	_ = encodingjson.NewEncoder(w).Encode(val)
 }
 
-func ParseAddress(r *http.Request) (address.Address, error) {
-	defer r.Body.Close()
-	dec := encodingjson.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-	var a address.Address
+func ParseAddress(req *http.Request) (address.Address, error) {
+	defer req.Body.Close()
 
-	if err := dec.Decode(&a); err != nil {
+	dec := encodingjson.NewDecoder(req.Body)
+	dec.DisallowUnknownFields()
+
+	var addr address.Address
+
+	if err := dec.Decode(&addr); err != nil {
 		return address.Address{}, fmt.Errorf("invalid JSON body: %w", err)
 	}
-
-	return a, nil
+	return addr, nil
 }
 
-func Method(m string, h func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+func Method(method string, handler func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != m {
-			w.Header().Set("Allow", m)
-			WriteJSON(w, http.StatusMethodNotAllowed, ErrorObj("method not allowed"))
+		if r.Method != method {
+			w.Header().Set("Allow", method)
+			WriteJSON(w, http.StatusMethodNotAllowed, Error405("method not allowed"))
 			return
 		}
-		h(w, r)
+		handler(w, r)
 	}
 }

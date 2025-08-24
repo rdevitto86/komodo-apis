@@ -13,74 +13,78 @@ import (
 )
 
 // HandleGeocode processes geocoding requests.
-func HandleGeocode(w http.ResponseWriter, r *http.Request) {
+func HandleGeocode(writer http.ResponseWriter, req *http.Request) {
 	// Parse the address from the request
-	addr, err := httpapi.ParseAddress(r)
+	addr, err := httpapi.ParseAddress(req)
 	if err != nil {
-		httpapi.WriteJSON(w, http.StatusBadRequest, httpapi.ErrorObj("invalid address: "+err.Error()))
+		httpapi.WriteJSON(writer, http.StatusBadRequest, httpapi.Error400("invalid address: "+err.Error()))
 		return
 	}
 
 	// Normalize the address for a cleaner geocode request
-	norm := address.NormalizeAddress(addr)
+	normalizedAddr := address.NormalizeAddress(addr)
 
 	// Select the geocoder provider
 	provider, providerName, err := selectGeocoder()
 	if err != nil {
-		httpapi.WriteJSON(w, http.StatusInternalServerError, httpapi.ErrorObj(err.Error()))
+		httpapi.WriteJSON(writer, http.StatusInternalServerError, httpapi.Error500(err.Error()))
 		return
 	}
 
 	// Set a timeout for the geocoding request
 	timeout := getGeocodeTimeout()
-	ctx, cancel := context.WithTimeout(r.Context(), timeout)
+	ctx, cancel := context.WithTimeout(req.Context(), timeout)
 	defer cancel()
 
 	// Perform the geocoding
-	lat, lng, acc, err := provider.Geocode(ctx, norm)
+	lat, lng, acc, err := provider.Geocode(ctx, normalizedAddr)
 	if err != nil {
-		httpapi.WriteJSON(w, http.StatusBadGateway, httpapi.ErrorObj(fmt.Sprintf("geocoding failed via %s: %v", providerName, err)))
+		httpapi.WriteJSON(writer, http.StatusBadGateway, httpapi.Error502(fmt.Sprintf("geocoding failed via %s: %v", providerName, err)))
 		return
 	}
 
 	// Return the geocoding response
-	httpapi.WriteJSON(w, http.StatusOK, geocode.GeocodeResponse{
+	httpapi.WriteJSON(writer, http.StatusOK, geocode.GeocodeResponse{
 		Latitude:   lat,
 		Longitude:  lng,
 		Accuracy:   acc,
 		Provider:   providerName,
-		Normalized: norm,
+		Normalized: normalizedAddr,
 	})
 }
 
 // selectGeocoder selects the geocoding provider based on environment variables.
 func selectGeocoder() (geocode.Geocoder, string, error) {
 	providerName := strings.ToLower(strings.TrimSpace(os.Getenv("GEOCODER")))
+
 	switch providerName {
-	case "google":
-		apiKey := os.Getenv("GOOGLE_MAPS_API_KEY")
-		if strings.TrimSpace(apiKey) == "" {
-			return nil, "", fmt.Errorf("missing GOOGLE_MAPS_API_KEY for Google geocoder")
-		}
-		return &geocode.GoogleGeocoder{APIKey: apiKey}, "google", nil
-	case "nominatim":
-		baseURL := os.Getenv("NOMINATIM_BASE_URL")
-		if strings.TrimSpace(baseURL) == "" {
-			baseURL = "https://nominatim.openstreetmap.org" // Default Nominatim URL
-		}
-		return &geocode.NominatimGeocoder{BaseURL: baseURL}, "nominatim", nil
-	default:
-		return &geocode.MockGeocoder{}, "mock", nil
+		case "google":
+			apiKey := os.Getenv("GOOGLE_MAPS_API_KEY")
+			if strings.TrimSpace(apiKey) == "" {
+				return nil, "", fmt.Errorf("missing GOOGLE_MAPS_API_KEY for Google geocoder")
+			}
+			return &geocode.GoogleGeocoder{APIKey: apiKey}, "google", nil
+		case "nominatim":
+			baseURL := os.Getenv("NOMINATIM_BASE_URL")
+			if strings.TrimSpace(baseURL) == "" {
+				baseURL = "https://nominatim.openstreetmap.org" // Default Nominatim URL
+			}
+			return &geocode.NominatimGeocoder{BaseURL: baseURL}, "nominatim", nil
+		default:
+			return &geocode.MockGeocoder{}, "mock", nil
 	}
 }
 
 // getGeocodeTimeout retrieves the geocoding timeout from an environment variable or defaults to 5 seconds.
 func getGeocodeTimeout() time.Duration {
 	timeoutStr := os.Getenv("GEOCODE_TIMEOUT")
+
 	if timeoutStr == "" {
 		return 5 * time.Second // Default timeout
 	}
+
 	timeout, err := time.ParseDuration(timeoutStr)
+
 	if err != nil {
 		return 5 * time.Second // Fallback to default if parsing fails
 	}

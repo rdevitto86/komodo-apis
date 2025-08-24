@@ -10,14 +10,14 @@ type NormalizeResponse struct {
 	Address address.Address `json:"address"`
 }
 
-func HandleNormalize(w http.ResponseWriter, r *http.Request) {
-	addr, err := httpapi.ParseAddress(r)
+func HandleNormalize(writer http.ResponseWriter, req *http.Request) {
+	addr, err := httpapi.ParseAddress(req)
 
 	if err != nil {
-		httpapi.WriteJSON(w, http.StatusBadRequest, httpapi.ErrorObj(err.Error()))
+		httpapi.WriteJSON(writer, http.StatusBadRequest, httpapi.Error400(err.Error()))
 		return
 	}
 
 	n := address.NormalizeAddress(addr)
-	httpapi.WriteJSON(w, http.StatusOK, NormalizeResponse{Address: n})
+	httpapi.WriteJSON(writer, http.StatusOK, NormalizeResponse{Address: n})
 }

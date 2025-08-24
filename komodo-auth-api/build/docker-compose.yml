@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  auth-api:
+    build: .
+    image: komodo-auth-api:dev
+    container_name: komodo-auth-api
+    ports:
+      - "7001:7001"       # local dev port mapping
+    environment:
+      PORT: "7001"
+    env_file: .internal/config/.env.dev

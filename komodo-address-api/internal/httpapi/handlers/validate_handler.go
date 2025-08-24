@@ -11,22 +11,22 @@ type ValidateResponse struct {
 	Errors map[string]string `json:"errors,omitempty"`
 }
 
-func HandleValidate(w http.ResponseWriter, r *http.Request) {
-	addr, err := httpapi.ParseAddress(r)
+func HandleValidate(writer http.ResponseWriter, req *http.Request) {
+	addr, err := httpapi.ParseAddress(req)
 
 	if err != nil {
-		httpapi.WriteJSON(w, http.StatusBadRequest, httpapi.ErrorObj(err.Error()))
+		httpapi.WriteJSON(writer, http.StatusBadRequest, httpapi.Error400(err.Error()))
 		return
 	}
 
 	errs := address.ValidateAddress(addr)
-	resp := ValidateResponse{Valid: len(errs) == 0}
+	res := ValidateResponse{Valid: len(errs) == 0}
 
 	if len(errs) > 0 {
-		resp.Errors = errs
-		httpapi.WriteJSON(w, http.StatusUnprocessableEntity, resp)
+		res.Errors = errs
+		httpapi.WriteJSON(writer, http.StatusUnprocessableEntity, res)
 		return
 	}
 
-	httpapi.WriteJSON(w, http.StatusOK, resp)
+	httpapi.WriteJSON(writer, http.StatusOK, res)
 }

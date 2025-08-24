@@ -85,7 +85,7 @@ Validate an address.
 
 **cURL:**
 ```bash
-curl -i -X POST http://localhost:7001/validate \
+curl -i -X POST http://localhost:7010/validate \
   -H "Content-Type: application/json" \
   -d '{"street":"123 Main St","city":"Chicago","state":"IL","postalCode":"60601"}'
 ```
@@ -107,7 +107,7 @@ Normalize an address.
 
 **cURL:**
 ```bash
-curl -i -X POST http://localhost:7001/normalize \
+curl -i -X POST http://localhost:7010/normalize \
   -H "Content-Type: application/json" \
   -d '{"street":"123 main street ","city":" chicago ","state":"il","postalCode":"60601"}'
 ```
@@ -130,7 +130,7 @@ Geocode an address.
 
 **cURL:**
 ```bash
-curl -i -X POST http://localhost:7001/geocode \
+curl -i -X POST http://localhost:7010/geocode \
   -H "Content-Type: application/json" \
   -d '{"street":"123 Main St","city":"Chicago","state":"IL","postalCode":"60601"}'
 ```
@@ -173,7 +173,7 @@ Check the health status of the API.
 
 **cURL:**
 ```bash
-curl -i http://localhost:7001/health
+curl -i http://localhost:7010/health
 ```
 
 ## License

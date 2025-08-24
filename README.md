@@ -13,13 +13,13 @@ A single repo showcasing a complete, production-style backend for a modern e-com
 - [Local Development](#local-development)  
 - [Conventions](#conventions)  
 - [Services](#services)
+  - [komodo-auth-api](#komodo-auth-api)
   - [komodo-address-api](#komodo-address-api)
   - [komodo-ai-chatbot-api](#komodo-ai-chatbot-api)
   - [komodo-ai-summary-api](#komodo-ai-summary-api)
   - [komodo-analytics-interaction-api](#komodo-analytics-interaction-api)
   - [komodo-analytics-logs-api](#komodo-analytics-logs-api)
   - [komodo-analytics-telemetry-api](#komodo-analytics-telemetry-api)
-  - [komodo-auth-api](#komodo-auth-api)
   - [komodo-catalog-api](#komodo-catalog-api)
   - [komodo-entitlements-api](#komodo-entitlements-api)
   - [komodo-knowledge-api](#komodo-knowledge-api)
@@ -93,7 +93,7 @@ make up SERVICE=komodo-catalog-api
 
 ## Services
 
-Each service uses the same template:
+Each service uses the template:
 
 - **Overview**  
 - **Build**  
@@ -102,44 +102,32 @@ Each service uses the same template:
 
 ---
 
-### komodo-address-api
+### Core Services (7000–7099)
+
+---
+
+### komodo-auth-api
 
 **Overview**  
-Validates, normalizes, and geocodes shipping/billing addresses.
+Authentication, authorization, MFA, etc.
 
 **Misc**  
 - **Language/Stack:** Golang
 - **Port:** DEV: 7001 | PROD: 8080
-- **Data Stores:** Postgres, Redis
-- **Key Ops:** Validate, Normalize, Geocode  
+- **Key Ops:** Signup, Login, Token refresh, Password reset  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
 
-### komodo-ai-chatbot-api
+### komodo-entitlements-api
 
 **Overview**  
-Provides LLM generated servicing via self-service chat
+Manages user entitlements and access control.
 
 **Misc**  
-- **Language/Stack:** Python + FastAPI
-- **Port:** 8080  
-- **Upstreams:** LLM provider(s)
-- **Key Ops:** Message
-- **Docs/Health:** `/docs`, `/health`
-
----
-
-### komodo-ai-summary-api
-
-**Overview**  
-Generates product/order/user summaries (LLMs).
-
-**Misc**  
-- **Language/Stack:** Python + FastAPI
-- **Port:** 8080  
-- **Upstreams:** LLM provider(s)  
-- **Key Ops:** Summaries, Models listing  
+- **Language/Stack:** Golang
+- **Port:** DEV: 7002 | PROD: 8080
+- **Key Ops:** Entitlement checks, Role management  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
@@ -151,7 +139,7 @@ Captures user interactions for real-time personalization.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7003 | PROD: 8080
 - **Data:** Kafka/Redpanda  
 - **Key Ops:** Events ingestion, Stats query  
 - **Docs/Health:** `/docs`, `/health`
@@ -165,7 +153,7 @@ Ingests application logs and exposes query endpoints.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7004 | PROD: 8080
 - **Data:** Loki/Elastic  
 - **Key Ops:** Ingest, Query logs  
 - **Docs/Health:** `/docs`, `/health`
@@ -179,23 +167,64 @@ Metrics/trace ingestion + query proxy.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7005 | PROD: 8080
 - **Data:** Prometheus, Jaeger/Tempo  
 - **Key Ops:** Metrics, Traces, Dashboards  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
 
-### komodo-auth-api
+### Address APIs (7100–7199)
+
+---
+
+### komodo-address-api
 
 **Overview**  
-Authentication, authorization, MFA, etc.
+Validates, normalizes, and geocodes shipping/billing addresses.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
-- **Key Ops:** Signup, Login, Token refresh, Password reset  
+- **Port:** DEV: 7100 | PROD: 8080
+- **Data Stores:** Postgres, Redis
+- **Key Ops:** Validate, Normalize, Geocode  
 - **Docs/Health:** `/docs`, `/health`
+
+---
+
+### AI APIs (7200–7299)
+
+---
+
+### komodo-ai-chatbot-api
+
+**Overview**  
+Provides LLM-generated servicing via self-service chat.
+
+**Misc**  
+- **Language/Stack:** Python + FastAPI
+- **Port:** DEV: 7200 | PROD: 8080
+- **Upstreams:** LLM provider(s)
+- **Key Ops:** Message  
+- **Docs/Health:** `/docs`, `/health`
+
+---
+
+### komodo-ai-summary-api
+
+**Overview**  
+Generates product/order/user summaries (LLMs).
+
+**Misc**  
+- **Language/Stack:** Python + FastAPI
+- **Port:** DEV: 7201 | PROD: 8080
+- **Upstreams:** LLM provider(s)  
+- **Key Ops:** Summaries, Models listing  
+- **Docs/Health:** `/docs`, `/health`
+
+---
+
+### Catalog APIs (7300–7399)
 
 ---
 
@@ -206,37 +235,44 @@ Products, variants, categories, pricing, inventory.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7300 | PROD: 8080
 - **Data:** Postgres, Redis, S3  
 - **Key Ops:** Products CRUD, Inventory, Categories  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
 
-### komodo-entitlements-api
+### komodo-catalog-engagement-api
 
 **Overview**  
-User entitlements and feature toggles
+Tracks and analyzes catalog engagement metrics.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
-- **Key Ops:** Entitlements, Toggles
+- **Port:** DEV: 7301 | PROD: 8080
+- **Key Ops:** Engagement tracking, Metrics  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
 
-### komodo-knowledge-api
+### Communication APIs (7400–7499)
+
+---
+
+### komodo-comms-api
 
 **Overview**  
-Knowledge base and FAQ retrieval.
+Handles email, SMS, and push notifications.
 
 **Misc**  
-- **Language/Stack:** Node + Fastify + Prisma
-- **Port:** 8080  
-- **Data:** Postgres + OpenSearch
-- **Key Ops:** Search, Ingest, Articles  
+- **Language/Stack:** Node.js
+- **Port:** DEV: 7400 | PROD: 8080
+- **Key Ops:** Send notifications, Manage templates  
 - **Docs/Health:** `/docs`, `/health`
+
+---
+
+### Order APIs (7500–7599)
 
 ---
 
@@ -246,8 +282,8 @@ Knowledge base and FAQ retrieval.
 Cart and checkout orchestration.
 
 **Misc**  
-- **Language/Stack:** Golang 
-- **Port:** 8080  
+- **Language/Stack:** Golang
+- **Port:** DEV: 7500 | PROD: 8080
 - **Key Ops:** Cart, Checkout, Orders, Tax  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -260,8 +296,21 @@ Promotions and coupon rules.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7501 | PROD: 8080
 - **Key Ops:** Evaluate, Manage rules  
+- **Docs/Health:** `/docs`, `/health`
+
+---
+
+### komodo-order-returns-api
+
+**Overview**  
+Handles order returns and refunds.
+
+**Misc**  
+- **Language/Stack:** Golang
+- **Port:** DEV: 7502 | PROD: 8080
+- **Key Ops:** Returns, Refunds  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
@@ -273,9 +322,13 @@ Delivery and pickup scheduling.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7503 | PROD: 8080
 - **Key Ops:** Slots, Reserve, Cancel reservation  
 - **Docs/Health:** `/docs`, `/health`
+
+---
+
+### Payments APIs (7600–7699)
 
 ---
 
@@ -285,10 +338,14 @@ Delivery and pickup scheduling.
 Payment methods, intents, and provider abstraction.
 
 **Misc**  
-- **Language/Stack:** Node + Fastify
-- **Port:** 8080  
+- **Language/Stack:** Node.js
+- **Port:** DEV: 7600 | PROD: 8080
 - **Key Ops:** Payment intents, Confirm, Webhooks  
 - **Docs/Health:** `/docs`, `/health`
+
+---
+
+### Search APIs (7700–7799)
 
 ---
 
@@ -299,37 +356,14 @@ Catalog search, autocomplete, ranking.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7700 | PROD: 8080
 - **Data:** OpenSearch/Meilisearch  
 - **Key Ops:** Search, Suggest, Reindex  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
 
-### komodo-servicing-chat-api
-
-**Overview**  
-Provides customer–agent chat integration for the e-commerce platform. Handles live support sessions, message delivery, and session lifecycle management.
-
-**Misc**  
-- **Language/Stack:** Node + Fastify
-- **Port:** 8080  
-- **Data:** OpenSearch/Meilisearch, Redis (session state)
-- **Key Ops:** Message, Terminate 
-- **Docs/Health:** `/docs`, `/health`
-
----
-
-### komodo-ssr-engine
-
-**Overview**  
-Server-side rendering for storefront.
-
-**Misc**  
-- **Language/Stack:** Node + Next.js
-- **Port:** 8080  
-- **Key Ops:** Pages, Products, Categories  
-- **Docs/Health:** `/health`
+### User APIs (7800–7899)
 
 ---
 
@@ -340,7 +374,7 @@ User profiles, addresses, preferences.
 
 **Misc**  
 - **Language/Stack:** Golang
-- **Port:** 8080  
+- **Port:** DEV: 7800 | PROD: 8080
 - **Key Ops:** User CRUD, Addresses  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -352,8 +386,8 @@ User profiles, addresses, preferences.
 Email/SMS campaigns and subscriptions.
 
 **Misc**  
-- **Language/Stack:** Node + Fastify
-- **Port:** 8080  
+- **Language/Stack:** Node.js
+- **Port:** DEV: 7801 | PROD: 8080
 - **Key Ops:** Subscribe, Campaigns, Consent  
 - **Docs/Health:** `/docs`, `/health`
 
@@ -365,8 +399,8 @@ Email/SMS campaigns and subscriptions.
 Personalized recommendations.
 
 **Misc**  
-- **Language/Stack:** Node + Fastify
-- **Port:** 8080  
+- **Language/Stack:** Node.js
+- **Port:** DEV: 7802 | PROD: 8080
 - **Data:** Feature store + ML models  
 - **Key Ops:** Recommendations, Model reload  
 - **Docs/Health:** `/docs`, `/health`
@@ -379,46 +413,20 @@ Personalized recommendations.
 Product reviews, ratings, moderation.
 
 **Misc**  
-- **Language/Stack:** Node + Fastify
-- **Port:** 8080  
+- **Language/Stack:** Node.js
+- **Port:** DEV: 7803 | PROD: 8080
 - **Key Ops:** Reviews, Ratings, Moderation  
 - **Docs/Health:** `/docs`, `/health`
 
 ---
 
-## Testing, Observability & Security
+### komodo-user-rewards-api
 
-**Testing**  
-- Unit, integration, and smoke tests per service.  
+**Overview**  
+Manages user rewards and loyalty programs.
 
-**Observability**  
-- Local stack: Jaeger/Grafana/Loki.  
-- Services expose `/metrics` (Prometheus).  
-
-**Security**  
-- JWT validation in all public endpoints.  
-- Optional mTLS between internal services.  
-- Secrets in `.env` locally, secret manager in prod.  
-- Rate limiting at edge.
-
----
-
-## CI/CD
-
-- **CI:** Lint, tests, build, OpenAPI validation.  
-- **CD:** Per-service deploys to Kubernetes/Helm.  
-- **Versioning:** Independent or monorepo-wide semantic versions.
-
----
-
-## Troubleshooting
-
-- **Port conflict:** Change `PORT` in `.env`.  
-- **DB migrations fail:** Reset and re-run migrations.  
-- **Auth errors locally:** Enable `BYPASS_AUTH` for dev.
-
----
-
-## License
-
-MIT (or your preferred license). See `LICENSE`.
+**Misc**  
+- **Language/Stack:** Node.js
+- **Port:** DEV: 7804 | PROD: 8080
+- **Key Ops:** Rewards, Loyalty programs  
+- **Docs/Health:** `/docs`, `/health`

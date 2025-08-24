@@ -1,0 +1,16 @@
+# Server configuration
+server:
+  port: 7001
+  read_timeout: 10s
+  write_timeout: 15s
+  idle_timeout: 60s
+
+# Logging configuration
+logging:
+  level: debug
+  format: json
+
+# Feature flags
+features:
+  enable_some_feature: true
+  enable_another_feature: false
