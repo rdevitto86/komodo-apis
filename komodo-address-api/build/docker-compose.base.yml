@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  address-api:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    image: komodo-address-api:${TAG-latest}

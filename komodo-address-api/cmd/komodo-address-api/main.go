@@ -1,7 +1,7 @@
 package main
 
 import (
-	context "context"
+	"context"
 	"errors"
 	"komodo-address-api/internal/httpapi/handlers"
 	internal_mw "komodo-address-api/internal/httpapi/middleware"
@@ -13,34 +13,58 @@ import (
 	"syscall"
 	"time"
 
-	chi_router "github.com/go-chi/chi/v5"
-	chi_mw "github.com/go-chi/chi/v5/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	router := chi_router.NewRouter()
+	env := os.Getenv("ENV")
+  switch strings.ToLower(env) {
+    case "prod":
+      gin.SetMode(gin.ReleaseMode)
+    case "dev": // local
+      gin.SetMode(gin.DebugMode)
+    default:
+      gin.SetMode(gin.TestMode)
+  }
 
-	// Add Chi middleware
-	router.Use(chi_mw.RequestID)
-	router.Use(chi_mw.Logger)
-	router.Use(chi_mw.Recoverer)
+	gin.SetMode(env)
 
-	// Add custom authentication middleware
+	router := gin.New()
+
+	// Gin middleware
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	// Custom authentication middleware
 	validateTokenURL := os.Getenv("AUTH_SERVICE_VALIDATE_URL")
-
 	if validateTokenURL == "" {
 		log.Fatal("AUTH_SERVICE_VALIDATE_URL is not set")
 	}
-	router.Use(internal_mw.AuthMiddleware(validateTokenURL))
+
+	// Authentication middleware
+	router.Use(func(c *gin.Context) {
+		if err := internal_mw.AuthMiddleware(validateTokenURL, c); err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		c.Next()
+	})
 
 	// Define routes
-	router.Get("/health", handlers.HandleHealth)
-	router.Post("/validate", handlers.HandleValidate)
-	router.Post("/normalize", handlers.HandleNormalize)
-	router.Post("/geocode", handlers.HandleGeocode)
+	router.GET("/health", func(c *gin.Context) {
+		handlers.HandleHealth(c)
+	})
+	router.POST("/validate", func(c *gin.Context) {
+		handlers.HandleValidate(c)
+	})
+	router.POST("/normalize", func(c *gin.Context) {
+		handlers.HandleNormalize(c)
+	})
+	router.POST("/geocode", func(c *gin.Context) {
+		handlers.HandleGeocode(c)
+	})
 
-	serverAddress := ":7010" // default port
-
+	serverAddress := ":7010"
 	if port := os.Getenv("PORT"); strings.TrimSpace(port) != "" {
 		serverAddress = ":" + port
 	}
@@ -57,7 +81,6 @@ func main() {
 	// Graceful shutdown
 	go func() {
 		log.Printf("komodo-address-api listening on %s", serverAddress)
-
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("server error: %v", err)
 		}
@@ -67,7 +90,7 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {

@@ -4,6 +4,8 @@ import (
 	"komodo-address-api/internal/address"
 	"komodo-address-api/internal/httpapi"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ValidateResponse struct {
@@ -11,11 +13,11 @@ type ValidateResponse struct {
 	Errors map[string]string `json:"errors,omitempty"`
 }
 
-func HandleValidate(writer http.ResponseWriter, req *http.Request) {
-	addr, err := httpapi.ParseAddress(req)
+func HandleValidate(c *gin.Context) {
+	var addr address.Address
 
-	if err != nil {
-		httpapi.WriteJSON(writer, http.StatusBadRequest, httpapi.Error400(err.Error()))
+	if err := c.ShouldBindJSON(&addr); err != nil {
+		c.JSON(http.StatusBadRequest, httpapi.Error400(err.Error()))
 		return
 	}
 
@@ -24,9 +26,9 @@ func HandleValidate(writer http.ResponseWriter, req *http.Request) {
 
 	if len(errs) > 0 {
 		res.Errors = errs
-		httpapi.WriteJSON(writer, http.StatusUnprocessableEntity, res)
+		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 
-	httpapi.WriteJSON(writer, http.StatusOK, res)
+	c.JSON(http.StatusOK, res)
 }

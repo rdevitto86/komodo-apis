@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  auth-api:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    image: komodo-auth-api:${TAG-latest}

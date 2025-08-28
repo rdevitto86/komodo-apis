@@ -1,9 +1,9 @@
 # Server configuration
 server:
-  port: 7001
+  port: 8080
   read_timeout: 10s
   write_timeout: 15s
-  idle_timeout: 60s
+  idle_timeout: 60så
 
 # Logging configuration
 logging:
@@ -12,9 +12,8 @@ logging:
 
 # Feature flags
 features:
-  use_redis: false
-  use_dynamo: false
-  use_mfa: false
-  use_oauth: false
-  enable_sms: false
-  enable_email: false
+  use_redis: true
+  use_dynamo: true
+  use_mfa: true
+  use_oauth: true
+  use_sms: true

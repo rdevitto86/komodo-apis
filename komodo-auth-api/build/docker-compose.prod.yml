@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  auth-api:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    container_name: komodo-auth-api-prod
+    env_file:
+      - ../config/.env.prod
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://TODO"]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+    image: komodo-auth-api:prod
+    ports:
+      - "7001:7001"

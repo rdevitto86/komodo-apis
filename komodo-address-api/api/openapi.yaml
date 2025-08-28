@@ -3,99 +3,144 @@ info:
   title: komodo-address-api
   version: 0.1.0
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:7010
 paths:
+  # Health Check
   /health:
     get:
       responses:
-        "200": { description: OK }
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  # Validate Address
   /validate:
     post:
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: "#/components/schemas/Address" } }
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressModel"
       responses:
         "200":
-          {
             description: Valid,
             content:
-              {
-                application/json:
-                  { schema: { $ref: "#/components/schemas/ValidateResponse" } },
-              },
-          }
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ValidateResponse"
         "422":
-          {
-            description: Invalid,
-            content:
-              {
-                application/json:
-                  { schema: { $ref: "#/components/schemas/ValidateResponse" } },
-              },
-          }
+          description: Invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  # Normalize Address
   /normalize:
     post:
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: "#/components/schemas/Address" } }
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/AddressModel"
       responses:
         "200":
-          {
-            description: Normalized,
-            content:
-              {
-                application/json:
-                  {
-                    schema: { $ref: "#/components/schemas/NormalizeResponse" },
-                  },
-              },
-          }
+          description: Normalized,
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NormalizeResponse"
+  # Geocode Address
   /geocode:
     post:
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: "#/components/schemas/Address" } }
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressModel"
       responses:
         "200":
-          {
-            description: Geocoded,
-            content:
-              {
-                application/json:
-                  { schema: { $ref: "#/components/schemas/GeocodeResponse" } },
-              },
-          }
+          description: Geocoded,
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeocodeResponse"
 components:
   schemas:
-    Address:
+    # Health Check
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+    # Errors
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        errorCode:
+          type: string
+          example: NotFound
+        message:
+          type: string
+          example: The requested resource was not found
+    # Address Model
+    AddressModel:
       type: object
       required: [street1, city, state, postalCode]
       properties:
-        street1: { type: string }
-        street2: { type: string }
-        city: { type: string }
-        state: { type: string, description: State/Province/Region code }
-        postalCode: { type: string }
-        country: { type: string, description: ISO name or code, default: US }
+        street1:
+          type: string
+        street2:
+          
+        type: string
+        city:
+          type: string
+        state:
+          type: string
+          description: State/Province/Region code
+        postalCode:
+          type: string
+        country:
+          type: string
+          description: ISO name or code
+          default: US
+    # Validation
     ValidateResponse:
       type: object
       properties:
-        valid: { type: boolean }
+        valid:
+          type: boolean
         errors:
           type: object
-          additionalProperties: { type: string }
+          additionalProperties:
+            type: string
+    # Normalization
     NormalizeResponse:
       type: object
       properties:
-        address: { $ref: "#/components/schemas/Address" }
+        address:
+          $ref: "#/components/schemas/Address"
+    # Geocoding
     GeocodeResponse:
       type: object
       properties:
-        latitude: { type: number, format: double }
-        longitude: { type: number, format: double }
-        accuracy: { type: string }
-        provider: { type: string }
-        normalized: { $ref: "#/components/schemas/Address" }
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        accuracy:
+          type: string
+        provider:
+          type: string
+        normalized:
+          $ref: "#/components/schemas/Address"

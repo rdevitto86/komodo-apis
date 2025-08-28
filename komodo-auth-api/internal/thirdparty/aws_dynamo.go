@@ -1,0 +1,5 @@
+package thirdparty
+
+func AWSDynamo() {
+
+}

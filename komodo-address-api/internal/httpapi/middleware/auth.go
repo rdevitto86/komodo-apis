@@ -1,33 +1,30 @@
 package middleware
 
 import (
-	"net/http"
+	"log"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
-// AuthMiddleware validates the Authorization token using an external service.
-func AuthMiddleware(validateTokenURL string) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
-			// Extract the Authorization header
-			authHeader := req.Header.Get("Authorization")
+// AuthMiddleware validates the Authorization token and logs events.
+func AuthMiddleware(validateTokenURL string, c *gin.Context) error {
+	authHeader := c.GetHeader("Authorization")
 
-			if authHeader == "" {
-				// Allow requests without an Authorization header
-				next.ServeHTTP(writer, req)
-				return
-			}
-
-			// Allow any token (for now)
-			parts := strings.Split(authHeader, " ")
-
-			if len(parts) == 2 && strings.ToLower(parts[0]) == "bearer" {
-				next.ServeHTTP(writer, req)
-				return
-			}
-
-			// If the token format is invalid, allow the request (for now)
-			next.ServeHTTP(writer, req)
-		})
+	if authHeader == "" {
+		// Log missing auth header
+		log.Printf("No Authorization header for %s %s", c.Request.Method, c.Request.URL.Path)
+		return nil // Allow requests without an Authorization header
 	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) == 2 && strings.ToLower(parts[0]) == "bearer" {
+		// Log valid token format
+		log.Printf("Bearer token received for %s %s", c.Request.Method, c.Request.URL.Path)
+		return nil // Allow valid bearer tokens (add validation logic here)
+	}
+
+	// Log invalid token format
+	log.Printf("Invalid Authorization header format for %s %s: %s", c.Request.Method, c.Request.URL.Path, authHeader)
+	return nil // Allow invalid format for now (add rejection logic if needed)
 }

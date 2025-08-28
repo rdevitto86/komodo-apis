@@ -1,1 +1,5 @@
 package handlers
+
+func HealthHandler() {
+
+}

@@ -10,14 +10,17 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-// HandleGeocode processes geocoding requests.
-func HandleGeocode(writer http.ResponseWriter, req *http.Request) {
+// HandleGeocodeGin processes geocoding requests for Gin.
+func HandleGeocode(c *gin.Context) {
 	// Parse the address from the request
-	addr, err := httpapi.ParseAddress(req)
-	if err != nil {
-		httpapi.WriteJSON(writer, http.StatusBadRequest, httpapi.Error400("invalid address: "+err.Error()))
+	var addr address.Address
+
+	if err := c.ShouldBindJSON(&addr); err != nil {
+		c.JSON(http.StatusBadRequest, httpapi.Error400("invalid address: " + err.Error()))
 		return
 	}
 
@@ -26,25 +29,29 @@ func HandleGeocode(writer http.ResponseWriter, req *http.Request) {
 
 	// Select the geocoder provider
 	provider, providerName, err := selectGeocoder()
+
 	if err != nil {
-		httpapi.WriteJSON(writer, http.StatusInternalServerError, httpapi.Error500(err.Error()))
+		c.JSON(http.StatusInternalServerError, httpapi.Error500(err.Error()))
 		return
 	}
 
 	// Set a timeout for the geocoding request
 	timeout := getGeocodeTimeout()
-	ctx, cancel := context.WithTimeout(req.Context(), timeout)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
 	defer cancel()
 
 	// Perform the geocoding
 	lat, lng, acc, err := provider.Geocode(ctx, normalizedAddr)
+
 	if err != nil {
-		httpapi.WriteJSON(writer, http.StatusBadGateway, httpapi.Error502(fmt.Sprintf("geocoding failed via %s: %v", providerName, err)))
+		c.JSON(http.StatusBadGateway, httpapi.Error502(
+			fmt.Sprintf("geocoding failed via %s: %v", providerName, err),
+		))
 		return
 	}
 
 	// Return the geocoding response
-	httpapi.WriteJSON(writer, http.StatusOK, geocode.GeocodeResponse{
+	c.JSON(http.StatusOK, geocode.GeocodeResponse{
 		Latitude:   lat,
 		Longitude:  lng,
 		Accuracy:   acc,
@@ -55,23 +62,23 @@ func HandleGeocode(writer http.ResponseWriter, req *http.Request) {
 
 // selectGeocoder selects the geocoding provider based on environment variables.
 func selectGeocoder() (geocode.Geocoder, string, error) {
-	providerName := strings.ToLower(strings.TrimSpace(os.Getenv("GEOCODER")))
+	providerName := strings.ToLower(strings.TrimSpace(os.Getenv("GEOCODER_PROVIDER")))
 
 	switch providerName {
-		case "google":
-			apiKey := os.Getenv("GOOGLE_MAPS_API_KEY")
-			if strings.TrimSpace(apiKey) == "" {
-				return nil, "", fmt.Errorf("missing GOOGLE_MAPS_API_KEY for Google geocoder")
-			}
-			return &geocode.GoogleGeocoder{APIKey: apiKey}, "google", nil
-		case "nominatim":
-			baseURL := os.Getenv("NOMINATIM_BASE_URL")
-			if strings.TrimSpace(baseURL) == "" {
-				baseURL = "https://nominatim.openstreetmap.org" // Default Nominatim URL
-			}
-			return &geocode.NominatimGeocoder{BaseURL: baseURL}, "nominatim", nil
-		default:
-			return &geocode.MockGeocoder{}, "mock", nil
+	case "google":
+		apiKey := os.Getenv("GOOGLE_MAPS_API_KEY")
+		if strings.TrimSpace(apiKey) == "" {
+			return nil, "", fmt.Errorf("missing GOOGLE_MAPS_API_KEY for Google geocoder")
+		}
+		return &geocode.GoogleGeocoder{APIKey: apiKey}, "google", nil
+	case "nominatim":
+		baseURL := os.Getenv("NOMINATIM_BASE_URL")
+		if strings.TrimSpace(baseURL) == "" {
+			baseURL = "https://nominatim.openstreetmap.org" // Default Nominatim URL
+		}
+		return &geocode.NominatimGeocoder{BaseURL: baseURL}, "nominatim", nil
+	default:
+		return &geocode.MockGeocoder{}, "mock", nil
 	}
 }
 
