@@ -1,17 +1,17 @@
 version: "3.9"
 services:
-  address-api:
+  auth-api:
     build:
       context: ..
       dockerfile: build/Dockerfile
-    container_name: komodo-address-api-prod
+    container_name: komodo-auth-api-staging
     env_file:
-      - ../config/.env.prod
+      - ../config/.env.staging
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://TODO"]
       interval: 10s
       timeout: 2s
       retries: 5
-    image: komodo-address-api:prod
+    image: komodo-auth-api:staging
     ports:
-      - "7010:7010"
+      - "7001:7001"

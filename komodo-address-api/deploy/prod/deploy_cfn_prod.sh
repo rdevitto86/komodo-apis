@@ -1,0 +1,1 @@
+aws cloudformation deploy --template-file aws_cfn_prod.yaml --stack-name komodo-address-api-prod --capabilities CAPABILITY_IAM

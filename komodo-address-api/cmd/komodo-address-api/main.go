@@ -5,6 +5,7 @@ import (
 	"errors"
 	"komodo-address-api/internal/httpapi/handlers"
 	internal_mw "komodo-address-api/internal/httpapi/middleware"
+	"komodo-address-api/thirdparty/aws"
 	"log"
 	"net/http"
 	"os"
@@ -17,17 +18,25 @@ import (
 )
 
 func main() {
-	env := os.Getenv("ENV")
+	env := os.Getenv("API_ENV")
+
   switch strings.ToLower(env) {
     case "prod":
-      gin.SetMode(gin.ReleaseMode)
-    case "dev": // local
-      gin.SetMode(gin.DebugMode)
-    default:
-      gin.SetMode(gin.TestMode)
-  }
+			secret, err := aws.GetSecret("prod/db/password")
 
-	gin.SetMode(env)
+			if err != nil {
+        log.Fatalf("failed to load secret: %v", err)
+      }
+
+      os.Setenv("DB_PASSWORD", secret)
+			gin.SetMode(gin.ReleaseMode)
+		case "staging":
+			gin.SetMode(gin.ReleaseMode)
+		case "dev":
+			gin.SetMode(gin.DebugMode)
+		default:
+			log.Fatal("API_ENV is not set")
+	}
 
 	router := gin.New()
 

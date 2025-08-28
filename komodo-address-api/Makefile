@@ -12,10 +12,9 @@ BUILD_DIR := build
 CONFIG_ENV := config/.env.$(ENV)
 
 # Compose (base + overlay)
-BASE_COMPOSE := $(BUILD_DIR)/docker-compose.base.yml
-ENV_COMPOSE := $(BUILD_DIR)/docker-compose.$(ENV).yml
+COMPOSE_FILE := $(BUILD_DIR)/docker-compose.$(ENV).yaml
 
-.PHONY: local build run bootstrap stop restart cleanup test_all test_unit test_int test_e2e fmt
+.PHONY: local build run bootstrap stop deploy_staging deploy_prod restart cleanup test_all test_unit test_int test_e2e fmt
 
 help:
 	@echo "Targets:"
@@ -40,18 +39,20 @@ help:
 	@echo "  make cleanup"
 	@echo "  make test_all"
 
+# Local No Docker Commands
 local:
 	@export $$(grep -v '^\s*#' $(CONFIG_ENV) | grep -v '^\s*$$' | xargs) ; \
 	go run ./cmd/$(APP)
 
+# Local Docker Commands
 build:
 	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg API_ENV=$(ENV) .
 
 run:
-	docker compose -f $(BASE_COMPOSE) -f $(ENV_COMPOSE) up -d
+	docker compose -f $(COMPOSE_FILE) up -d
 
 stop:
-	docker compose -f $(BASE_COMPOSE) -f $(ENV_COMPOSE) down -v
+	docker compose -f $(COMPOSE_FILE) down -v
 
 bootstrap:
 	$(MAKE) build
@@ -68,6 +69,17 @@ cleanup:
 	docker volume prune -f
 	rm -rf bin
 
+# ENV Deploy Commands
+deploy_dev:
+	$(MAKE) bootstrap ENV=dev
+
+deploy_staging:
+	bash deploy/staging/deploy_docker_staging.sh
+
+deploy_prod:
+	bash deploy/prod/deploy_docker_prod.sh
+
+# Test Commands
 test_all:
 	go test ./... -race
 
