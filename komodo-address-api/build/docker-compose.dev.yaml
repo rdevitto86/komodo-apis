@@ -6,7 +6,7 @@ services:
       dockerfile: build/Dockerfile
     container_name: komodo-address-api-dev
     env_file:
-      - ../config/.env.dev
+      - ../env/.env.dev
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:7010/health"]
       interval: 10s

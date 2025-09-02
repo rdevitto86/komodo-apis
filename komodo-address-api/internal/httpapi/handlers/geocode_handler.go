@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"komodo-address-api/internal/address"
 	"komodo-address-api/internal/geocode"
-	"komodo-address-api/internal/httpapi"
+	"komodo-address-api/internal/httpapi/errors"
 	"net/http"
 	"os"
 	"strings"
@@ -20,7 +20,7 @@ func HandleGeocode(c *gin.Context) {
 	var addr address.Address
 
 	if err := c.ShouldBindJSON(&addr); err != nil {
-		c.JSON(http.StatusBadRequest, httpapi.Error400("invalid address: " + err.Error()))
+		c.JSON(http.StatusBadRequest, errors.Error400("invalid address: " + err.Error()))
 		return
 	}
 
@@ -31,7 +31,7 @@ func HandleGeocode(c *gin.Context) {
 	provider, providerName, err := selectGeocoder()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, httpapi.Error500(err.Error()))
+		c.JSON(http.StatusInternalServerError, errors.Error500(err.Error()))
 		return
 	}
 
@@ -44,7 +44,7 @@ func HandleGeocode(c *gin.Context) {
 	lat, lng, acc, err := provider.Geocode(ctx, normalizedAddr)
 
 	if err != nil {
-		c.JSON(http.StatusBadGateway, httpapi.Error502(
+		c.JSON(http.StatusBadGateway, errors.Error502(
 			fmt.Sprintf("geocoding failed via %s: %v", providerName, err),
 		))
 		return

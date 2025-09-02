@@ -9,7 +9,7 @@ TAG ?= $(ENV)
 
 # Paths
 BUILD_DIR := build
-CONFIG_ENV := config/.env.$(ENV)
+CONFIG_ENV := env/.env.$(ENV)
 
 # Compose (base + overlay)
 COMPOSE_FILE := $(BUILD_DIR)/docker-compose.$(ENV).yaml
@@ -39,11 +39,6 @@ help:
 	@echo "  make cleanup"
 	@echo "  make test_all"
 
-# Local No Docker Commands
-local:
-	@export $$(grep -v '^\s*#' $(CONFIG_ENV) | grep -v '^\s*$$' | xargs) ; \
-	go run ./cmd/$(APP)
-
 # Local Docker Commands
 build:
 	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg API_ENV=$(ENV) .
@@ -52,7 +47,7 @@ run:
 	docker compose -f $(COMPOSE_FILE) up -d
 
 stop:
-	docker compose -f $(COMPOSE_FILE) down -v
+	docker compose -f $(COMPOSE_FILE) down --remove-orphans
 
 bootstrap:
 	$(MAKE) build

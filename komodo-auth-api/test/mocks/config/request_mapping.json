@@ -1,0 +1,26 @@
+{
+  "login":  {
+    "POST": {
+      "body" : "username"
+    }
+  },
+  "logout": {
+    "POST": {
+      "body" : "username"
+    }
+  },
+  "session-create": {
+    "POST": {
+      "body": {
+        "username": "string"
+      }
+    }
+  },
+  "session-delete": {
+    "POST": {
+      "body": {
+        "username": "string"
+      }
+    }
+  }
+}
