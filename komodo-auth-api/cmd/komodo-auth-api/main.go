@@ -3,6 +3,7 @@ package main
 import (
 	"komodo-auth-api/internal/httpapi/handlers"
 	"komodo-auth-api/internal/httpapi/middleware"
+	"komodo-auth-api/internal/logger"
 	"komodo-auth-api/internal/thirdparty/aws"
 	"log"
 	"net/http"
@@ -23,42 +24,44 @@ func main() {
 		default:
 			log.Fatalf("Environment variable API_ENV is not set or invalid")
 	}
-	log.Printf("Starting Komodo Auth API in %s environment", env)
 
-	// Init HTTP client
-	middleware.InitHttpClient()
+	// Initialize logger
+	logger.InitLogger()
 
 	// Initialize router
 	rtr := chi.NewRouter()
 
 	// Initialize middleware
+	rtr.Use(middleware.ObscureDataMiddleware)
 	rtr.Use(middleware.RequestValidationMiddleware)
-	rtr.Use(middleware.ObscurePIIMiddleware)
-	rtr.Use(middleware.SecureLoggerMiddleware)
 	rtr.Use(middleware.ResponseJSONMiddleware)
+	rtr.Use(middleware.InitMoxtoxMiddleware(
+		"test/mocks/config/moxtox.json",
+		"test/mocks/data",
+		os.Getenv("USE_MOCKS") == "true",
+	))
 
-	if os.Getenv("USE_MOCKS") == "true" {
-    rtr.Use(middleware.InitMoxtoxMiddleware(
-      "test/mocks/config/ignored_routes.json",
-      "test/mocks/config/request_mapping.json",
-      true,
-    ))
-	}
+	// Initialize HTTP client
+	middleware.InitHttpClient()
 
 	// Initialize routes
-	rtr.Route(("/" + os.Getenv("API_VERSION")), func(r chi.Router) {
-		r.Get("/health", handlers.HealthHandler)
-		r.Post("/login", handlers.LoginHandler)
-		r.Post("/logout", handlers.LogoutHandler)
-		// r.Post("/mfa-disable", handlers.MFADisableHandler)
-		// r.Post("/mfa-enable", handlers.MFAEnableHandler)
-		// r.Post("/mfa-setup", handlers.MFASetupHandler)
-		// r.Post("/mfa-verify", handlers.MFAVerifyHandler)
-		r.Post("/session-delete", handlers.SessionDeleteHandler)
-		r.Post("/session-create", handlers.SessionCreateHandler)
-		// r.Post("/token-refresh", handlers.TokenRefreshHandler)
-		// r.Post("/token-revoke", handlers.TokenRevokeHandler)
-		// r.Post("/token-verify", handlers.TokenVerifyHandler)
+	rtr.Get("/health", handlers.HealthHandler)
+	rtr.Get("/.well-known/jwks.json", handlers.JWKSHandler)
+
+	rtr.Route(("/v" + os.Getenv("API_VERSION")), func(ver chi.Router) {
+		ver.Route("/auth", func(auth chi.Router) {
+			auth.Post("/login", handlers.LoginHandler)
+			auth.Post("/logout", handlers.LogoutHandler)
+			auth.Post("/mfa/disable", handlers.MFADisableHandler)
+			auth.Post("/mfa/enable", handlers.MFAEnableHandler)
+			auth.Post("/mfa/setup", handlers.MFASetupHandler)
+			auth.Post("/mfa/verify", handlers.MFAVerifyHandler)
+			auth.Post("/passkey/start", handlers.PasskeyStartHandler)
+			auth.Post("/passkey/verify", handlers.PasskeyVerifyHandler)
+			auth.Post("/token", handlers.TokenCreateHandler)
+			auth.Delete("/token", handlers.TokenDeleteHandler)
+			auth.Post("/token/refresh", handlers.TokenRefreshHandler)
+		})
 	})
 
 	// Start server

@@ -7,22 +7,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
-)
 
-func IsAPIRequest(req *http.Request) bool {
-	return strings.HasPrefix(req.URL.Path, "/api/") ||
-		strings.Contains(req.Header.Get("Accept"), "application/json") ||
-		req.Header.Get("X-Requested-By") == "API"
-}
+	"github.com/go-chi/chi/v5"
+) 
 
-func IsUIRequest(req *http.Request) bool {
-	return strings.HasPrefix(req.URL.Path, "/ui/") ||
-		strings.Contains(req.Header.Get("Accept"), "text/html") ||
-		req.Header.Get("X-Requested-By") == "UI"
-}
-
-func IsValidAPIPath(req *http.Request) bool {
-	return strings.HasPrefix(req.URL.Path, ("/" + os.Getenv("API_VERSION")))
+func IsValidAPIVersion(path string) bool {
+	return path == ("/v" + os.Getenv("API_VERSION"))
 }
 
 func IsValidBearer(bearer string) bool {
@@ -41,13 +31,14 @@ func IsValidBearer(bearer string) bool {
 }
 
 func IsValidContentAcceptType(str string) bool {
+	if str == "" { return false }
 	return strings.HasPrefix(str, "application/json")
 }
 
-func IsValidContentLength(cl string) bool {
-	if cl == "" { return false }
+func IsValidContentLength(str string) bool {
+	if str == "" { return false }
 
-	val, err := strconv.Atoi(cl)
+	val, err := strconv.Atoi(str)
 	if err != nil { return false }
 
 	getMax := func() int {
@@ -61,8 +52,7 @@ func IsValidContentLength(cl string) bool {
 }
 
 func IsValidCSRF(csrf string, session string) bool {
-	if csrf == "" || session == "" { return false }
-	return csrf == session
+	return csrf != "" && csrf == session
 }
 
 func IsValidSession(session string) bool {
@@ -79,16 +69,82 @@ func IsValidCookie(cookie string) bool {
 	return cookie != ""
 }
 
-func IsValidUserAgent(userAgent string) bool {
-	// TODO: Implement User-Agent validation logic (e.g., block bots)
-	return userAgent != ""
+func IsValidUserAgent(str string) bool {
+	if str == "" { return false }
+	commonAgents := []string{"Mozilla/", "Chrome/", "Safari/", "Opera/", "Edge/", "Firefox/", "PostmanRuntime/", "curl/"}
+	for _, agent := range commonAgents {
+		if strings.Contains(str, agent) {
+			return true
+		}
+	}
+	return false
 }
 
-func IsValidCacheControl(cacheControl string) bool {
-	switch cacheControl {
-	case "no-cache", "no-store", "must-revalidate":
-		return true
-	default:
-		return false
+func IsValidReferer(str string) bool {
+	return strings.HasPrefix(str, "http://") || strings.HasPrefix(str, "https://")
+}
+
+func IsValidCacheControl(str string) bool {
+	return str == "no-cache" || str == "no-store" || str == "must-revalidate"
+}
+
+func IsValidRequestedBy(str string) bool {
+	return str == "API_INTERNAL" || str == "API_EXTERNAL" || str == "UI_USER" || str == "UI_GUEST" || str == "ADMIN"
+}
+
+func ParseURI(req *http.Request) (string, string) {
+	var base string = req.URL.Path
+	if idx := strings.Index(req.URL.Path, "?"); idx != -1 {
+		base = req.URL.Path[:idx]
 	}
+
+	// Split path and detect version segment if present
+	trimmed := strings.TrimPrefix(base, "/")
+	segments := strings.Split(trimmed, "/")
+
+	version := ""
+	route := ""
+
+	if len(segments) > 0 && len(segments[0]) > 0 && segments[0][0] == 'v' {
+		// Treat the first segment like v1, v2, etc. as API version
+		version = "/" + segments[0]
+		if len(segments) > 1 {
+			route = "/" + strings.Join(segments[1:], "/")
+		} else {
+			route = "/"
+		}
+	} else {
+		// No explicit version prefix
+		route = "/" + strings.Join(segments, "/")
+	}
+
+	// Append the raw query back to the route if present (preserves original casing)
+	if raw := req.URL.RawQuery; raw != "" {
+		route = route + "?" + raw
+	}
+	return version, route
+}
+
+func ParsePathParams(req *http.Request, filters ...string) map[string]string {
+	out := make(map[string]string)
+
+	for _, name := range filters {
+		if name == "" {
+			continue
+		}
+		val := chi.URLParam(req, name)
+		if val != "" {
+			out[name] = val
+		}
+	}
+	return out
+}
+
+func ParseQueryParams(req *http.Request) map[string][]string {
+	out := make(map[string][]string)
+
+	for k, vals := range req.URL.Query() {
+		out[k] = append([]string{}, vals...)
+	}
+	return out
 }

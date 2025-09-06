@@ -9,7 +9,6 @@ func ResponseJSONMiddleware(next http.Handler) http.Handler {
 		wtr.Header().Set("Content-Type", "application/json")
 		wtr.Header().Set("Cache-Control", "no-store")
 		wtr.Header().Set("X-Content-Type-Options", "nosniff")
-		wtr.Header().Set("Access-Control-Allow-Origin", "*") // CORS
 		next.ServeHTTP(wtr, req)
 	})
 }

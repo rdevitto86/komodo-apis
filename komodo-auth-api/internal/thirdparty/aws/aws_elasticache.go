@@ -11,6 +11,8 @@ type ElasticacheConnector struct {
 	Password string
 }
 
+const DEFAULT_SESH_TTL = 3600
+
 var ElasticacheClient *ElasticacheConnector
 
 func InitElasticacheClient() {
@@ -27,7 +29,7 @@ func InitElasticacheClient() {
   ElasticacheClient = &ElasticacheConnector{Endpoint: endpoint, Password: password}
 }
 
-func GetSessionToken(key string) (string, error) {
+func GetSessionToken(token string) (string, error) {
 	if ElasticacheClient == nil {
 		return "", errors.New("ElastiCache client is not initialized")
 	}
@@ -35,7 +37,7 @@ func GetSessionToken(key string) (string, error) {
 	return "", nil
 }
 
-func SetSessionToken(key, value string) error {
+func SetSessionToken(token string) error {
 	if ElasticacheClient == nil {
 		return errors.New("ElastiCache client is not initialized")
 	}

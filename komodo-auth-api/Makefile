@@ -14,7 +14,7 @@ CONFIG_ENV := env/.env.$(ENV)
 # Compose (base + overlay)
 COMPOSE_FILE := $(BUILD_DIR)/docker-compose.$(ENV).yaml
 
-.PHONY: local build run bootstrap stop deploy_staging deploy_prod restart cleanup test_all test_unit test_int test_e2e fmt
+.PHONY: local build run bootstrap stop deploy_staging deploy_prod restart clean test_all test_unit test_int test_e2e fmt
 
 help:
 	@echo "Targets:"
@@ -23,7 +23,7 @@ help:
 	@echo "  local             Run app locally (no Docker, loads $(CONFIG_ENV))"
 	@echo "  stop              Stop and remove container stack"
 	@echo "  restart           Restart container stack"
-	@echo "  cleanup           Prune Docker and remove local build artifacts"
+	@echo "  clean           	 Prune Docker and remove local build artifacts"
 	@echo "  test_all          Run all tests"
 	@echo "  test_unit         Run unit tests"
 	@echo "  test_int          Run integration tests"
@@ -36,7 +36,7 @@ help:
 	@echo "  make local ENV=dev"
 	@echo "  make stop ENV=prod"
 	@echo "  make restart ENV=dev"
-	@echo "  make cleanup"
+	@echo "  make clean"
 	@echo "  make test_all"
 
 # Local Docker Commands
@@ -57,7 +57,7 @@ restart:
 	$(MAKE) stop ENV=$(ENV)
 	$(MAKE) run ENV=$(ENV)
 
-cleanup:
+clean:
 	docker container prune -f
 	docker image prune -f
 	docker network prune -f
