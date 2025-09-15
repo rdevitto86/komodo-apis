@@ -10,6 +10,6 @@ type healthResponse struct {
 	Status string `json:"status"`
 }
 
-func HandleHealth(c *gin.Context) {
-	c.JSON(http.StatusOK, healthResponse{Status: "ok"})
+func HandleHealth(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, healthResponse{Status: "OK"})
 }

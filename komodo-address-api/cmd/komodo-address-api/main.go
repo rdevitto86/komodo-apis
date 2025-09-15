@@ -20,9 +20,20 @@ import (
 func main() {
 	env := os.Getenv("API_ENV")
 
+	// Set ENV specific config
   switch strings.ToLower(env) {
-    case "prod":
-			secret, err := aws.GetSecret("prod/db/password")
+		case "dev":
+			gin.SetMode(gin.DebugMode)
+		case "staging", "prod":
+			var secretName string
+
+			if env == "staging" {
+				secretName = "staging/db/password"
+			} else {
+				secretName = "prod/db/password"
+			}
+
+			secret, err := aws.GetSecret(secretName)
 
 			if err != nil {
         log.Fatalf("failed to load secret: %v", err)
@@ -30,10 +41,6 @@ func main() {
 
       os.Setenv("DB_PASSWORD", secret)
 			gin.SetMode(gin.ReleaseMode)
-		case "staging":
-			gin.SetMode(gin.ReleaseMode)
-		case "dev":
-			gin.SetMode(gin.DebugMode)
 		default:
 			log.Fatal("API_ENV is not set")
 	}

@@ -1,21 +1,20 @@
 #!/bin/bash
-# filepath: /Users/rad/komodo-apis/komodo-address-api/deploy/deploy_docker_qa.sh
+# filepath: /Users/rad/komodo-apis/komodo-address-api/deploy/deploy_docker_staging.sh
 
 set -e
 
 # Set environment
-ENV=qa
-COMPOSE_BASE="build/docker-compose.base.yml"
-COMPOSE_QA="build/docker-compose.qa.yml"
-ENV_FILE="config/.env.qa"
+ENV=staging
+COMPOSE_STAGING="build/docker-compose.staging.yaml"
+ENV_FILE="env/.env.staging"
 
-echo "Deploying komodo-address-api to QA Docker cluster..."
+echo "Deploying komodo-address-api to Staging Docker cluster..."
 
-# Build the Docker image with QA settings
+# Build the Docker image with Staging settings
 docker build -f build/Dockerfile -t komodo-address-api:${ENV} --build-arg API_ENV=${ENV} .
 
-# Start the QA stack using Docker Compose overlays
-docker compose -f ${COMPOSE_BASE} -f ${COMPOSE_QA} --env-file ${ENV_FILE} up -d --remove-orphans
+# Start the Staging stack using Docker Compose overlays
+docker compose -f ${COMPOSE_STAGING} --env-file ${ENV_FILE} up -d --remove-orphans
 
-echo "QA deployment complete."
-docker compose -f ${COMPOSE_BASE} -f ${COMPOSE_QA} ps
+echo "Staging deployment complete."
+docker compose -f ${COMPOSE_STAGING} ps
