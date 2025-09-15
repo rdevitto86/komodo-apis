@@ -10,11 +10,11 @@ import (
 )
 
 func TelemetryMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Trailer", "Server-Timing")
-		w.Header().Add("Trailer", "X-Response-Time")
+	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
+		wtr.Header().Add("Trailer", "Server-Timing")
+		wtr.Header().Add("Trailer", "X-Response-Time")
 
-		ww := chimw.NewWrapResponseWriter(w, r.ProtoMajor)
+		ww := chimw.NewWrapResponseWriter(wtr, req.ProtoMajor)
 		start := time.Now()
 
 		defer func() {
@@ -26,7 +26,7 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 					http.Error(ww, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				}
 				logger.Error("telemetry panicked!", map[string]any{
-					"request_id": chimw.GetReqID(r.Context()),
+					"request_id": chimw.GetReqID(req.Context()),
 					"err":        rec,
 				})
 			}
@@ -40,18 +40,18 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 			}
 
 			payload := map[string]any{
-				"request_id": chimw.GetReqID(r.Context()),
-				"method":     r.Method,
-				"path":       r.URL.Path,
-				"query":      r.URL.RawQuery,
+				"request_id": chimw.GetReqID(req.Context()),
+				"method":     req.Method,
+				"path":       req.URL.Path,
+				"query":      req.URL.RawQuery,
 				"status":     status,
 				"bytes":     ww.BytesWritten(),
 				"latency_ms": ms,
-				"ip":         r.RemoteAddr,
-				"user_agent": r.UserAgent(),
-				"referer":    r.Referer(),
-				"proto":     r.Proto,
-				"host":      r.Host,
+				"ip":         req.RemoteAddr,
+				"user_agent": req.UserAgent(),
+				"referer":    req.Referer(),
+				"proto":     req.Proto,
+				"host":      req.Host,
 				"start_time": start.UTC().Format(time.RFC3339Nano),
 				"finish_time": time.Now().UTC().Format(time.RFC3339Nano),
 			}
@@ -63,6 +63,6 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 			}
 		}()
 
-		next.ServeHTTP(ww, r)
+		next.ServeHTTP(ww, req)
 	})
 }
