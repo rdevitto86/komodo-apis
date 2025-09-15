@@ -13,13 +13,6 @@ const HEADER_X_REQUESTED_WITH = "X-Requested-With"
 const HEADER_X_SESSION = "X-Session-Token"
 const HEADER_X_CSRF_TOKEN = "X-CSRF-Token"
 
-var UIDefaultHeaders = []string{
-	HEADER_X_SESSION, HEADER_X_CSRF_TOKEN, HEADER_X_REQUESTED_BY,
-}
-var APIDefaultHeaders = []string{
-	HEADER_AUTH, HEADER_CONTENT_TYPE, HEADER_X_REQUESTED_BY,
-}
-
 type RequestType string
 const (
 	REQ_TYPE_API_INT 		RequestType = "API_INTERNAL"
@@ -29,8 +22,12 @@ const (
 	REQ_TYPE_ADMIN 			RequestType = "ADMIN"
 )
 
-type MandatoryHeaders []string
-type OptionalHeaders []string
+type HeaderSpec struct {
+	Type     string // "string","int","uuid",...
+	Required bool
+	Pattern  string // optional regex
+}
+type Headers map[string]HeaderSpec
 
 type ParamSpec struct {
 	Type     string // "string","int","uuid",...
@@ -63,8 +60,7 @@ type Body map[string]BodySpec
 type Request struct {
 	Method           	string
 	Type              []RequestType
-	MandatoryHeaders  MandatoryHeaders
-	OptionalHeaders   OptionalHeaders
+	Headers           Headers
 	PathParams        PathParams
 	QueryParams       QueryParams
 	Body              Body
