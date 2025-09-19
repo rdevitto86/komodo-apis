@@ -2,125 +2,182 @@ package model
 
 import "net/http"
 
+// TODO - remap headers using map[string]spec
+
 // Health Check Request
 var HealthRequest = Request{
-	Method:            http.MethodGet,
-	Type:              []RequestType{
+	Method: http.MethodGet,
+	Type: []RequestType{
 		REQ_TYPE_API_INT,
 		REQ_TYPE_API_EXT,
 		REQ_TYPE_UI_USER,
 		REQ_TYPE_UI_GUEST,
 		REQ_TYPE_ADMIN,
 	},
-	MandatoryHeaders:  MandatoryHeaders{
-		HEADER_X_REQUESTED_BY,
-	},
-	OptionalHeaders:   OptionalHeaders{
-		HEADER_USER_AGENT,
-		HEADER_REFERER,
+	Headers: Headers{
+		HEADER_X_REQUESTED_BY: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_USER_AGENT: {
+			Type:     "string",
+			Required: false,
+		},
+		HEADER_REFERER: {
+			Type:     "string",
+			Required: false,
+		},
 	},
 }
 
 // Login Request
 var LoginRequest = Request{
-	Method:            http.MethodPost,
-	Type:              []RequestType{
+	Method: http.MethodPost,
+	Type: []RequestType{
 		REQ_TYPE_UI_USER,
 		REQ_TYPE_UI_GUEST,
 	},
-	MandatoryHeaders:  MandatoryHeaders{
-		HEADER_CONTENT_TYPE,
-		HEADER_X_REQUESTED_BY,
+	Headers: Headers{
+		HEADER_CONTENT_TYPE: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_X_REQUESTED_BY: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_USER_AGENT: {
+			Type:     "string",
+			Required: false,
+		},
+		HEADER_REFERER: {
+			Type:     "string",
+			Required: false,
+		},
 	},
-	OptionalHeaders:   OptionalHeaders{
-		HEADER_USER_AGENT,
-		HEADER_REFERER,
-	},
-	PathParams:        PathParams{},
-	QueryParams:       QueryParams{},
-	Body:              Body{},
+	Body: Body{},
 }
 
 // Logout Request
 var LogoutRequest = Request{
-	Method:            http.MethodPost,
-	Type:              []RequestType{
+	Method: http.MethodPost,
+	Type: []RequestType{
 		REQ_TYPE_API_INT,
 		REQ_TYPE_API_EXT,
 		REQ_TYPE_UI_GUEST,
 	},
-	MandatoryHeaders:  MandatoryHeaders{
-		HEADER_X_REQUESTED_BY,
+	Headers: Headers{
+		HEADER_X_REQUESTED_BY: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_USER_AGENT: {
+			Type:     "string",
+			Required: false,
+		},
+		HEADER_REFERER: {
+			Type:     "string",
+			Required: false,
+		},
 	},
-	OptionalHeaders:   OptionalHeaders{
-		HEADER_USER_AGENT,
-		HEADER_REFERER,
-	},
-	PathParams:        PathParams{},
-	QueryParams:       QueryParams{},
-	Body:              Body{},
+	Body: Body{},
 }
 
 // Token Create Request
 var TokenCreateRequest = Request{
-	Method:            http.MethodPost,
-	Type:              []RequestType{
+	Method: http.MethodPost,
+	Type: []RequestType{
 		REQ_TYPE_API_INT,
 		REQ_TYPE_API_EXT,
 		REQ_TYPE_UI_GUEST,
 	},
-	MandatoryHeaders:  MandatoryHeaders{
-		HEADER_X_REQUESTED_BY,
+	Headers: Headers{
+		HEADER_X_REQUESTED_BY: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_USER_AGENT: {
+			Type:     "string",
+			Required: false,
+		},
+		HEADER_REFERER: {
+			Type:     "string",
+			Required: false,
+		},
 	},
-	OptionalHeaders:   OptionalHeaders{
-		HEADER_USER_AGENT,
-		HEADER_REFERER,
+	Body: Body{
+		"client_id": {
+			Type:     "string",
+			Required: true,
+		},
+		"client_secret": {
+			Type:     "string",
+			Required: true,
+		},
 	},
-	PathParams:        PathParams{},
-	QueryParams:       QueryParams{},
-	Body:              Body{},
 }
 
 // Token Delete Request
 var TokenDeleteRequest = Request{
-	Method:            http.MethodDelete,
-	Type:              []RequestType{
+	Method: http.MethodDelete,
+	Type: []RequestType{
 		REQ_TYPE_API_INT,
 		REQ_TYPE_API_EXT,
 	},
-	MandatoryHeaders:  MandatoryHeaders{
-		HEADER_AUTH,
-		HEADER_CONTENT_TYPE,
-		HEADER_X_REQUESTED_BY,
+	Headers: Headers{
+		HEADER_AUTH: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_CONTENT_TYPE: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_X_REQUESTED_BY: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_USER_AGENT: {
+			Type:     "string",
+			Required: false,
+		},
+		HEADER_REFERER: {
+			Type:     "string",
+			Required: false,
+		},
 	},
-	OptionalHeaders:   OptionalHeaders{
-		HEADER_USER_AGENT,
-		HEADER_REFERER,
+	Body: Body{
+		"token": {
+			Type:     "string",
+			Required: true,
+		},
 	},
-	PathParams:        PathParams{},
-	QueryParams:       QueryParams{},
-	Body:              Body{},
 }
 
 // Token Refresh Request
 var TokenRefreshRequest = Request{
-	Method:            http.MethodPost,
-	Type:              []RequestType{
+	Method: http.MethodPost,
+	Type: []RequestType{
 		REQ_TYPE_API_INT,
 		REQ_TYPE_API_EXT,
 		REQ_TYPE_UI_GUEST,
 	},
-	MandatoryHeaders:  MandatoryHeaders{
-		HEADER_X_REQUESTED_BY,
+	Headers: Headers{
+		HEADER_X_REQUESTED_BY: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_USER_AGENT: {
+			Type:     "string",
+			Required: false,
+		},
+		HEADER_REFERER: {
+			Type:     "string",
+			Required: false,
+		},
 	},
-	OptionalHeaders:   OptionalHeaders{
-		HEADER_USER_AGENT,
-		HEADER_REFERER,
-	},
-	PathParams:        PathParams{},
-	QueryParams:       QueryParams{},
 	Body: Body{
-		"refresh_token": {
+		"token": {
 			Type:     "string",
 			Required: true,
 		},
@@ -129,19 +186,23 @@ var TokenRefreshRequest = Request{
 
 // Well Known JWKS Request
 var WellKnownJWKSRequest = Request{
-	Method:            http.MethodGet,
-	Type:              []RequestType{
+	Method: http.MethodGet,
+	Type: []RequestType{
 		REQ_TYPE_API_INT,
 		REQ_TYPE_API_EXT,
 	},
-	MandatoryHeaders:  MandatoryHeaders{
-		HEADER_X_REQUESTED_BY,
+	Headers: Headers{
+		HEADER_X_REQUESTED_BY: {
+			Type:     "string",
+			Required: true,
+		},
+		HEADER_USER_AGENT: {
+			Type:     "string",
+			Required: false,
+		},
+		HEADER_REFERER: {
+			Type:     "string",
+			Required: false,
+		},
 	},
-	OptionalHeaders:   OptionalHeaders{
-		HEADER_USER_AGENT,
-		HEADER_REFERER,
-	},
-	PathParams:        PathParams{},
-	QueryParams:       QueryParams{},
-	Body:              Body{},
 }

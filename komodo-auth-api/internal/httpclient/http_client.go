@@ -1,4 +1,4 @@
-package middleware
+package httpclient
 
 import (
 	"bytes"
