@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-func PasskeyStartHandler(w http.ResponseWriter, r *http.Request) {
+func PasskeyStartHandler(wtr http.ResponseWriter, req *http.Request) {
 	// TODO: Implement passkey start logic
 }

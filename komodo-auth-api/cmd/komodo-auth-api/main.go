@@ -1,9 +1,9 @@
 package main
 
 import (
+	"komodo-auth-api/internal/config"
 	"komodo-auth-api/internal/httpapi/handlers"
 	mw "komodo-auth-api/internal/httpapi/middleware"
-	"komodo-auth-api/internal/httpclient"
 	"komodo-auth-api/internal/logger"
 	"komodo-auth-api/internal/thirdparty/aws"
 	"net/http"
@@ -14,33 +14,36 @@ import (
 )
 
 func main() {
-	env := os.Getenv("API_ENV")
-
-	// Initialize HTTP client
-	httpclient.InitHttpClient()
+	env := config.GetConfigValue("API_ENV")
 
 	// Load secrets from AWS Secrets Manager in prod/staging
 	switch env {
 		case "dev", "staging", "prod":
-			if os.Getenv("USE_MOCKS") == "true" {
-				logger.Warn("skipping secret retrieval. using local env instead", nil)
-				break
+			if config.GetConfigValue("USE_MOCKS") == "true" {
+				if env == "prod" {
+					logger.Fatal("mocks cannot be used in production", nil)
+					os.Exit(1)
+				} else {
+					logger.Warn("using mocks in non-production environment", nil)
+					break
+				}
 			}
 
-			// Initialize AWS Secrets Manager client
-			aws.InitSecretsClient()
+			secrets, err := aws.GetSecrets([]string{
+				"JWT_PUBLIC_KEY",
+				"JWT_PRIVATE_KEY",
+				"JWT_ENC_KEY",
+				"JWT_HMAC_SECRET",
+				"IP_WHITELIST",
+				"IP_BLACKLIST",
+			})
+			if err != nil && env != "dev" {
+				logger.Fatal("failed to get secrets: "+err.Error(), nil)
+				os.Exit(1)
+			}
 
-			if s, err := aws.GetSecret("JWT_PUBLIC_KEY"); err == nil {
-				os.Setenv("JWT_PUBLIC_KEY", string(s))
-			}
-			if s, err := aws.GetSecret("JWT_PRIVATE_KEY"); err == nil {
-				os.Setenv("JWT_PRIVATE_KEY", string(s))
-			}
-			if s, err := aws.GetSecret("JWT_ENC_KEY"); err == nil {
-				os.Setenv("JWT_ENC_KEY", string(s))
-			}
-			if s, err := aws.GetSecret("JWT_HMAC_SECRET"); err == nil {
-				os.Setenv("JWT_HMAC_SECRET", string(s))
+			for k, v := range secrets {
+				config.SetConfigValue(k, v)
 			}
 		default:
 			logger.Fatal("environment variable API_ENV is not set", nil)

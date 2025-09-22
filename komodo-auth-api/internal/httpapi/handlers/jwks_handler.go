@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-func JWKSHandler(w http.ResponseWriter, r *http.Request) {
+func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	// Implementation for JWKS endpoint
 }

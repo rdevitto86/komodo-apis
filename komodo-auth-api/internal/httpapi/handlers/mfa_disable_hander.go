@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-func MFADisableHandler(w http.ResponseWriter, r *http.Request) {
+func MFADisableHandler(wtr http.ResponseWriter, req *http.Request) {
 	// Handler logic for disabling MFA
 }

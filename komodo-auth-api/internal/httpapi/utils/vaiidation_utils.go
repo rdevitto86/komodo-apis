@@ -3,10 +3,10 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"komodo-auth-api/internal/config"
 	"komodo-auth-api/internal/crypto"
 	"komodo-auth-api/internal/model"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,7 +15,7 @@ import (
 )
 
 func IsValidAPIVersion(path string) bool {
-	return path == ("/v" + os.Getenv("API_VERSION"))
+	return path == ("/v" + config.GetConfigValue("API_VERSION"))
 }
 
 func IsValidBearer(bearer string) bool {
@@ -46,7 +46,7 @@ func IsValidContentLength(str string) bool {
 	if err != nil { return false }
 
 	getMax := func() int {
-		val := os.Getenv("MAX_CONTENT_LENGTH")
+		val := config.GetConfigValue("MAX_CONTENT_LENGTH")
 		num, err := strconv.Atoi(val)
 		if val == "" || err != nil { return 4096 }
 		return num

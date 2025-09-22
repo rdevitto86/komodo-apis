@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-func MFAVerifyHandler(w http.ResponseWriter, r *http.Request) {
+func MFAVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
 	// Handler logic for verifying MFA
 }

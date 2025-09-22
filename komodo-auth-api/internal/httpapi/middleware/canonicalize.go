@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"komodo-auth-api/internal/config"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -120,7 +120,7 @@ func CanonicalizeMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Validate Host against allowlist if provided
-		if allowed := strings.TrimSpace(os.Getenv("ALLOWED_HOSTS")); allowed != "" {
+		if allowed := strings.TrimSpace(config.GetConfigValue("ALLOWED_HOSTS")); allowed != "" {
 			ok := false
 			hostLC := strings.ToLower(strings.TrimSpace(req.Host))
 
@@ -138,7 +138,7 @@ func CanonicalizeMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Proxy handling: honor or strip X-Forwarded-* based on TRUST_PROXY
-		if strings.EqualFold(os.Getenv("TRUST_PROXY"), "true") {
+		if strings.EqualFold(config.GetConfigValue("TRUST_PROXY"), "true") {
 			if v := hdr.Get("X-Forwarded-Host"); v != "" {
 				req.Host = strings.ToLower(strings.TrimSpace(v))
 			}

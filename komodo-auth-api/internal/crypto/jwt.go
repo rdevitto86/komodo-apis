@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"os"
+	"komodo-auth-api/internal/config"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,12 +27,12 @@ func VerifyJWT(tokenString string) (bool, error) {
 	}
 
 	// Try HS256 if secret present
-	if secret := os.Getenv("JWT_HMAC_SECRET"); secret != "" {
+	if hmac := config.GetConfigValue("JWT_HMAC_SECRET"); hmac != "" {
 		_, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
-			return []byte(secret), nil
+			return []byte(hmac), nil
 		})
 		if err != nil {
 			return false, err
@@ -41,7 +41,7 @@ func VerifyJWT(tokenString string) (bool, error) {
 	}
 
 	// Fallback to RS256 with provided public key
-	pubPEM := os.Getenv("JWT_PUBLIC_KEY")
+	pubPEM := config.GetConfigValue("JWT_PUBLIC_KEY")
 	if pubPEM == "" {
 		return false, errors.New("no JWT verification configuration available")
 	}

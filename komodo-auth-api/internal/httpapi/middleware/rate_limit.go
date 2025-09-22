@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"komodo-auth-api/internal/config"
 	"komodo-auth-api/internal/logger"
 	"komodo-auth-api/internal/thirdparty/aws"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -29,10 +29,10 @@ var (
 
 func RateLimiterMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
-		env := strings.ToLower(strings.TrimSpace(os.Getenv("ENV")))
+		env := strings.ToLower(config.GetConfigValue("API_ENV"))
 		key := clientKey(req)
 
-		if !strings.EqualFold(os.Getenv("USE_MOCKS"), "true") && (env == "prod" || env == "staging") {
+		if !strings.EqualFold(config.GetConfigValue("USE_MOCKS"), "true") && (env == "prod" || env == "staging") {
 			// Try distributed token consume via Elasticache/Redis. If Redis
 			// is not available, fall back to the local in-process bucket.
 			ctx := req.Context()
@@ -147,7 +147,7 @@ func rateConfig() (float64, float64) {
 	rlOnce.Do(func() {
 		// Helper to parse float env var with default
 		parseFloatEnv := func(key string, dflt float64) float64 {
-			if val := strings.TrimSpace(os.Getenv(key)); val != "" {
+			if val := strings.TrimSpace(config.GetConfigValue(key)); val != "" {
 				if f, err := strconv.ParseFloat(val, 64); err == nil {
 					return f
 				}
@@ -203,7 +203,7 @@ func getBucket(key string) *bucket {
 // startBucketEvictor removes idle buckets after configured TTL
 func startBucketEvictor() {
 	ttlSec := 300
-	if val := strings.TrimSpace(os.Getenv("RATE_LIMIT_BUCKET_TTL_SEC")); val != "" {
+	if val := strings.TrimSpace(config.GetConfigValue("RATE_LIMIT_BUCKET_TTL_SEC")); val != "" {
 		if i, err := strconv.Atoi(val); err == nil && i > 0 {
 			ttlSec = i
 		}
@@ -236,7 +236,7 @@ func startBucketEvictor() {
 
 // shouldFailOpen decides fail-open vs fail-closed when the distributed store is unavailable
 func shouldFailOpen() bool {
-	v := strings.ToLower(strings.TrimSpace(os.Getenv("RATE_LIMIT_FAIL_OPEN")))
+	v := strings.ToLower(strings.TrimSpace(config.GetConfigValue("RATE_LIMIT_FAIL_OPEN")))
 	if v == "" {
 		return true // default to fail-open to reduce customer impact
 	}

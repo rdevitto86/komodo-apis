@@ -3,9 +3,9 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"komodo-auth-api/internal/config"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
@@ -35,10 +35,10 @@ type logPayload struct {
 }
 
 var (
-	enableRemoteLogs    = os.Getenv("ENABLE_REMOTE_LOGS") == "true"
+	enableRemoteLogs    = config.GetConfigValue("ENABLE_REMOTE_LOGS") == "true"
 	logQueue         		= make(chan logPayload, 1000) // bounded queue of JSON payloads
-	host             		= os.Getenv("HOSTNAME")
-	logLevel        		= os.Getenv("LOG_LEVEL")
+	host             		= config.GetConfigValue("HOSTNAME")
+	logLevel        		= config.GetConfigValue("LOG_LEVEL")
 )
 
 func init() {

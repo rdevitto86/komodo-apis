@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-func PasskeyVerifyHandler(w http.ResponseWriter, r *http.Request) {
+func PasskeyVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
 	// TODO: Implement passkey verification logic
 }

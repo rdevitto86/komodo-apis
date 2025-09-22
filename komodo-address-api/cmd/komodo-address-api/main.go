@@ -58,26 +58,26 @@ func main() {
 	}
 
 	// Authentication middleware
-	router.Use(func(c *gin.Context) {
-		if err := internal_mw.AuthMiddleware(validateTokenURL, c); err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	router.Use(func(ctx *gin.Context) {
+		if err := internal_mw.AuthMiddleware(validateTokenURL, ctx); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
-		c.Next()
+		ctx.Next()
 	})
 
 	// Define routes
-	router.GET("/health", func(c *gin.Context) {
-		handlers.HandleHealth(c)
+	router.GET("/health", func(ctx *gin.Context) {
+		handlers.HandleHealth(ctx)
 	})
-	router.POST("/validate", func(c *gin.Context) {
-		handlers.HandleValidate(c)
+	router.POST("/validate", func(ctx *gin.Context) {
+		handlers.HandleValidate(ctx)
 	})
-	router.POST("/normalize", func(c *gin.Context) {
-		handlers.HandleNormalize(c)
+	router.POST("/normalize", func(ctx *gin.Context) {
+		handlers.HandleNormalize(ctx)
 	})
-	router.POST("/geocode", func(c *gin.Context) {
-		handlers.HandleGeocode(c)
+	router.POST("/geocode", func(ctx *gin.Context) {
+		handlers.HandleGeocode(ctx)
 	})
 
 	serverAddress := ":7010"

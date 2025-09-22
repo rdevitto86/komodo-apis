@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"context"
+	"komodo-auth-api/internal/config"
 	"komodo-auth-api/internal/httpapi/utils"
 	"komodo-auth-api/internal/logger"
 	"komodo-auth-api/internal/thirdparty/aws"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 )
@@ -79,7 +79,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 
 func getIdemTTL() int64 {
 	// Parse env only once per process would be ideal, but keep simple/fast
-	if ttl := os.Getenv("IDEMPOTENCY_TTL_SEC"); ttl != "" {
+	if ttl := config.GetConfigValue("IDEMPOTENCY_TTL_SEC"); ttl != "" {
 		if dur, err := time.ParseDuration(ttl + "s"); err == nil {
 			if dur <= 0 { return 300 }
 			return int64(dur.Seconds())

@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"komodo-auth-api/internal/config"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -13,7 +13,7 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 	sessionToken := uuid.NewString()
 	// aws.SetSessionToken(sessionToken)
 
-	timeout, err := strconv.Atoi(os.Getenv("SESSION_EXPIRATION_HR"))
+	timeout, err := strconv.Atoi(config.GetConfigValue("SESSION_TIMEOUT_HOURS"))
 	if err != nil {
 		http.Error(wtr, "Invalid session expiration", http.StatusInternalServerError)
 		return

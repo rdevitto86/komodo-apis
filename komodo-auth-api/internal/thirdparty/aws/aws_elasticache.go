@@ -3,8 +3,8 @@ package aws
 import (
 	"context"
 	"errors"
+	"komodo-auth-api/internal/config"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -32,8 +32,8 @@ var initOnce sync.Once
 func InitElasticacheClient() error {
 	var initErr error
 	initOnce.Do(func() {
-		env := os.Getenv("API_ENV")
-		useMocks := strings.EqualFold(os.Getenv("USE_MOCKS"), "true")
+		env := config.GetConfigValue("API_ENV")
+		useMocks := strings.EqualFold(config.GetConfigValue("USE_MOCKS"), "true")
 
 		// Local/dev/mocks: initialize an in-memory store so callers can
 		// use the same API without an external dependency.
@@ -43,14 +43,8 @@ func InitElasticacheClient() error {
 			return
 		}
 
-		endpoint, err := GetSecret("ELASTICACHE_ENDPOINT")
-		if err != nil {
-			initErr = err
-			log.Printf("InitElasticacheClient: failed to load ELASTICACHE_ENDPOINT secret: %v", err)
-			return
-		}
-
-		password, err := GetSecret("ELASTICACHE_PASSWORD")
+		endpoint := config.GetConfigValue("ELASTICACHE_ENDPOINT")
+		secrets, err := GetSecrets([]string{"ELASTICACHE_PASSWORD"})
 		if err != nil {
 			initErr = err
 			log.Printf("InitElasticacheClient: failed to load ELASTICACHE_PASSWORD secret: %v", err)
@@ -60,7 +54,7 @@ func InitElasticacheClient() error {
 		// create redis client
 		client := redis.NewClient(&redis.Options{
 			Addr:     endpoint,
-			Password: password,
+			Password: secrets["ELASTICACHE_PASSWORD"],
 			DB:       0,
 		})
 
@@ -75,7 +69,7 @@ func InitElasticacheClient() error {
 
 		ElasticacheClient = &ElasticacheConnector{
 			Endpoint: endpoint,
-			Password: password,
+			Password: secrets["ELASTICACHE_PASSWORD"],
 			Client:   client,
 		}
 	})
@@ -203,15 +197,15 @@ func AllowDistributed(ctx context.Context, key string) (bool, time.Duration, err
 	// Read rate config from env with defaults (match middleware defaults)
 	rate := float64(10)
 	burst := float64(20)
-	if v := strings.TrimSpace(os.Getenv("RATE_LIMIT_RPS")); v != "" {
+	if v := strings.TrimSpace(config.GetConfigValue("RATE_LIMIT_RPS")); v != "" {
 		if f, err := strconv.ParseFloat(v, 64); err == nil && f > 0 { rate = f }
 	}
-	if v := strings.TrimSpace(os.Getenv("RATE_LIMIT_BURST")); v != "" {
+	if v := strings.TrimSpace(config.GetConfigValue("RATE_LIMIT_BURST")); v != "" {
 		if f, err := strconv.ParseFloat(v, 64); err == nil && f > 0 { burst = f }
 	}
 
 	ttlSec := 300
-	if v := strings.TrimSpace(os.Getenv("RATE_LIMIT_BUCKET_TTL_SEC")); v != "" {
+	if v := strings.TrimSpace(config.GetConfigValue("RATE_LIMIT_BUCKET_TTL_SEC")); v != "" {
 		if i, err := strconv.Atoi(v); err == nil && i > 0 { ttlSec = i }
 	}
 
@@ -275,57 +269,57 @@ func newLocalCache() *localCache {
 	return lc
 }
 
-func (lc *localCache) janitor() {
+func (cache *localCache) janitor() {
 	for {
 		select {
-			case <-lc.ticker.C:
+			case <-cache.ticker.C:
 				now := time.Now()
-				lc.mu.Lock()
-				for key, val := range lc.items {
+				cache.mu.Lock()
+				for key, val := range cache.items {
 					if !val.expiresAt.IsZero() && now.After(val.expiresAt) {
-						delete(lc.items, key)
+						delete(cache.items, key)
 					}
 				}
-				lc.mu.Unlock()
-			case <-lc.stopCh:
-				lc.ticker.Stop()
+				cache.mu.Unlock()
+			case <-cache.stopCh:
+				cache.ticker.Stop()
 				return
 		}
 	}
 }
 
-func (lc *localCache) Get(key string) string {
-	lc.mu.RLock()
-	itm, ok := lc.items[key]
-	lc.mu.RUnlock()
+func (cache *localCache) Get(key string) string {
+	cache.mu.RLock()
+	itm, ok := cache.items[key]
+	cache.mu.RUnlock()
 	if !ok { return "" }
 
 	if !itm.expiresAt.IsZero() && time.Now().After(itm.expiresAt) {
 		// expired
-		lc.mu.Lock()
-		delete(lc.items, key)
-		lc.mu.Unlock()
+		cache.mu.Lock()
+		delete(cache.items, key)
+		cache.mu.Unlock()
 		return ""
 	}
 	return itm.value
 }
 
-func (lc *localCache) Set(key string, val string, ttl int64) {
+func (cache *localCache) Set(key string, val string, ttl int64) {
 	var exp time.Time
 	if ttl > 0 {
 		exp = time.Now().Add(time.Duration(ttl) * time.Second)
 	}
-	lc.mu.Lock()
-	lc.items[key] = memItem{value: val, expiresAt: exp}
-	lc.mu.Unlock()
+	cache.mu.Lock()
+	cache.items[key] = memItem{value: val, expiresAt: exp}
+	cache.mu.Unlock()
 }
 
-func (lc *localCache) Delete(key string) {
-	lc.mu.Lock()
-	delete(lc.items, key)
-	lc.mu.Unlock()
+func (cache *localCache) Delete(key string) {
+	cache.mu.Lock()
+	delete(cache.items, key)
+	cache.mu.Unlock()
 }
 
-func (lc *localCache) Close() {
-	close(lc.stopCh)
+func (cache *localCache) Close() {
+	close(cache.stopCh)
 }

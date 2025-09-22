@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"komodo-address-api/internal/address"
 	"komodo-address-api/internal/geocode"
-	"komodo-address-api/internal/httpapi/errors"
 	"net/http"
 	"os"
 	"strings"
@@ -15,12 +14,12 @@ import (
 )
 
 // HandleGeocodeGin processes geocoding requests for Gin.
-func HandleGeocode(c *gin.Context) {
+func HandleGeocode(ctx *gin.Context) {
 	// Parse the address from the request
 	var addr address.Address
 
-	if err := c.ShouldBindJSON(&addr); err != nil {
-		c.JSON(http.StatusBadRequest, errors.Error400("invalid address: " + err.Error()))
+	if err := ctx.ShouldBindJSON(&addr); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -31,27 +30,25 @@ func HandleGeocode(c *gin.Context) {
 	provider, providerName, err := selectGeocoder()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errors.Error500(err.Error()))
+		ctx.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// Set a timeout for the geocoding request
 	timeout := getGeocodeTimeout()
-	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
+	c, cancel := context.WithTimeout(ctx.Request.Context(), timeout)
 	defer cancel()
 
 	// Perform the geocoding
-	lat, lng, acc, err := provider.Geocode(ctx, normalizedAddr)
+	lat, lng, acc, err := provider.Geocode(c, normalizedAddr)
 
 	if err != nil {
-		c.JSON(http.StatusBadGateway, errors.Error502(
-			fmt.Sprintf("geocoding failed via %s: %v", providerName, err),
-		))
+		ctx.JSON(http.StatusBadGateway, err.Error())
 		return
 	}
 
 	// Return the geocoding response
-	c.JSON(http.StatusOK, geocode.GeocodeResponse{
+	ctx.JSON(http.StatusOK, geocode.GeocodeResponse{
 		Latitude:   lat,
 		Longitude:  lng,
 		Accuracy:   acc,
