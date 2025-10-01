@@ -41,7 +41,7 @@ help:
 
 # Local Docker Commands
 build:
-	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg API_ENV=$(ENV) .
+	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg ENV=$(ENV) .
 
 run:
 	docker compose -f $(COMPOSE_FILE) up -d

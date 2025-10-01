@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"komodo-auth-api/internal/logger"
-	"komodo-auth-api/internal/thirdparty/aws"
+	"komodo-internal-lib-apis-go/aws/elasticache"
+	logger "komodo-internal-lib-apis-go/logger/runtime"
 )
 
 func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
@@ -20,7 +20,7 @@ func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
 	// Here we simply emit a new session token and store it in cache.
 	sessionToken := uuid.NewString()
 
-	if err := aws.SetCacheItem(sessionToken, "1", aws.DEFAULT_SESH_TTL); err != nil {
+	if err := elasticache.SetCacheItem(sessionToken, "1", elasticache.DEFAULT_SESH_TTL); err != nil {
 		logger.Error("failed to store refreshed token: "+err.Error(), req)
 		http.Error(wtr, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -31,6 +31,6 @@ func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(wtr).Encode(map[string]interface{}{
 		"token":      sessionToken,
 		"token_type": "Bearer",
-		"expires_in": aws.DEFAULT_SESH_TTL,
+		"expires_in": elasticache.DEFAULT_SESH_TTL,
 	})
 }

@@ -1,207 +1,212 @@
 package model
 
-import "net/http"
+import (
+	evalTypes "komodo-internal-lib-apis-go/config/rules/types"
+	httpTypes "komodo-internal-lib-apis-go/http/types"
+	"net/http"
+)
 
-// TODO - remap headers using map[string]spec
+type RequestRules map[string]map[string]evalTypes.RequestEvalRule
+var ValidationRules RequestRules
 
 // Health Check Request
-var HealthRequest = Request{
+var HealthRequest = httpTypes.Request{
 	Method: http.MethodGet,
-	Type: []RequestType{
-		REQ_TYPE_API_INT,
-		REQ_TYPE_API_EXT,
-		REQ_TYPE_UI_USER,
-		REQ_TYPE_UI_GUEST,
-		REQ_TYPE_ADMIN,
+	Type: []httpTypes.RequestType{
+		httpTypes.REQ_TYPE_API_INT,
+		httpTypes.REQ_TYPE_API_EXT,
+		httpTypes.REQ_TYPE_UI_USER,
+		httpTypes.REQ_TYPE_UI_GUEST,
+		httpTypes.REQ_TYPE_ADMIN,
 	},
-	Headers: Headers{
-		HEADER_X_REQUESTED_BY: {
-			Type:     "string",
+	Headers: httpTypes.Headers{
+		httpTypes.HEADER_X_REQUESTED_BY: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_USER_AGENT: {
-			Type:     "string",
+		httpTypes.HEADER_USER_AGENT: {
+			Type: "string",
 			Required: false,
 		},
-		HEADER_REFERER: {
-			Type:     "string",
+		httpTypes.HEADER_REFERER: {
+			Type: "string",
 			Required: false,
 		},
 	},
 }
 
 // Login Request
-var LoginRequest = Request{
+var LoginRequest = httpTypes.Request{
 	Method: http.MethodPost,
-	Type: []RequestType{
-		REQ_TYPE_UI_USER,
-		REQ_TYPE_UI_GUEST,
+	Type: []httpTypes.RequestType{
+		httpTypes.REQ_TYPE_UI_USER,
+		httpTypes.REQ_TYPE_UI_GUEST,
 	},
-	Headers: Headers{
-		HEADER_CONTENT_TYPE: {
-			Type:     "string",
+	Headers: httpTypes.Headers{
+		httpTypes.HEADER_CONTENT_TYPE: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_X_REQUESTED_BY: {
-			Type:     "string",
+		httpTypes.HEADER_X_REQUESTED_BY: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_USER_AGENT: {
-			Type:     "string",
+		httpTypes.HEADER_USER_AGENT: {
+			Type: "string",
 			Required: false,
 		},
-		HEADER_REFERER: {
-			Type:     "string",
+		httpTypes.HEADER_REFERER: {
+			Type: "string",
 			Required: false,
 		},
 	},
-	Body: Body{},
+	Body: httpTypes.Body{},
 }
 
 // Logout Request
-var LogoutRequest = Request{
+var LogoutRequest = httpTypes.Request{
 	Method: http.MethodPost,
-	Type: []RequestType{
-		REQ_TYPE_API_INT,
-		REQ_TYPE_API_EXT,
-		REQ_TYPE_UI_GUEST,
+	Type: []httpTypes.RequestType{
+		httpTypes.REQ_TYPE_API_INT,
+		httpTypes.REQ_TYPE_API_EXT,
+		httpTypes.REQ_TYPE_UI_GUEST,
 	},
-	Headers: Headers{
-		HEADER_X_REQUESTED_BY: {
-			Type:     "string",
+	Headers: httpTypes.Headers{
+		httpTypes.HEADER_X_REQUESTED_BY: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_USER_AGENT: {
-			Type:     "string",
+		httpTypes.HEADER_USER_AGENT: {
+			Type: "string",
 			Required: false,
 		},
-		HEADER_REFERER: {
-			Type:     "string",
+		httpTypes.HEADER_REFERER: {
+			Type: "string",
 			Required: false,
 		},
 	},
-	Body: Body{},
+	Body: httpTypes.Body{},
 }
 
 // Token Create Request
-var TokenCreateRequest = Request{
+var TokenCreateRequest = httpTypes.Request{
 	Method: http.MethodPost,
-	Type: []RequestType{
-		REQ_TYPE_API_INT,
-		REQ_TYPE_API_EXT,
-		REQ_TYPE_UI_GUEST,
+	Type: []httpTypes.RequestType{
+		httpTypes.REQ_TYPE_API_INT,
+		httpTypes.REQ_TYPE_API_EXT,
+		httpTypes.REQ_TYPE_UI_GUEST,
 	},
-	Headers: Headers{
-		HEADER_X_REQUESTED_BY: {
-			Type:     "string",
+	Headers: httpTypes.Headers{
+		httpTypes.HEADER_X_REQUESTED_BY: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_USER_AGENT: {
-			Type:     "string",
+		httpTypes.HEADER_USER_AGENT: {
+			Type: "string",
 			Required: false,
 		},
-		HEADER_REFERER: {
-			Type:     "string",
+		httpTypes.HEADER_REFERER: {
+			Type: "string",
 			Required: false,
 		},
 	},
-	Body: Body{
+	Body: httpTypes.Body{
 		"client_id": {
-			Type:     "string",
+			Type: "string",
 			Required: true,
 		},
 		"client_secret": {
-			Type:     "string",
+			Type: "string",
 			Required: true,
 		},
 	},
 }
 
 // Token Delete Request
-var TokenDeleteRequest = Request{
+var TokenDeleteRequest = httpTypes.Request{
 	Method: http.MethodDelete,
-	Type: []RequestType{
-		REQ_TYPE_API_INT,
-		REQ_TYPE_API_EXT,
+	Type: []httpTypes.RequestType{
+		httpTypes.REQ_TYPE_API_INT,
+		httpTypes.REQ_TYPE_API_EXT,
 	},
-	Headers: Headers{
-		HEADER_AUTH: {
-			Type:     "string",
+	Headers: httpTypes.Headers{
+		httpTypes.HEADER_AUTH: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_CONTENT_TYPE: {
-			Type:     "string",
+		httpTypes.HEADER_CONTENT_TYPE: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_X_REQUESTED_BY: {
-			Type:     "string",
+		httpTypes.HEADER_X_REQUESTED_BY: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_USER_AGENT: {
-			Type:     "string",
+		httpTypes.HEADER_USER_AGENT: {
+			Type: "string",
 			Required: false,
 		},
-		HEADER_REFERER: {
-			Type:     "string",
+		httpTypes.HEADER_REFERER: {
+			Type: "string",
 			Required: false,
 		},
 	},
-	Body: Body{
+	Body: httpTypes.Body{
 		"token": {
-			Type:     "string",
+			Type: "string",
 			Required: true,
 		},
 	},
 }
 
 // Token Refresh Request
-var TokenRefreshRequest = Request{
+var TokenRefreshRequest = httpTypes.Request{
 	Method: http.MethodPost,
-	Type: []RequestType{
-		REQ_TYPE_API_INT,
-		REQ_TYPE_API_EXT,
-		REQ_TYPE_UI_GUEST,
+	Type: []httpTypes.RequestType{
+		httpTypes.REQ_TYPE_API_INT,
+		httpTypes.REQ_TYPE_API_EXT,
+		httpTypes.REQ_TYPE_UI_GUEST,
 	},
-	Headers: Headers{
-		HEADER_X_REQUESTED_BY: {
-			Type:     "string",
+	Headers: httpTypes.Headers{
+		httpTypes.HEADER_X_REQUESTED_BY: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_USER_AGENT: {
-			Type:     "string",
+		httpTypes.HEADER_USER_AGENT: {
+			Type: "string",
 			Required: false,
 		},
-		HEADER_REFERER: {
-			Type:     "string",
+		httpTypes.HEADER_REFERER: {
+			Type: "string",
 			Required: false,
 		},
 	},
-	Body: Body{
+	Body: httpTypes.Body{
 		"token": {
-			Type:     "string",
+			Type: "string",
 			Required: true,
 		},
 	},
 }
 
 // Well Known JWKS Request
-var WellKnownJWKSRequest = Request{
+var WellKnownJWKSRequest = httpTypes.Request{
 	Method: http.MethodGet,
-	Type: []RequestType{
-		REQ_TYPE_API_INT,
-		REQ_TYPE_API_EXT,
+	Type: []httpTypes.RequestType{
+		httpTypes.REQ_TYPE_API_INT,
+		httpTypes.REQ_TYPE_API_EXT,
 	},
-	Headers: Headers{
-		HEADER_X_REQUESTED_BY: {
-			Type:     "string",
+	Headers: httpTypes.Headers{
+		httpTypes.HEADER_X_REQUESTED_BY: {
+			Type: "string",
 			Required: true,
 		},
-		HEADER_USER_AGENT: {
-			Type:     "string",
+		httpTypes.HEADER_USER_AGENT: {
+			Type: "string",
 			Required: false,
 		},
-		HEADER_REFERER: {
-			Type:     "string",
+		httpTypes.HEADER_REFERER: {
+			Type: "string",
 			Required: false,
 		},
 	},

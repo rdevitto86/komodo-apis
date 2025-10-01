@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"komodo-auth-api/internal/logger"
-	"komodo-auth-api/internal/thirdparty/aws"
+	"komodo-internal-lib-apis-go/aws/elasticache"
+	logger "komodo-internal-lib-apis-go/logger/runtime"
 )
 
 func TokenDeleteHandler(wtr http.ResponseWriter, req *http.Request) {
@@ -34,8 +34,8 @@ func TokenDeleteHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := aws.DeleteCacheItem(token); err != nil {
-		logger.Error("failed to delete token from cache: "+err.Error(), req)
+	if err := elasticache.DeleteCacheItem(token); err != nil {
+		logger.Error("failed to delete token from cache: " + err.Error(), req)
 		http.Error(wtr, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"komodo-auth-api/internal/config"
+	"komodo-internal-lib-apis-go/config"
 	"net/http"
 	"strconv"
 	"time"

@@ -43,7 +43,7 @@
 #           PortMappings:
 #             - ContainerPort: 7010
 #           Environment:
-#             - Name: API_ENV
+#             - Name: ENV
 #               Value: prod
 #             # Add other env vars as needed
 

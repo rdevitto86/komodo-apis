@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"komodo-auth-api/internal/logger"
-	"komodo-auth-api/internal/thirdparty/aws"
+	"komodo-internal-lib-apis-go/aws/elasticache"
+	logger "komodo-internal-lib-apis-go/logger/runtime"
 )
 
 func TokenVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
@@ -34,7 +34,7 @@ func TokenVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	val, err := aws.GetCacheItem(token)
+	val, err := elasticache.GetCacheItem(token)
 	if err != nil {
 		logger.Error("failed to read token from cache: "+err.Error(), req)
 		http.Error(wtr, "Internal Server Error", http.StatusInternalServerError)
@@ -49,6 +49,6 @@ func TokenVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
 	wtr.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(wtr).Encode(map[string]interface{}{
 		"valid":      true,
-		"expires_in": aws.DEFAULT_SESH_TTL,
+		"expires_in": elasticache.DEFAULT_SESH_TTL,
 	})
 }

@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	env := os.Getenv("API_ENV")
+	env := os.Getenv("ENV")
 
 	// Set ENV specific config
   switch strings.ToLower(env) {
@@ -42,7 +42,7 @@ func main() {
       os.Setenv("DB_PASSWORD", secret)
 			gin.SetMode(gin.ReleaseMode)
 		default:
-			log.Fatal("API_ENV is not set")
+			log.Fatal("ENV is not set")
 	}
 
 	router := gin.New()
