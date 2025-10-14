@@ -4,8 +4,7 @@ services:
       context: ..
       dockerfile: build/Dockerfile
     container_name: komodo-auth-api-dev
-    env_file:
-      - ../env/.env.dev
+    env_file: ../env/.env.dev
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:7001/health"]
       interval: 10s

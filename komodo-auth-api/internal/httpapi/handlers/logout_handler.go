@@ -3,10 +3,9 @@ package handlers
 import "net/http"
 
 func LogoutHandler(wtr http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(wtr, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	wtr.Header().Set("Content-Type", "application/json")
 
 	// TODO Implement logout logic
+
+	wtr.WriteHeader(http.StatusNoContent)
 }

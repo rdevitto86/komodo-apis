@@ -7,22 +7,22 @@ import (
 )
 
 // buildSliceLookupMap builds LookupMap for default mode.
-func (c *MoxtoxConfig) buildSliceLookupMap() {
-	c.LookupMap = make(map[string]map[string][]Scenario)
+func (cnfg *MoxtoxConfig) buildSliceLookupMap() {
+	cnfg.LookupMap = make(map[string]map[string][]Scenario)
 
-	for path, rawMapping := range c.Mappings {
+	for path, rawMapping := range cnfg.Mappings {
 		mappingData, ok := rawMapping.(map[interface{}]interface{})
 		if !ok { continue }
 
 		mapping := parseMapping(mappingData)
-		c.LookupMap[path] = make(map[string][]Scenario)
+		cnfg.LookupMap[path] = make(map[string][]Scenario)
 
 		for method, methodData := range mapping.Methods {
 			scenarios := methodData.Scenarios
 			sort.Slice(scenarios, func(i, j int) bool {
 				return scenarios[i].Priority > scenarios[j].Priority
 			})
-			c.LookupMap[path][method] = scenarios
+			cnfg.LookupMap[path][method] = scenarios
 		}
 	}
 }
@@ -39,7 +39,7 @@ func matchesRequestSlice(req *http.Request) (Scenario, bool) {
 			for _, scenario := range scenarios {
 				if matchesConditions(req, scenario.Conditions) {
 					if config.Debug || scenario.Log {
-						fmt.Printf("Moxtox :: matched scenario '%s' for %s %s\n", scenario.Name, method, path)
+						fmt.Printf("[::Moxtox::] matched scenario '%s' for %s %s\n", scenario.Name, method, path)
 					}
 					return scenario, true
 				}
@@ -50,7 +50,7 @@ func matchesRequestSlice(req *http.Request) (Scenario, bool) {
 			for _, scenario := range scenarios {
 				if matchesConditions(req, scenario.Conditions) {
 					if config.Debug || scenario.Log {
-						fmt.Printf("Moxtox :: matched scenario '%s' for %s %s\n", scenario.Name, "*", path)
+						fmt.Printf("[::Moxtox::] matched scenario '%s' for %s %s\n", scenario.Name, "*", path)
 					}
 					return scenario, true
 				}
@@ -58,7 +58,7 @@ func matchesRequestSlice(req *http.Request) (Scenario, bool) {
 		}
 	}
 	if config.Debug {
-		fmt.Printf("Moxtox :: no match for %s %s\n", method, path)
+		fmt.Printf("[::Moxtox::] no match for %s %s\n", method, path)
 	}
 	return Scenario{}, false
 }

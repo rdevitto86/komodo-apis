@@ -40,8 +40,10 @@ help:
 	@echo "  make test_all"
 
 # Local Docker Commands
+# build:
+# 	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg ENV=$(ENV) .
 build:
-	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg ENV=$(ENV) .
+	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg ENV=$(ENV) ..
 
 run:
 	docker compose -f $(COMPOSE_FILE) up -d

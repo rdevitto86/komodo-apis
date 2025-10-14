@@ -52,9 +52,9 @@ type MockResponse struct {
 }
 
 // countTotalScenarios counts the total number of scenarios across all mappings for dynamic mode.
-func (c *MoxtoxConfig) countTotalScenarios() int {
+func (cnfg *MoxtoxConfig) countTotalScenarios() int {
 	count := 0
-	for _, rawMapping := range c.Mappings {
+	for _, rawMapping := range cnfg.Mappings {
 		mappingData, ok := rawMapping.(map[interface{}]interface{})
 		if !ok { continue }
 		mapping := parseMapping(mappingData)

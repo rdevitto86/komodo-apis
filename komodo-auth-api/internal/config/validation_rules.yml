@@ -1,0 +1,147 @@
+# TODO:
+# - Make sure required and optional are mutually exclusive
+# - If val is missing, default to false or empty
+# - Add min/max length support for headers, params, query, body values
+# - add support for "ALL" originTypes
+# - if "ALL" is in originTypes, reference validation map and auto return outcome
+# - add support for wildcard values
+
+rules:
+  "/health":
+    GET:
+      level: "ignore" 
+      headers:
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          optional: true
+          type: "string"
+        "Referer":
+          optional: true
+          type: "string"
+  "/auth/login":
+    POST:
+      level: "lenient"
+      headers:
+        "Content-Type":
+          required: true
+          type: "string"
+          value: "application/json"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          optional: true
+          type: "string"
+        "Referer":
+          optional: true
+          type: "string"
+      requiredVersion: 1
+  "/auth/logout":
+    POST:
+      level: "lenient"
+      headers:
+        "Content-Type":
+          required: true
+          type: "string"
+          value: "application/json"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          optional: true
+          type: "string"
+        "Referer":
+          optional: true
+          type: "string"
+      requiredVersion: 1
+  "/auth/token":
+    POST:
+      level: "strict"
+      headers:
+        "Content-Type":
+          required: true
+          type: "string"
+          value: "application/json"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          optional: true
+          type: "string"
+        "Referer":
+          optional: true
+          type: "string"
+      body:
+        "client_id":
+          required: true
+          type: "string"
+        "client_secret":
+          required: true
+          type: "string"
+      requiredVersion: 1
+    DELETE:
+      level: "strict"
+      headers:
+        "Authorization":
+          required: true
+          type: "string"
+          value: "Bearer *"
+        "Content-Type":
+          required: true
+          type: "string"
+          value: "application/json"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          optional: true
+          type: "string"
+        "Referer":
+          optional: true
+          type: "string"
+      body:
+        "token":
+          required: true
+          type: "string"
+      requiredVersion: 1
+  "/auth/token/refresh":
+    POST:
+      level: "strict"
+      headers:
+        "Content-Type":
+          required: true
+          type: "string"
+          value: "application/json"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          optional: true
+          type: "string"
+        "Referer":
+          optional: true
+          type: "string"
+      body:
+        "token":
+          required: true
+          type: "string"
+      requiredVersion: 1
+  "/well-known/jwks":
+    GET:
+      level: "ignore"
+      headers:
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          optional: true
+          type: "string"
+        "Referer":
+          optional: true
+          type: "string"
+      query:
+        "kid":
+          optional: true
+          type: "string"

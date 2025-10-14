@@ -5,5 +5,9 @@ import (
 )
 
 func MFAEnableHandler(wtr http.ResponseWriter, req *http.Request) {
-	// Handler logic for enabling MFA
+	wtr.Header().Set("Content-Type", "application/json")
+
+	// Implementation for enabling MFA
+
+	wtr.WriteHeader(http.StatusOK)
 }

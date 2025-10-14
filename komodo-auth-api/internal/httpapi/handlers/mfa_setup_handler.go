@@ -5,5 +5,9 @@ import (
 )
 
 func MFASetupHandler(wtr http.ResponseWriter, req *http.Request) {
-	// Handler logic for setting up MFA
+	wtr.Header().Set("Content-Type", "application/json")
+
+	// Implementation for setting up MFA
+
+	wtr.WriteHeader(http.StatusCreated)
 }

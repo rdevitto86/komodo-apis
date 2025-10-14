@@ -7,14 +7,11 @@ import (
 	"github.com/google/uuid"
 
 	"komodo-internal-lib-apis-go/aws/elasticache"
-	logger "komodo-internal-lib-apis-go/logger/runtime"
+	logger "komodo-internal-lib-apis-go/services/logger/runtime"
 )
 
 func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(wtr, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	wtr.Header().Set("Content-Type", "application/json")
 
 	// In a real flow you might validate an existing refresh token or session.
 	// Here we simply emit a new session token and store it in cache.
@@ -26,11 +23,12 @@ func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	wtr.Header().Set("Authorization", "Bearer "+sessionToken)
-	wtr.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(wtr).Encode(map[string]interface{}{
 		"token":      sessionToken,
 		"token_type": "Bearer",
 		"expires_in": elasticache.DEFAULT_SESH_TTL,
 	})
+
+	wtr.Header().Set("Authorization", "Bearer " + sessionToken)
+	wtr.WriteHeader(http.StatusCreated)
 }

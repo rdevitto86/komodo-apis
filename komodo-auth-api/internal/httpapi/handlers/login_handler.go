@@ -10,6 +10,9 @@ import (
 )
 
 func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
+	wtr.Header().Set("Content-Type", "application/json")
+	wtr.Header().Set("Access-Control-Allow-Origin", "*")
+
 	sessionToken := uuid.NewString()
 	// aws.SetSessionToken(sessionToken)
 
@@ -29,12 +32,12 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 		SameSite: http.SameSiteStrictMode, // CSRF protection
 	})
 
-	wtr.Header().Set("Access-Control-Allow-Origin", "*")
-
 	// Parse and validate the request body (get username and password).
 	// Verify credentials (check username/password against your user store).
 	// Generate a session or JWT token if credentials are valid.
 	// Store session/token (in cache or DB, if needed).
 	// Return the token and user info in the response.
 	// Handle errors (invalid credentials, missing fields, etc.).
+
+	wtr.WriteHeader(http.StatusOK)
 }

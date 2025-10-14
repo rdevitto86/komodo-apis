@@ -6,14 +6,11 @@ import (
 	"strings"
 
 	"komodo-internal-lib-apis-go/aws/elasticache"
-	logger "komodo-internal-lib-apis-go/logger/runtime"
+	logger "komodo-internal-lib-apis-go/services/logger/runtime"
 )
 
 func TokenVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(wtr, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	wtr.Header().Set("Content-Type", "application/json")
 
 	token := ""
 	if auth := req.Header.Get("Authorization"); auth != "" {
@@ -46,9 +43,10 @@ func TokenVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	wtr.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(wtr).Encode(map[string]interface{}{
 		"valid":      true,
 		"expires_in": elasticache.DEFAULT_SESH_TTL,
 	})
+
+	wtr.WriteHeader(http.StatusOK)
 }

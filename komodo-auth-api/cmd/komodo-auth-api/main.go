@@ -2,21 +2,10 @@ package main
 
 import (
 	"komodo-auth-api/internal/httpapi/handlers"
-	"komodo-internal-lib-apis-go/aws/elasticache"
 	secretsManager "komodo-internal-lib-apis-go/aws/secrets-manager"
 	"komodo-internal-lib-apis-go/config"
-	authJWT "komodo-internal-lib-apis-go/http/middleware/auth-jwt"
-	canonical "komodo-internal-lib-apis-go/http/middleware/canonicalize"
-	context "komodo-internal-lib-apis-go/http/middleware/context/chi"
-	"komodo-internal-lib-apis-go/http/middleware/csrf"
-	"komodo-internal-lib-apis-go/http/middleware/idempotency"
-	ipAccess "komodo-internal-lib-apis-go/http/middleware/ip-access"
-	rateLimiter "komodo-internal-lib-apis-go/http/middleware/rate-limiter"
-	reqEval "komodo-internal-lib-apis-go/http/middleware/request-validation"
-	resPreprocessor "komodo-internal-lib-apis-go/http/middleware/response-preprocessor"
-	securityHeaders "komodo-internal-lib-apis-go/http/middleware/security-headers"
-	telemetry "komodo-internal-lib-apis-go/http/middleware/telemetry/chi"
-	logger "komodo-internal-lib-apis-go/logger/runtime"
+	mw "komodo-internal-lib-apis-go/http/middleware/chi"
+	logger "komodo-internal-lib-apis-go/services/logger/runtime"
 	moxtox "komodo-internal-lib-apis-go/test/moxtox"
 	"net/http"
 	"os"
@@ -64,26 +53,23 @@ func main() {
 	logger.Info("starting komodo-auth-api in " + env + " environment", nil)
 
 	// Initialize Elasticache client
-	elasticache.InitElasticacheClient()
-
-	// Set request validation rules
-	// TODO
+	// elasticache.InitElasticacheClient()
 
 	// Initialize router
 	rtr := chi.NewRouter()
 
 	// Initialize middleware
-	rtr.Use(securityHeaders.SecurityHeadersMiddleware)
-	rtr.Use(canonical.CanonicalizeMiddleware)
-	rtr.Use(context.ContextMiddleware)
-	rtr.Use(ipAccess.IPAccessMiddleware)
-	rtr.Use(rateLimiter.RateLimiterMiddleware)
-	rtr.Use(authJWT.AuthnJWTMiddleware)
-	rtr.Use(reqEval.RequestValidationMiddleware)
-	rtr.Use(csrf.CSRFMiddleware)
-	rtr.Use(idempotency.IdempotencyMiddleware)
-	rtr.Use(telemetry.TelemetryMiddleware)
-	rtr.Use(resPreprocessor.ResponsePreprocessorMiddleware)
+	rtr.Use(mw.ContextMiddleware)
+	rtr.Use(mw.TelemetryMiddleware)
+	rtr.Use(mw.NormalizationMiddleware)
+	rtr.Use(mw.SanitizationMiddleware)
+	rtr.Use(mw.SecurityHeadersMiddleware)
+	rtr.Use(mw.IPAccessMiddleware)
+	rtr.Use(mw.RateLimiterMiddleware)
+	rtr.Use(mw.AuthnJWTMiddleware)
+	rtr.Use(mw.CSRFMiddleware)
+	rtr.Use(mw.IdempotencyMiddleware)
+	rtr.Use(mw.RuleValidationMiddleware)
 
 	// Initialize moxtox response handler
 	if env != "prod" && os.Getenv("USE_MOCKS") == "true" {
@@ -111,11 +97,12 @@ func main() {
 	})
 
 	// Start server
-	(&http.Server{
+	server := &http.Server{
 		Addr:         ":7001",
 		Handler:      rtr,
 		ReadTimeout:  5 * time.Second, // 5 seconds
 		WriteTimeout: 10 * time.Second, // 10 seconds
 		IdleTimeout:  60 * time.Second, // 1 minute
-	}).ListenAndServe()
+	}
+	server.ListenAndServe()
 }

@@ -5,5 +5,9 @@ import (
 )
 
 func MFADisableHandler(wtr http.ResponseWriter, req *http.Request) {
-	// Handler logic for disabling MFA
+	wtr.Header().Set("Content-Type", "application/json")
+
+	// Implementation for disabling MFA
+
+	wtr.WriteHeader(http.StatusNoContent)
 }

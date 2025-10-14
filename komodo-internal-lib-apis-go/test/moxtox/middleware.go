@@ -24,7 +24,7 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 		if len(configPath) == 0 || configPath[0] == "" {
 			cwd, err := os.Getwd()
 			if err != nil {
-				fmt.Println("Moxtox :: error getting current working directory:", err)
+				fmt.Println("[::Moxtox::] error getting current working directory:", err)
 				allowMocks = false
 				return
 			}
@@ -36,17 +36,17 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 		// Load the Moxtox config
 		if data, err := os.ReadFile(filepath.Join(dir, "moxtox_config.yml")); err == nil {
 			if err := yaml.Unmarshal(data, &config); err != nil {
-				fmt.Println("Moxtox :: error loading moxtox config:", err)
+				fmt.Println("[::Moxtox::] error loading moxtox config:", err)
 				allowMocks = false
 				return
 			}
 			if !config.EnableMoxtox {
-				fmt.Printf("Moxtox :: mocks disabled - using default behavior\n")
+				fmt.Printf("[::Moxtox::] mocks disabled - using default behavior\n")
 				allowMocks = false
 				return
 			}
 			if !contains(config.AllowedEnvironments, env) {
-				fmt.Printf("Moxtox :: mocks not allowed in this environment\n")
+				fmt.Printf("[::Moxtox::] mocks not allowed in this environment\n")
 				allowMocks = false
 				return
 			}
@@ -57,7 +57,7 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 					config.buildHashLookupMap()
 				case "dynamic":
 					totalScenarios := config.countTotalScenarios()
-					if totalScenarios > 10 {
+					if totalScenarios > 10 { // threshold for switching to quick mode
 						config.buildHashLookupMap()
 					} else {
 						config.buildSliceLookupMap()
@@ -66,9 +66,9 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 					config.buildSliceLookupMap()
 			}
 
-			fmt.Printf("Moxtox :: mocks enabled\n")
+			fmt.Printf("[::Moxtox::] mocks enabled\n")
 		} else {
-			fmt.Println("Moxtox :: error loading moxtox config:", err)
+			fmt.Println("[::Moxtox::] error loading moxtox config:", err)
 			allowMocks = false
 		}
 	})
@@ -77,12 +77,7 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 	if allowMocks {
 		return mockResponseHandler()
 	}
-	return defaultBehavior
-}
-
-// defaultBehavior is a no-op middleware that simply calls the next handler.
-func defaultBehavior(next http.Handler) http.Handler {
-	return next
+	return func(next http.Handler) http.Handler { return next }
 }
 
 // mockResponseHandler returns a middleware that injects mock responses based on the LookupMap.

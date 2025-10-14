@@ -10,22 +10,22 @@ import (
 )
 
 // buildHashLookupMap builds HashLookupMap for quick mode.
-func (c *MoxtoxConfig) buildHashLookupMap() {
-	c.HashLookupMap = make(map[string]map[string]map[string]Scenario)
+func (cnfg *MoxtoxConfig) buildHashLookupMap() {
+	cnfg.HashLookupMap = make(map[string]map[string]map[string]Scenario)
 
-	for path, rawMapping := range c.Mappings {
+	for path, rawMapping := range cnfg.Mappings {
 		mappingData, ok := rawMapping.(map[interface{}]interface{})
 		if !ok { continue }
 
 		mapping := parseMapping(mappingData)
-		c.HashLookupMap[path] = make(map[string]map[string]Scenario)
+		cnfg.HashLookupMap[path] = make(map[string]map[string]Scenario)
 
 		for method, methodData := range mapping.Methods {
-			c.HashLookupMap[path][method] = make(map[string]Scenario)
+			cnfg.HashLookupMap[path][method] = make(map[string]Scenario)
 
 			for _, scenario := range methodData.Scenarios {
 				hash := hashConditions(scenario.Conditions)
-				c.HashLookupMap[path][method][hash] = scenario
+				cnfg.HashLookupMap[path][method][hash] = scenario
 			}
 		}
 	}
@@ -63,7 +63,7 @@ func matchesRequestHash(req *http.Request) (Scenario, bool) {
 		if scenarioMap, ok := methodMap[method]; ok {
 			if scenario, ok := scenarioMap[hash]; ok {
 				if config.Debug || scenario.Log {
-					fmt.Printf("Moxtox :: matched scenario '%s' for %s %s (quick mode)\n", scenario.Name, method, path)
+					fmt.Printf("[::Moxtox::] matched scenario '%s' for %s %s (quick mode)\n", scenario.Name, method, path)
 				}
 				return scenario, true
 			}
@@ -72,14 +72,14 @@ func matchesRequestHash(req *http.Request) (Scenario, bool) {
 		if scenarioMap, ok := methodMap["*"]; ok {
 			if scenario, ok := scenarioMap[hash]; ok {
 				if config.Debug || scenario.Log {
-					fmt.Printf("Moxtox :: matched scenario '%s' for %s %s (quick mode)\n", scenario.Name, "*", path)
+					fmt.Printf("[::Moxtox::] matched scenario '%s' for %s %s (quick mode)\n", scenario.Name, "*", path)
 				}
 				return scenario, true
 			}
 		}
 	}
 	if config.Debug {
-		fmt.Printf("Moxtox :: no match for %s %s (quick mode)\n", method, path)
+		fmt.Printf("[::Moxtox::] no match for %s %s (quick mode)\n", method, path)
 	}
 	return Scenario{}, false
 }
