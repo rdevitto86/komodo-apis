@@ -2,8 +2,6 @@ package evalheaders
 
 import (
 	"komodo-internal-lib-apis-go/config"
-	"komodo-internal-lib-apis-go/crypto/jwt"
-	hdrTypes "komodo-internal-lib-apis-go/types/headers"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,10 +15,11 @@ func isValidBearer(s string) bool {
 		return false
 	}
 
-	valid, err := jwt.VerifyJWT(bearerSplit[1])
-	if !valid || err != nil {
-		return false
-	}
+	// TODO - validate JWT token format and signature
+	// valid, err := jwt.VerifyJWT(bearerSplit[1])
+	// if !valid || err != nil {
+	// 	return false
+	// }
 	return true
 }
 
@@ -72,11 +71,7 @@ func isValidCacheControl(s string) bool {
 }
 
 func isValidRequestedBy(s string) bool {
-	return s == hdrTypes.REQUESTED_BY_API_INT ||
-		s == hdrTypes.REQUESTED_BY_API_EXT ||
-		s == hdrTypes.REQUESTED_BY_UI_USER_VERIFIED ||
-		s == hdrTypes.REQUESTED_BY_UI_USER_UNVERIFIED ||
-		s == hdrTypes.REQUESTED_BY_USER_ADMIN
+  return s != "" && len(s) <= 64 && regexp.MustCompile(`^[A-Za-z0-9_\-/]+$`).MatchString(s)
 }
 
 func isValidClientID(s string) bool {

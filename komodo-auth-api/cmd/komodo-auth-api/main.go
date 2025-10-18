@@ -15,94 +15,106 @@ import (
 )
 
 func main() {
-	env := config.GetConfigValue("ENV")
+	// initialize logger
+	logger.InitLogger()
 
-	// Load secrets from AWS Secrets Manager in prod/staging
+	env := config.GetConfigValue("ENV")
+	logger.Info("starting komodo-auth-api in " + env + " environment")
+
+	// load secrets from AWS Secrets Manager in prod/staging
 	switch env {
 		case "dev", "staging", "prod":
-			if config.GetConfigValue("USE_MOCKS") == "true" {
-				if env == "prod" {
-					logger.Fatal("mocks cannot be used in production", nil)
-					os.Exit(1)
-				} else {
-					logger.Warn("using mocks in non-production environment", nil)
-					break
+			// load secrets from AWS Secrets Manager
+			if secretsManager.IsUsingAWS() {
+				logger.Info("AWS Secrets Manager integration enabled")
+
+				secrets := []string{
+					"JWT_PUBLIC_KEY",
+					"JWT_PRIVATE_KEY",
+					"JWT_ENC_KEY",
+					"JWT_HMAC_SECRET",
+					"IP_WHITELIST",
+					"IP_BLACKLIST",
 				}
-			}
 
-			secrets, err := secretsManager.GetSecrets([]string{
-				"JWT_PUBLIC_KEY",
-				"JWT_PRIVATE_KEY",
-				"JWT_ENC_KEY",
-				"JWT_HMAC_SECRET",
-				"IP_WHITELIST",
-				"IP_BLACKLIST",
-			})
-			if err != nil && env != "dev" {
-				logger.Fatal("failed to get secrets: "+err.Error(), nil)
-				os.Exit(1)
-			}
-
-			for k, v := range secrets {
-				config.SetConfigValue(k, v)
+				// load AWS Secrets
+				if err := secretsManager.LoadSecrets(secrets); err != nil {
+					logger.Fatal("failed to get secrets", err)
+					os.Exit(1)
+				}
+			} else {
+				logger.Warn("AWS Secrets Manager integration disabled")
 			}
 		default:
-			logger.Fatal("environment variable ENV is not set", nil)
+			logger.Fatal("environment variable ENV invalid or not set")
 			os.Exit(1)
 	}
-	logger.Info("starting komodo-auth-api in " + env + " environment", nil)
 
-	// Initialize Elasticache client
+	// initialize Elasticache client
 	// elasticache.InitElasticacheClient()
 
-	// Initialize router
+	// initialize router
 	rtr := chi.NewRouter()
 
-	// Initialize middleware
+	// initialize global middleware
 	rtr.Use(mw.ContextMiddleware)
 	rtr.Use(mw.TelemetryMiddleware)
 	rtr.Use(mw.NormalizationMiddleware)
 	rtr.Use(mw.SanitizationMiddleware)
 	rtr.Use(mw.SecurityHeadersMiddleware)
 	rtr.Use(mw.IPAccessMiddleware)
-	rtr.Use(mw.RateLimiterMiddleware)
-	rtr.Use(mw.AuthnJWTMiddleware)
-	rtr.Use(mw.CSRFMiddleware)
-	rtr.Use(mw.IdempotencyMiddleware)
 	rtr.Use(mw.RuleValidationMiddleware)
 
-	// Initialize moxtox response handler
+	// initialize moxtox response handler
 	if env != "prod" && os.Getenv("USE_MOCKS") == "true" {
+		logger.Info("using mocks in non-production environment")
 		rtr.Use(moxtox.InitMoxtoxMiddleware(env))
 	}
 
-	// Initialize routes
+	// unprotected public routes
 	rtr.Get("/health", handlers.HealthHandler)
-	rtr.Get("/.well-known/jwks.json", handlers.JWKSHandler)
 
-	rtr.Route(("/v" + os.Getenv("API_VERSION")), func(ver chi.Router) {
+	rtr.Route(("/v" + os.Getenv("VERSION")), func(ver chi.Router) {
 		ver.Route("/auth", func(auth chi.Router) {
-			auth.Post("/login", handlers.LoginHandler)
-			auth.Post("/logout", handlers.LogoutHandler)
-			auth.Post("/mfa/disable", handlers.MFADisableHandler)
-			auth.Post("/mfa/enable", handlers.MFAEnableHandler)
-			auth.Post("/mfa/setup", handlers.MFASetupHandler)
-			auth.Post("/mfa/verify", handlers.MFAVerifyHandler)
-			auth.Post("/passkey/start", handlers.PasskeyStartHandler)
-			auth.Post("/passkey/verify", handlers.PasskeyVerifyHandler)
-			auth.Post("/token", handlers.TokenCreateHandler)
-			auth.Delete("/token", handlers.TokenDeleteHandler)
-			auth.Post("/token/refresh", handlers.TokenRefreshHandler)
+			// rate limited public endpoints
+			auth.With(mw.RateLimiterMiddleware).Post("/login", handlers.LoginHandler)
+      auth.With(mw.RateLimiterMiddleware).Post("/token", handlers.TokenCreateHandler)
+      auth.With(mw.RateLimiterMiddleware).Post("/token/refresh", handlers.TokenRefreshHandler)
+
+			// protected endpoints
+			auth.Group(func(protected chi.Router) {
+				protected.Use(mw.AuthnJWTMiddleware)
+				protected.Use(mw.CSRFMiddleware)
+				protected.Use(mw.IdempotencyMiddleware)
+				
+				protected.Post("/logout", handlers.LogoutHandler)
+				protected.Post("/mfa/disable", handlers.MFADisableHandler)
+				protected.Post("/mfa/enable", handlers.MFAEnableHandler)
+				protected.Post("/mfa/setup", handlers.MFASetupHandler)
+				protected.Post("/mfa/verify", handlers.MFAVerifyHandler)
+				protected.Post("/passkey/start", handlers.PasskeyStartHandler)
+				protected.Post("/passkey/verify", handlers.PasskeyVerifyHandler)
+				protected.Delete("/token", handlers.TokenDeleteHandler)
+				protected.Post("/token/verify", handlers.TokenVerifyHandler)
+			})
 		})
 	})
 
-	// Start server
+	port := config.GetConfigValue("PORT")
+	if port == "" { port = "7001" }
+	logger.Info("server starting on port " + port)
+
 	server := &http.Server{
-		Addr:         ":7001",
+		Addr:         (":" + port),
 		Handler:      rtr,
 		ReadTimeout:  5 * time.Second, // 5 seconds
 		WriteTimeout: 10 * time.Second, // 10 seconds
 		IdleTimeout:  60 * time.Second, // 1 minute
 	}
-	server.ListenAndServe()
+
+	// start server
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Fatal("server failed to start", err)
+		os.Exit(1)
+  }
 }

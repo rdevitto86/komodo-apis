@@ -6,7 +6,7 @@ const (
 	StartTimeKey 					ctxKey = "start_time"
 	EndTimeKey   					ctxKey = "end_time"
 	DurationKey  					ctxKey = "duration"
-	ApiVersionKey 				ctxKey = "api_version"
+	VersionKey 						ctxKey = "version"
 	UriKey       					ctxKey = "uri"
 	PathParamsKey 				ctxKey = "path_params"
 	QueryParamsKey 				ctxKey = "query_params"

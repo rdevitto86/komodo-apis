@@ -21,7 +21,7 @@ func init() {
 	})
 }
 
-// GetConfigValue checks local in-memory config first, then falls back to environment variable
+// Checks local in-memory config first, then falls back to environment variable
 func GetConfigValue(key string) string {
 	if key == "" || instance == nil { return "" }
 	instance.mu.RLock()
@@ -31,7 +31,7 @@ func GetConfigValue(key string) string {
 	return os.Getenv(key)
 }
 
-// SetConfigValue sets value in local in-memory config
+// Sets value in local in-memory config
 func SetConfigValue(key, value string) {
 	if value == "" || key == "" || instance == nil { return }
 	instance.mu.Lock()
@@ -39,10 +39,24 @@ func SetConfigValue(key, value string) {
 	instance.mu.Unlock()
 }
 
-// DeleteLocalConfig removes value from local in-memory config only
+// Removes value from local in-memory config only
 func DeleteConfigValue(key string) {
 	if key == "" || instance == nil { return }
 	instance.mu.Lock()
 	delete(instance.data, key)
 	instance.mu.Unlock()
+}
+
+// Returns all keys currently stored in the config
+func GetAllKeys() []string {
+	if instance == nil { return []string{} }
+
+	instance.mu.RLock()
+	defer instance.mu.RUnlock()
+
+	keys := make([]string, 0, len(instance.data))
+	for k := range instance.data {
+		keys = append(keys, k)
+	}
+	return keys
 }

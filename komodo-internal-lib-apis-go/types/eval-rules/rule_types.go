@@ -8,18 +8,17 @@ const (
 
 type Headers map[string]struct {
 	Type     string 	`yaml:"type,omitempty"`
-	Required bool   	`yaml:"required,omitempty"`
-	Optional bool   	`yaml:"optional,omitempty"`
-	Pattern  string 	`yaml:"pattern,omitempty"` // regex pattern
-	Enum     []string `yaml:"enum,omitempty"` // list of allowed values
+	Required bool   	`yaml:"required,omitempty"` // defaults to false (optional)
+	Value    string 	`yaml:"value,omitempty"`    // exact value or pattern (e.g., "Bearer *")
+	Pattern  string 	`yaml:"pattern,omitempty"`  // regex pattern
+	Enum     []string `yaml:"enum,omitempty"`     // list of allowed values
 	MinLen   int    	`yaml:"min_len,omitempty"`
 	MaxLen   int    	`yaml:"max_len,omitempty"`
 }
 
 type PathParams map[string]struct {
-  Type     string 	`yaml:"type,omitempty"` // "string","int","bool","object","array"
-	Required bool   	`yaml:"required,omitempty"`
-	Optional bool   	`yaml:"optional,omitempty"`
+	Type     string 	`yaml:"type,omitempty"` // "string","int","bool","object","array"
+	Required bool   	`yaml:"required,omitempty"` // defaults to false (optional)
 	Value    any    	`yaml:"value,omitempty"`
 	Enum     []string `yaml:"enum,omitempty"` // list of allowed values
 	Pattern  string 	`yaml:"pattern,omitempty"` // regex pattern
@@ -29,8 +28,7 @@ type PathParams map[string]struct {
 
 type QueryParams map[string]struct {
 	Type     string 	`yaml:"type,omitempty"` // "string","int","bool","object","array"
-	Required bool   	`yaml:"required,omitempty"`
-	Optional bool   	`yaml:"optional,omitempty"`
+	Required bool   	`yaml:"required,omitempty"` // defaults to false (optional)
 	Value    any    	`yaml:"value,omitempty"`
 	Enum     []string `yaml:"enum,omitempty"` // list of allowed values
 	Pattern  string 	`yaml:"pattern,omitempty"` // regex pattern
@@ -39,12 +37,11 @@ type QueryParams map[string]struct {
 }
 
 type Body map[string]struct {
-	Type     string   			`yaml:"type,omitempty"` // "string","int","bool","object","array"
-	Required bool     			`yaml:"required,omitempty"`
-	Optional bool     			`yaml:"optional,omitempty"`
-	Value    any     				`yaml:"value,omitempty"`
-	Enum     []string 			`yaml:"enum,omitempty"` // list of allowed values
-	Pattern  string   			`yaml:"pattern,omitempty"` // regex pattern
+	Type     string   	`yaml:"type,omitempty"` // "string","int","bool","object","array"
+	Required bool     	`yaml:"required,omitempty"` // defaults to false (optional)
+	Value    any     		`yaml:"value,omitempty"`
+	Enum     []string 	`yaml:"enum,omitempty"` // list of allowed values
+	Pattern  string   	`yaml:"pattern,omitempty"` // regex pattern
 }
 
 type EvalRule struct {

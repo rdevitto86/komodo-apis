@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -34,38 +35,57 @@ type logPayload struct {
 	Host      string      `json:"host,omitempty"`
 }
 
+type LoggerConfig struct {
+	EnableRemoteLogs bool
+	Host             string
+	LogLevel         string
+}
+
 var (
-	enableRemoteLogs    = config.GetConfigValue("ENABLE_REMOTE_LOGS") == "true"
-	logQueue         		= make(chan logPayload, 1000) // bounded queue of JSON payloads
-	host             		= config.GetConfigValue("HOSTNAME")
-	logLevel        		= config.GetConfigValue("LOG_LEVEL")
+	enableRemoteLogs bool
+	logQueue         chan logPayload
+	host             string
+	logLevel         string
+	initOnce         sync.Once
 )
 
-func init() {
-	if lvl := strings.ToUpper(logLevel); lvl != "" {
-		logLevel = lvl
-	}
-	if logLevel == "" {
-		logLevel = "ERROR"
-	}
+// ensureInitialized lazily initializes the logger on first use
+func ensureInitialized() {
+	initOnce.Do(func() {
+		// Read config values (now they should be available)
+		enableRemoteLogs = config.GetConfigValue("ENABLE_REMOTE_LOGS") == "true"
+		host = config.GetConfigValue("HOSTNAME")
+		logLevel = strings.ToUpper(config.GetConfigValue("LOG_LEVEL"))
+		
+		if logLevel == "" {
+			logLevel = "INFO" // Default to INFO, not ERROR
+		}
 
-	if enableRemoteLogs {
-		go func() {
-			for pl := range logQueue {
-				b, err := json.Marshal(pl)
-				if err != nil {
-					fmt.Printf("[ERROR] failed to marshal log payload: %v\n", err)
-					continue
+		logQueue = make(chan logPayload, 1000)
+
+		// Start the remote log consumer goroutine
+		if enableRemoteLogs {
+			go func() {
+				for pl := range logQueue {
+					b, err := json.Marshal(pl)
+					if err != nil {
+						fmt.Printf("[ERROR] failed to marshal log payload: %v\n", err)
+						continue
+					}
+					if err := postRemoteLog(b); err != nil {
+						fmt.Printf("[ERROR] failed to send log to remote: %v\n", err)
+					}
 				}
-				if err := postRemoteLog(b); err != nil {
-					fmt.Printf("[ERROR] failed to send log to remote: %v\n", err)
-				}
-			}
-		}()
-	}
+			}()
+		}
+
+		log.Println("[INFO] Logger initialized:", "level="+logLevel, "remote=", enableRemoteLogs)
+	})
 }
 
 func logByLevel(level, msg string, meta any) {
+	ensureInitialized()
+
 	// ignore non-scoped logs
 	if logPriorities[level] < logPriorities[logLevel] {
 		return
@@ -105,8 +125,10 @@ func postRemoteLog(raw []byte) error {
 	return nil
 }
 
-func sanitizeMeta(meta any) any {
-	switch m := meta.(type) {			
+func sanitizeMeta(meta ...any) any {
+	if len(meta) == 0 { return nil }
+
+	switch m := meta[0].(type) {
 		case string, map[string]any:
 			return m
 		case error:
@@ -141,42 +163,56 @@ func sanitizeMeta(meta any) any {
 	return nil // unsupported type
 }
 
-func Info(msg string, meta any)  {
-	meta = sanitizeMeta(meta)
-	logByLevel("INFO", msg, meta)
-	enqueueRemoteLog("INFO", msg, meta)
-}
-func Warn(msg string, meta any)  {
-	meta = sanitizeMeta(meta)
-	logByLevel("WARN", msg, meta)
-	enqueueRemoteLog("WARN", msg, meta)
-}
-func Error(msg string, meta any) {
-	meta = sanitizeMeta(meta)
-	logByLevel("ERROR", msg, meta)
-	enqueueRemoteLog("ERROR", msg, meta)
-}
-func Fatal(msg string, meta any) {
-	meta = sanitizeMeta(meta)
-	logByLevel("FATAL", msg, meta)
-	enqueueRemoteLog("FATAL", msg, meta)
-}
-func Debug(msg string, meta any) {
-	meta = sanitizeMeta(meta)
-	logByLevel("DEBUG", msg, meta)
-	enqueueRemoteLog("DEBUG", msg, meta)
-}
-func Trace(msg string, meta any) {
-	meta = sanitizeMeta(meta)
-	logByLevel("TRACE", msg, meta)
-	enqueueRemoteLog("TRACE", msg, meta)
+func InitLogger(cfg ...LoggerConfig) {
+	ensureInitialized() 
+
+	if len(cfg) > 0 {
+		c := cfg[0]
+		enableRemoteLogs = c.EnableRemoteLogs
+		host = c.Host
+		if c.LogLevel != "" { logLevel = strings.ToUpper(c.LogLevel) }
+	}
 }
 
-// Prints logs only to stdout
-func Print(level string, msg string, meta ...any) { logByLevel(level, msg, sanitizeMeta(meta)) }
-func PrintFatal(msg string, meta ...any) { logByLevel("FATAL", msg, sanitizeMeta(meta)) }
-func PrintError(msg string, meta ...any) { logByLevel("ERROR", msg, sanitizeMeta(meta)) }
-func PrintWarn(msg string, meta ...any)  { logByLevel("WARN", msg, sanitizeMeta(meta)) }
-func PrintInfo(msg string, meta ...any)  { logByLevel("INFO", msg, sanitizeMeta(meta)) }
-func PrintDebug(msg string, meta ...any) { logByLevel("DEBUG", msg, sanitizeMeta(meta)) }
-func PrintTrace(msg string, meta ...any) { logByLevel("TRACE", msg, sanitizeMeta(meta)) }
+// ===== All-purpose logging functions =====
+
+func Info(msg string, details ...any)  {
+	m := sanitizeMeta(details...)
+	logByLevel("INFO", msg, m)
+	enqueueRemoteLog("INFO", msg, m)
+}
+func Warn(msg string, details ...any)  {
+	m := sanitizeMeta(details...)
+	logByLevel("WARN", msg, m)
+	enqueueRemoteLog("WARN", msg, m)
+}
+func Error(msg string, details ...any) {
+	m := sanitizeMeta(details...)
+	logByLevel("ERROR", msg, m)
+	enqueueRemoteLog("ERROR", msg, m)
+}
+func Fatal(msg string, details ...any) {
+	m := sanitizeMeta(details...)
+	logByLevel("FATAL", msg, m)
+	enqueueRemoteLog("FATAL", msg, m)
+}
+func Debug(msg string, details ...any) {
+	m := sanitizeMeta(details...)
+	logByLevel("DEBUG", msg, m)
+	enqueueRemoteLog("DEBUG", msg, m)
+}
+func Trace(msg string, details ...any) {
+	m := sanitizeMeta(details...)
+	logByLevel("TRACE", msg, m)
+	enqueueRemoteLog("TRACE", msg, m)
+}
+
+// ===== Prints logs only to stdout ===== 
+
+func Print(level string, msg string, details ...any) { logByLevel(level, msg, sanitizeMeta(details)) }
+func PrintFatal(msg string, details ...any) { logByLevel("FATAL", msg, sanitizeMeta(details)) }
+func PrintError(msg string, details ...any) { logByLevel("ERROR", msg, sanitizeMeta(details)) }
+func PrintWarn(msg string, details ...any)  { logByLevel("WARN", msg, sanitizeMeta(details)) }
+func PrintInfo(msg string, details ...any)  { logByLevel("INFO", msg, sanitizeMeta(details)) }
+func PrintDebug(msg string, details ...any) { logByLevel("DEBUG", msg, sanitizeMeta(details)) }
+func PrintTrace(msg string, details ...any) { logByLevel("TRACE", msg, sanitizeMeta(details)) }

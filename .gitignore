@@ -9,6 +9,11 @@
 */node_modules
 /test-node-examples
 
+# Local secrets
+.env.local
+.env.*.local
+.env.secrets
+
 # Test binary, build with `go test -c`
 *.test
 

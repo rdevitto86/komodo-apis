@@ -18,13 +18,10 @@ func ContextMiddleware(next http.Handler) http.Handler {
 		ctx := req.Context()
 		ctx = context.WithValue(ctx, chimw.RequestIDKey, generateRequestId())
 		ctx = context.WithValue(ctx, ctxKeys.StartTimeKey, time.Now().UTC())
-		ctx = context.WithValue(ctx, ctxKeys.ApiVersionKey, utils.GetAPIVersion(req))
+		ctx = context.WithValue(ctx, ctxKeys.VersionKey, utils.GetAPIVersion(req))
 		ctx = context.WithValue(ctx, ctxKeys.UriKey, utils.GetAPIRoute(req))
 		ctx = context.WithValue(ctx, ctxKeys.PathParamsKey, getPathParams(req))
 		ctx = context.WithValue(ctx, ctxKeys.QueryParamsKey, utils.GetQueryParams(req))
-
-		// Set Request timeout
-		// TODO
 
 		req = req.WithContext(ctx)
 		next.ServeHTTP(wtr, req)

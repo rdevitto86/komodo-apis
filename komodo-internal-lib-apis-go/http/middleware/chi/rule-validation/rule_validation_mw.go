@@ -22,7 +22,7 @@ func RuleValidationMiddleware(next http.Handler) http.Handler {
 			}
 		} else {
 			logger.Error("no validation rule found", req)
-			// http.Error(wtr, "Unable to validate request", http.StatusBadRequest)
+			http.Error(wtr, "Unable to validate request", http.StatusBadRequest)
 		}
 
 		next.ServeHTTP(wtr, req)
