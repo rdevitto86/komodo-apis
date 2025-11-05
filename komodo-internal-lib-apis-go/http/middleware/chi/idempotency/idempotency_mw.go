@@ -4,8 +4,10 @@ import (
 	"context"
 	elasticacheClient "komodo-internal-lib-apis-go/aws/elasticache"
 	"komodo-internal-lib-apis-go/config"
+	httpUtils "komodo-internal-lib-apis-go/http/utils/http"
 	hdrSrv "komodo-internal-lib-apis-go/services/headers/eval"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	ctxKeys "komodo-internal-lib-apis-go/types/context"
 	hdrTypes "komodo-internal-lib-apis-go/types/headers"
 	"net/http"
 	"sync"
@@ -25,11 +27,23 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 				next.ServeHTTP(wtr, req)
 				return
 		}
+		
+		clientType := req.Context().Value(ctxKeys.ClientTypeKey)
+		if clientType == nil {
+			clientType = httpUtils.GetClientType(req) == "api"
+		}
+		
+		if clientType == "api" {
+			ctx := context.WithValue(req.Context(), IdempotencyValidCtxKey, true)
+			req = req.WithContext(ctx)
+			next.ServeHTTP(wtr, req)
+			return
+		}
 
 		key := req.Header.Get("Idempotency-Key")
 
 		if !hdrSrv.ValidateHeaderValue(hdrTypes.HEADER_IDEMPOTENCY, req) {
-			logger.Error("invalid idempotency key: " + key, req)
+			logger.Error("invalid idempotency key for browser client: " + key)
 			http.Error(wtr, "Invalid Idempotency-Key", http.StatusBadRequest)
 			return
 		} 

@@ -13,4 +13,8 @@ const (
 	ValidationRuleKey 		ctxKey = "validation_rule"
 	RequestIDKey     			ctxKey = "request_id"
 	RequestTimeoutKey    	ctxKey = "request_timeout"
+	ClientIPKey       		ctxKey = "client_ip"
+	UserAgentKey     			ctxKey = "user_agent"
+	MethodKey         		ctxKey = "method"
+	ClientTypeKey			 		ctxKey = "client_type"
 )

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	httpUtils "komodo-internal-lib-apis-go/http/utils"
+	httpUtils "komodo-internal-lib-apis-go/http/utils/http"
 	headers "komodo-internal-lib-apis-go/services/headers/eval"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
-	evalrules "komodo-internal-lib-apis-go/types/eval-rules"
+	evalRules "komodo-internal-lib-apis-go/types/eval-rules"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -16,9 +16,9 @@ import (
 )
 
 // Checks if the request complies with all aspects of the provided EvalRule.
-func IsRuleValid(req *http.Request, rule *evalrules.EvalRule) bool {
+func IsRuleValid(req *http.Request, rule *evalRules.EvalRule) bool {
 	if req == nil || rule == nil { return false }
-	if rule.Level == evalrules.LevelIgnore { return true }
+	if rule.Level == evalRules.LevelIgnore { return true }
 
 	return AreValidHeaders(req, rule) &&
 		AreValidPathParams(req, rule) &&
@@ -27,7 +27,7 @@ func IsRuleValid(req *http.Request, rule *evalrules.EvalRule) bool {
 }
 
 // Checks if the request headers comply with the provided EvalRule.
-func AreValidHeaders(req *http.Request, rule *evalrules.EvalRule) bool {
+func AreValidHeaders(req *http.Request, rule *evalRules.EvalRule) bool {
 	if req == nil || rule == nil {
 		logger.Error("request or rule is nil")
 		return false
@@ -103,7 +103,7 @@ func AreValidHeaders(req *http.Request, rule *evalrules.EvalRule) bool {
 }
 
 // Checks if the request path parameters comply with the provided EvalRule.
-func AreValidPathParams(req *http.Request, rule *evalrules.EvalRule) bool {
+func AreValidPathParams(req *http.Request, rule *evalRules.EvalRule) bool {
 	if req == nil || rule == nil {
 		logger.Error("request or rule is nil")
 		return false
@@ -188,7 +188,7 @@ func AreValidPathParams(req *http.Request, rule *evalrules.EvalRule) bool {
 }
 
 // Checks if the request query parameters comply with the provided EvalRule.
-func AreValidQueryParams(req *http.Request, rule *evalrules.EvalRule) bool {
+func AreValidQueryParams(req *http.Request, rule *evalRules.EvalRule) bool {
 	if req == nil || rule == nil {
 		logger.Error("request or rule is nil")
 		return false
@@ -238,7 +238,7 @@ func AreValidQueryParams(req *http.Request, rule *evalrules.EvalRule) bool {
 }
 
 // Checks if the request body complies with the provided EvalRule.
-func IsValidBody(req *http.Request, rule *evalrules.EvalRule) bool {
+func IsValidBody(req *http.Request, rule *evalRules.EvalRule) bool {
 	if req == nil || rule == nil {
 		logger.Error("request or rule is nil")
 		return false

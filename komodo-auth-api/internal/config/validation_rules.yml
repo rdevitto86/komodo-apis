@@ -66,6 +66,9 @@ rules:
         "client_secret":
           required: true
           type: "string"
+        "grant_type":
+          required: true
+          type: "string"
       requiredVersion: 1
     DELETE:
       level: "strict"
@@ -74,20 +77,12 @@ rules:
           required: true
           type: "string"
           value: "Bearer *"
-        "Content-Type":
-          required: true
-          type: "string"
-          value: "application/json"
         "X-Requested-By":
           required: true
           type: "string"
         "User-Agent":
           type: "string"
         "Referer":
-          type: "string"
-      body:
-        "token":
-          required: true
           type: "string"
       requiredVersion: 1
   "/auth/token/refresh":
@@ -106,7 +101,11 @@ rules:
         "Referer":
           type: "string"
       body:
-        "token":
+        "refresh_token":
           required: true
           type: "string"
+        "grant_type":
+          required: true
+          type: "string"
+          value: "refresh_token"
       requiredVersion: 1

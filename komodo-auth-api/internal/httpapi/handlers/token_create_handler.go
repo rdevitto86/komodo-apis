@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
-	"komodo-internal-lib-apis-go/config"
+	authUtils "komodo-internal-lib-apis-go/http/utils/auth"
+	errUtils "komodo-internal-lib-apis-go/http/utils/error"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	errTypes "komodo-internal-lib-apis-go/types/error"
 
-	jwt "github.com/golang-jwt/jwt/v5"
+	jwtUtils "komodo-auth-api/internal/httpapi/utils/jwt"
 )
 
 type TokenCreateRequest struct {
@@ -17,6 +18,7 @@ type TokenCreateRequest struct {
 	ClientSecret string `json:"client_secret"`
 	GrantType    string `json:"grant_type,omitempty"`
 	Scope        string `json:"scope,omitempty"`
+	ExpiresIn    int    `json:"expires_in,omitempty"`
 }
 
 type TokenCreateResponse struct {
@@ -28,115 +30,152 @@ type TokenCreateResponse struct {
 	IssuedAt     int64  `json:"issued_at"`
 }
 
-type ErrorResponse struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description,omitempty"`
-}
-
+// Handles token creation requests
 func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 	wtr.Header().Set("Content-Type", "application/json")
-	wtr.Header().Set("Cache-Control", "no-store")
-	wtr.Header().Set("Pragma", "no-cache")
 
 	// Parse request body
 	var reqBody TokenCreateRequest
 	if err := json.NewDecoder(req.Body).Decode(&reqBody); err != nil {
-		wtr.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(wtr).Encode(ErrorResponse{
-			Error:            "invalid_request",
-			ErrorDescription: "Invalid request body",
-		})
+		logger.Error("Failed to parse request body", err)
+		errUtils.WriteErrorResponse(
+			wtr,
+			http.StatusBadRequest,
+			"Failed to parse request body",
+			errTypes.ERR_INVALID_REQUEST,
+			req.Header.Get("X-Request-ID"),
+		)
 		return
 	}
 
 	// Validate client credentials
 	if reqBody.ClientID == "" || reqBody.ClientSecret == "" {
-		wtr.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(wtr).Encode(ErrorResponse{
-			Error:            "invalid_client",
-			ErrorDescription: "Missing client credentials",
-		})
+		logger.Error("Missing client credentials")
+		errUtils.WriteErrorResponse(
+			wtr,
+			http.StatusBadRequest,
+			"Missing client credentials",
+			errTypes.ERR_INVALID_REQUEST,
+			req.Header.Get("X-Request-ID"),
+		)
 		return
 	}
 
 	// TODO: Validate client_id and client_secret against database
 	// Placeholder validation for now
 	if reqBody.ClientID != "test-client" || reqBody.ClientSecret != "test-secret" {
-		wtr.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(wtr).Encode(ErrorResponse{
-			Error:            "invalid_client",
-			ErrorDescription: "Invalid client credentials",
-		})
+		logger.Error("Invalid client credentials")
+		errUtils.WriteErrorResponse(
+			wtr,
+			http.StatusUnauthorized,
+			"Invalid client credentials",
+			errTypes.ERR_INVALID_REQUEST,
+			req.Header.Get("X-Request-ID"),
+		)
 		return
 	}
 
-	// Load RSA private key from config
-	privateKeyPEM := config.GetConfigValue("JWT_PRIVATE_KEY")
-	fmt.Printf("privateKeyPEM: %s\n", privateKeyPEM)
-	if privateKeyPEM == "" {
-		logger.Error("JWT_PRIVATE_KEY not configured")
-		wtr.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(wtr).Encode(ErrorResponse{
-			Error:            "server_error",
-			ErrorDescription: "Token signing not configured",
-		})
+	// Validate grant_type
+	if !authUtils.IsValidGrantType(reqBody.GrantType) {
+		logger.Error("Unsupported grant_type: " + reqBody.GrantType)
+		errUtils.WriteErrorResponse(
+			wtr,
+			http.StatusBadRequest,
+			"Unsupported grant_type",
+			errTypes.ERR_INVALID_REQUEST,
+			req.Header.Get("X-Request-ID"),
+		)
 		return
 	}
 
-	// Parse private key
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKeyPEM))
-	if err != nil {
-		logger.Error("failed to parse private key", err)
-		wtr.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(wtr).Encode(ErrorResponse{
-			Error:            "server_error",
-			ErrorDescription: "Token signing failed",
-		})
+	// Validate scope
+	if !authUtils.IsValidScope(reqBody.Scope) {
+		logger.Error("Invalid scope: " + reqBody.Scope)
+		errUtils.WriteErrorResponse(
+			wtr,
+			http.StatusBadRequest,
+			"Invalid scope",
+			errTypes.ERR_INVALID_REQUEST,
+			req.Header.Get("X-Request-ID"),
+		)
 		return
 	}
 
-	// Create JWT claims
+	// Use default TTL for access token (1 hour)
 	now := time.Now()
-	expiresIn := 3600 // 1hr
+	accessExpiresIn := int64(jwtUtils.DefaultTokenTTL)
 
-	claims := jwt.MapClaims{
-	"iss":       "komodo-auth-api",
-	"sub":       reqBody.ClientID,
-	"aud":       "komodo-apis",
-	"exp":       now.Add(time.Duration(expiresIn) * time.Second).Unix(),
-	"iat":       now.Unix(),
-	"nbf":       now.Unix(),
-	"scope":     reqBody.Scope,
-	"client_id": reqBody.ClientID,
-	}
+	// Create access token with JTI
+	accessClaims := jwtUtils.CreateStandardClaims(
+		"komodo-auth-api",
+		reqBody.ClientID,
+		"komodo-apis",
+		accessExpiresIn,
+		map[string]interface{}{
+			"scope":      reqBody.Scope,
+			"grant_type": reqBody.GrantType,
+			"client_id":  reqBody.ClientID,
+			"token_use":  "access",
+		},
+	)
 
-	// Create and sign token with RS256
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-
-	accessToken, err := token.SignedString(privateKey)
+	// Sign access token
+	accessToken, err := jwtUtils.SignToken(accessClaims)
 	if err != nil {
-		logger.Error("failed to sign token", err)
-		wtr.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(wtr).Encode(ErrorResponse{
-			Error:            "server_error",
-			ErrorDescription: "Token generation failed",
-		})
+		logger.Error("Failed to sign access token", err)
+		errUtils.WriteErrorResponse(
+			wtr,
+			http.StatusInternalServerError,
+			"Token signing failed",
+			errTypes.ERR_INTERNAL_SERVER,
+			req.Header.Get("X-Request-ID"),
+		)
 		return
 	}
 
-	// TODO: Generate refresh token (optional)
-	// TODO: Store token in Elasticache/Redis with TTL for revocation support
-	// Example:
-	// tokenID := uuid.NewString()
-	// claims["jti"] = tokenID
-	// elasticache.SetCacheItem("token:"+tokenID, accessToken, time.Duration(expiresIn)*time.Second)
+	// Determine refresh token TTL with bounds checking (default 7 days)
+	refreshExpiresIn := 604800 // 7 days default
+	if reqBody.ExpiresIn > 0 {
+		refreshExpiresIn = jwtUtils.ClampTTL(reqBody.ExpiresIn, reqBody.ClientID)
+	}
+
+	// Generate refresh token
+	refreshClaims := jwtUtils.CreateStandardClaims(
+		"komodo-auth-api",
+		reqBody.ClientID,
+		"komodo-apis",
+		int64(refreshExpiresIn),
+		map[string]interface{}{
+			"scope":     reqBody.Scope,
+			"client_id": reqBody.ClientID,
+			"token_use": "refresh",
+		},
+	)
+
+	refreshToken, err := jwtUtils.SignToken(refreshClaims)
+	if err != nil {
+		logger.Error("Failed to sign refresh token", err)
+		errUtils.WriteErrorResponse(
+			wtr,
+			http.StatusInternalServerError,
+			"Token signing failed",
+			errTypes.ERR_INTERNAL_SERVER,
+			req.Header.Get("X-Request-ID"),
+		)
+		return
+	}
+
+	// TODO: Store tokens in Elasticache/Redis with TTL for tracking and revocation
+	// accessJTI, _ := jwtUtils.ExtractStringClaim(accessClaims, "jti")
+	// redisClient.Set("token:" + accessJTI, reqBody.ClientID, time.Duration(accessExpiresIn)*time.Second)
 
 	wtr.WriteHeader(http.StatusOK)
 	json.NewEncoder(wtr).Encode(TokenCreateResponse{
-		AccessToken: accessToken,
-		TokenType:   "Bearer",
-		ExpiresIn:   expiresIn,
-		Scope:       reqBody.Scope,
-		IssuedAt:    now.Unix(),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    int(accessExpiresIn),
+		Scope:        reqBody.Scope,
+		IssuedAt:     now.Unix(),
 	})
 }

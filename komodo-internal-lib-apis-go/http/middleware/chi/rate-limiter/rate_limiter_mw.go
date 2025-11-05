@@ -1,7 +1,7 @@
 package ratelimiting
 
 import (
-	utils "komodo-internal-lib-apis-go/http/utils"
+	utils "komodo-internal-lib-apis-go/http/utils/http"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
 	rl "komodo-internal-lib-apis-go/services/rate_limiter"
 	"net/http"

@@ -7,12 +7,14 @@
 
 # Dependancies
 */node_modules
-/test-node-examples
 
 # Local secrets
-.env.local
-.env.*.local
-.env.secrets
+.env
+.env.*
+*.secrets.*
+*.pem
+/secrets
+/env
 
 # Test binary, build with `go test -c`
 *.test

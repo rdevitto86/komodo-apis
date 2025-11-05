@@ -3,6 +3,7 @@ package chi
 import (
 	authjwt "komodo-internal-lib-apis-go/http/middleware/chi/auth-jwt"
 	"komodo-internal-lib-apis-go/http/middleware/chi/canonicalization"
+	clientType "komodo-internal-lib-apis-go/http/middleware/chi/client-type"
 	"komodo-internal-lib-apis-go/http/middleware/chi/context"
 	"komodo-internal-lib-apis-go/http/middleware/chi/cors"
 	"komodo-internal-lib-apis-go/http/middleware/chi/csrf"
@@ -12,7 +13,6 @@ import (
 	ipaccess "komodo-internal-lib-apis-go/http/middleware/chi/ip-access"
 	logger "komodo-internal-lib-apis-go/http/middleware/chi/logging"
 	"komodo-internal-lib-apis-go/http/middleware/chi/normalization"
-	postprocessor "komodo-internal-lib-apis-go/http/middleware/chi/post-processor"
 	ratelimiter "komodo-internal-lib-apis-go/http/middleware/chi/rate-limiter"
 	"komodo-internal-lib-apis-go/http/middleware/chi/redaction"
 	evalrules "komodo-internal-lib-apis-go/http/middleware/chi/rule-validation"
@@ -24,6 +24,7 @@ import (
 
 var AuthnJWTMiddleware = authjwt.AuthnJWTMiddleware
 var CanonicalizeMiddleware = canonicalization.CanonicalizationMiddleware
+var ClientTypeMiddleware = clientType.ClientTypeMiddleware
 var ContextMiddleware = context.ContextMiddleware
 var CORSMiddleware = cors.CORSMiddleware
 var CSRFMiddleware = csrf.CSRFMiddleware
@@ -33,7 +34,6 @@ var IdempotencyMiddleware = idempotency.IdempotencyMiddleware
 var IPAccessMiddleware = ipaccess.IPAccessMiddleware
 var LoggingMiddleware = logger.LoggingMiddleware
 var NormalizationMiddleware = normalization.NormalizationMiddleware
-var PostProcessorMiddleware = postprocessor.PostProcessorMiddleware
 var RateLimiterMiddleware = ratelimiter.RateLimiterMiddleware
 var RedactionMiddleware = redaction.RedactionMiddleware
 var RuleValidationMiddleware = evalrules.RuleValidationMiddleware

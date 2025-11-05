@@ -1,7 +1,6 @@
 package telemetry
 
 import (
-	"fmt"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
 	"net/http"
 	"time"
@@ -11,9 +10,6 @@ import (
 
 func TelemetryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
-		wtr.Header().Add("Trailer", "Server-Timing")
-		wtr.Header().Add("Trailer", "X-Response-Time")
-
 		ww := chimw.NewWrapResponseWriter(wtr, req.ProtoMajor)
 		start := time.Now()
 
@@ -22,36 +18,56 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 
 			// Recover from panics and ensure a 500 is sent if nothing written.
 			if rec := recover(); rec != nil {
-				if ww.Status() == 0 {
-					http.Error(ww, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				// Get request ID safely
+				reqID := chimw.GetReqID(req.Context())
+				if reqID == "" { reqID = "unknown" }
+				
+				// Safely check status
+				status := 0
+				if ww != nil {
+					status = ww.Status()
 				}
+				
+				if status == 0 {
+					http.Error(wtr, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				}
+				
 				logger.Error("telemetry panicked!", map[string]any{
-					"request_id": chimw.GetReqID(req.Context()),
+					"request_id": reqID,
 					"err":        rec,
 				})
+				return // Don't continue after panic
 			}
 
-			ww.Header().Set("Server-Timing", fmt.Sprintf("app;dur=%d", ms))
-			ww.Header().Set("X-Response-Time", fmt.Sprintf("%dms", ms))
-
-			status := ww.Status()
+			// Get status safely
+			status := 0
+			bytesWritten := 0
+			if ww != nil {
+				status = ww.Status()
+				bytesWritten = ww.BytesWritten()
+			}
+			
 			if status == 0 {
 				status = http.StatusOK
 			}
 
+			// Get request ID safely
+			reqID := chimw.GetReqID(req.Context())
+			if reqID == "" { reqID = "unknown" }
+
 			payload := map[string]any{
-				"request_id": chimw.GetReqID(req.Context()),
+				"request_id": reqID,
 				"method":     req.Method,
 				"path":       req.URL.Path,
 				"query":      req.URL.RawQuery,
 				"status":     status,
-				"bytes":     ww.BytesWritten(),
+				"bytes":     	bytesWritten,
 				"latency_ms": ms,
 				"ip":         req.RemoteAddr,
 				"user_agent": req.UserAgent(),
 				"referer":    req.Referer(),
-				"proto":     req.Proto,
-				"host":      req.Host,
+				"proto":     	req.Proto,
+				"host":      	req.Host,
 				"start_time": start.UTC().Format(time.RFC3339Nano),
 				"finish_time": time.Now().UTC().Format(time.RFC3339Nano),
 			}

@@ -2,10 +2,7 @@ package context
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
-	"fmt"
-	utils "komodo-internal-lib-apis-go/http/utils"
+	utils "komodo-internal-lib-apis-go/http/utils/http"
 	ctxKeys "komodo-internal-lib-apis-go/types/context"
 	"net/http"
 	"time"
@@ -13,32 +10,48 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
+// Enriches request context with common values
 func ContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
-		ctx = context.WithValue(ctx, chimw.RequestIDKey, generateRequestId())
+
+		var reqID string
+		if rid := req.Header.Get("X-Request-ID"); rid != "" {
+			reqID = rid
+		} else if rid := chimw.GetReqID(ctx); rid != "" {
+			reqID = rid
+		} else if rid, ok := ctx.Value(ctxKeys.RequestIDKey).(string); ok && rid != "" {
+			reqID = rid
+		} else {
+			reqID = utils.GenerateRequestId()
+		}
+
+		authHeader := req.Header.Get("Authorization")
+		hasReferer := req.Header.Get("Referer") != ""
+		hasCookie := req.Header.Get("Cookie") != ""
+
+		var clientType string
+		if authHeader != "" && !hasReferer && !hasCookie {
+			clientType = "api"
+		} else {
+			clientType = "browser"
+		}
+
+		req.Header.Set("X-Request-ID", reqID)
+		wtr.Header().Set("X-Request-ID", reqID)
+	
+		ctx = context.WithValue(ctx, chimw.RequestIDKey, reqID)
+		ctx = context.WithValue(ctx, ctxKeys.RequestIDKey, reqID)
 		ctx = context.WithValue(ctx, ctxKeys.StartTimeKey, time.Now().UTC())
 		ctx = context.WithValue(ctx, ctxKeys.VersionKey, utils.GetAPIVersion(req))
 		ctx = context.WithValue(ctx, ctxKeys.UriKey, utils.GetAPIRoute(req))
-		ctx = context.WithValue(ctx, ctxKeys.PathParamsKey, getPathParams(req))
+		ctx = context.WithValue(ctx, ctxKeys.MethodKey, req.Method)
+		ctx = context.WithValue(ctx, ctxKeys.PathParamsKey, utils.GetPathParams(req))
 		ctx = context.WithValue(ctx, ctxKeys.QueryParamsKey, utils.GetQueryParams(req))
+		// ctx = context.WithValue(ctx, ctxKeys.ClientIPKey, utils.GetClientIP(req))
+		ctx = context.WithValue(ctx, ctxKeys.UserAgentKey, req.UserAgent())
+		ctx = context.WithValue(ctx, ctxKeys.ClientTypeKey, clientType)
 
-		req = req.WithContext(ctx)
-		next.ServeHTTP(wtr, req)
+		next.ServeHTTP(wtr, req.WithContext(ctx))
 	})
-}
-
-func generateRequestId() string {
-	bytes := make([]byte, 12)
-	if _, err := rand.Read(bytes); err != nil {
-		return fmt.Sprintf("%d", time.Now().UnixNano())
-	}
-	return hex.EncodeToString(bytes)
-}
-
-func getPathParams(req *http.Request) map[string]string {
-	if req == nil {
-		return map[string]string{}
-	}
-	return map[string]string{} // TODO
 }

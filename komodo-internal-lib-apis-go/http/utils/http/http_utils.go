@@ -1,13 +1,17 @@
-package http
+package httputils
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
-// ParseURI extracts version, route, path parameters, and query parameters from the request URL.
+// Extracts version, route, path parameters, and query parameters from the request URL.
 func GetAPIVersion(req *http.Request) string {
 	if req == nil || req.URL == nil {
 		return ""
@@ -22,7 +26,7 @@ func GetAPIVersion(req *http.Request) string {
 	return ""
 }
 
-// GetAPIRoute extracts the API route from the request URL, excluding version prefix if present.
+// Extracts the API route from the request URL, excluding version prefix if present.
 func GetAPIRoute(req *http.Request) string {
 	if req == nil || req.URL == nil {
 		return ""
@@ -53,7 +57,14 @@ func GetAPIRoute(req *http.Request) string {
 	return route
 }
 
-// GetQueryParams extracts the first value of each query parameter from the request URL.
+// Extracts path parameters from the request URL based on a predefined pattern.
+// Note: This is a placeholder implementation and should be replaced with actual path parameter extraction logic.
+func GetPathParams(req *http.Request) map[string]string {
+	// Placeholder: return empty map as path parameter extraction requires route pattern knowledge
+	return map[string]string{}
+}
+
+// Extracts the first value of each query parameter from the request URL.
 func GetQueryParams(req *http.Request) map[string]string {
 	if req == nil || req.URL == nil {
 		return map[string]string{}
@@ -71,7 +82,7 @@ func GetQueryParams(req *http.Request) map[string]string {
 	return out
 }
 
-// GetClientKey extracts a client identifier from the request, preferring
+// Extracts a client identifier from the request, preferring
 func GetClientKey(req *http.Request) string {
 	// prefer first X-Forwarded-For entry when present
 	if xf := req.Header.Get("X-Forwarded-For"); xf != "" {
@@ -88,4 +99,27 @@ func GetClientKey(req *http.Request) string {
 		return host
 	}
 	return req.RemoteAddr
+}
+
+// Creates a unique request ID using random bytes encoded in hex.
+func GenerateRequestId() string {
+	bytes := make([]byte, 12)
+	if _, err := rand.Read(bytes); err != nil {
+		return fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(bytes)
+}
+
+// Determines if the request is from an API client or a browser client.
+func GetClientType(req *http.Request) string {
+	authHeader := req.Header.Get("Authorization")
+	hasReferer := req.Header.Get("Referer") != ""
+	hasCookie := req.Header.Get("Cookie") != ""
+	var clientType string
+	if authHeader != "" && !hasReferer && !hasCookie {
+		clientType = "api"
+	} else {
+		clientType = "browser"
+	}
+	return clientType
 }

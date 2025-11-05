@@ -1,64 +1,88 @@
-# Default to Docker-first workflow: `make` -> build image + up (dev)
+# Default to Docker-first workflow
 .DEFAULT_GOAL := bootstrap
 
 # === Service metadata ===
 APP := komodo-auth-api
-ENV ?= dev
+
+# Map environments to compose files
+# local, dev, staging -> nonprod compose file
+# prod -> prod compose file
+ENV ?= local
 ENV := $(strip $(ENV))
 TAG ?= $(ENV)
 
 # Paths
 BUILD_DIR := build
-CONFIG_ENV := env/.env.$(ENV)
 
-# Compose (base + overlay)
-COMPOSE_FILE := $(BUILD_DIR)/docker-compose.$(ENV).yaml
+# Determine which compose file to use
+ifeq ($(ENV),prod)
+	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.prod.yaml
+else
+	# local, dev, staging all use nonprod compose
+	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.nonprod.yaml
+endif
 
-.PHONY: local build run bootstrap stop deploy_staging deploy_prod restart clean test_all test_unit test_int test_e2e fmt
+.PHONY: help build run bootstrap stop restart clean test_all test_unit test_int test_e2e fmt
 
 help:
 	@echo "Targets:"
 	@echo "  build             Build Docker image for ENV ($(ENV))"
-	@echo "  run               Build image and start container via Docker Compose"
-	@echo "  local             Run app locally (no Docker, loads $(CONFIG_ENV))"
+	@echo "  run               Start container via Docker Compose"
+	@echo "  bootstrap         Build + run in one command"
 	@echo "  stop              Stop and remove container stack"
 	@echo "  restart           Restart container stack"
-	@echo "  clean           	 Prune Docker and remove local build artifacts"
+	@echo "  clean             Prune Docker and remove local build artifacts"
 	@echo "  test_all          Run all tests"
 	@echo "  test_unit         Run unit tests"
 	@echo "  test_int          Run integration tests"
 	@echo "  test_e2e          Run end-to-end tests"
 	@echo "  fmt               Run go fmt and go vet"
 	@echo ""
+	@echo "Supported Environments:"
+	@echo "  local    - Local development (no AWS, uses .env.local)"
+	@echo "  dev      - Development (AWS enabled, uses .env.dev)"
+	@echo "  staging  - Staging (AWS enabled, uses .env.staging)"
+	@echo "  prod     - Production (AWS enabled, uses .env.prod)"
+	@echo ""
 	@echo "Examples:"
-	@echo "  make build ENV=prod"
-	@echo "  make run ENV=dev"
-	@echo "  make local ENV=dev"
-	@echo "  make stop ENV=prod"
-	@echo "  make restart ENV=dev"
-	@echo "  make clean"
-	@echo "  make test_all"
+	@echo "  make bootstrap               # Default: local"
+	@echo "  make bootstrap ENV=local     # Explicit local"
+	@echo "  make bootstrap ENV=dev       # Dev environment"
+	@echo "  make bootstrap ENV=staging   # Staging environment"
+	@echo "  make bootstrap ENV=prod      # Production environment"
+	@echo "  make stop ENV=dev"
+	@echo "  make restart ENV=staging"
 
-# Local Docker Commands
-# build:
-# 	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg ENV=$(ENV) .
+# Build Docker image
 build:
-	docker build -f $(BUILD_DIR)/Dockerfile -t $(APP):$(TAG) --build-arg ENV=$(ENV) ..
+	@echo "Building $(APP):$(TAG) for ENV=$(ENV)"
+	@docker build \
+		-f $(BUILD_DIR)/Dockerfile \
+		-t $(APP):$(TAG) \
+		--build-arg ENV=$(ENV) \
+		..
 
+# Run container with docker-compose
 run:
-	docker compose -f $(COMPOSE_FILE) up -d
+	@echo "Starting $(APP) for ENV=$(ENV) using $(COMPOSE_FILE)"
+	@ENV=$(ENV) docker compose -f $(COMPOSE_FILE) up -d
 
+# Stop container
 stop:
-	docker compose -f $(COMPOSE_FILE) down --remove-orphans
+	@echo "Stopping $(APP) for ENV=$(ENV)"
+	ENV=$(ENV) docker compose -f $(COMPOSE_FILE) down --remove-orphans
 
+# Bootstrap: build + run
 bootstrap:
-	$(MAKE) build
-	$(MAKE) run
+	$(MAKE) build ENV=$(ENV)
+	$(MAKE) run ENV=$(ENV)
 
+# Restart container
 restart:
 	$(MAKE) stop ENV=$(ENV)
 	$(MAKE) run ENV=$(ENV)
 
+# Clean up Docker resources
 clean:
 	docker container prune -f
 	docker image prune -f
@@ -66,15 +90,18 @@ clean:
 	docker volume prune -f
 	rm -rf bin
 
-# ENV Deploy Commands
-deploy_dev:
+# Deployment shortcuts
+deploy-local:
+	$(MAKE) bootstrap ENV=local
+
+deploy-dev:
 	$(MAKE) bootstrap ENV=dev
 
-deploy_staging:
-	bash deploy/staging/deploy_docker_staging.sh
+deploy-staging:
+	$(MAKE) bootstrap ENV=staging
 
-deploy_prod:
-	bash deploy/prod/deploy_docker_prod.sh
+deploy-prod:
+	$(MAKE) bootstrap ENV=prod
 
 # Test Commands
 test_all:

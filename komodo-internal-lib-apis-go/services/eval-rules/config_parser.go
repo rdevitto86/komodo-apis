@@ -27,7 +27,7 @@ type routePattern struct {
 }
 
 // Loads validation rules from a file path or embedded data
-func LoadConfig(path ...string) {
+func LoadConfig(path ...string) bool {
 	loadOnce.Do(func() { 
 		var data []byte
 		var err error
@@ -43,14 +43,14 @@ func LoadConfig(path ...string) {
 		}
 
 		if err != nil || data == nil {
-			logger.PrintError(fmt.Sprintf("Failed to load validation rules from %s", source), err)
+			logger.Error("Failed to load validation rules from" + source, err)
 			configLoaded = false
 			return
 		}
 
 		rt, patterns, parseErr := parseConfigFromData(data)
 		if parseErr != nil {
-			logger.PrintError("Failed to parse validation rules")
+			logger.Error("Failed to parse validation rules", parseErr)
 			configLoaded = false
 			return
 		}
@@ -59,8 +59,9 @@ func LoadConfig(path ...string) {
 		patternRoutes = patterns
 		configLoaded = true
 
-		logger.PrintInfo(fmt.Sprintf("Successfully loaded validation rules from %s", source))
+		logger.Info("Successfully loaded validation rules from: " + source)
 	})
+	return configLoaded
 }
 
 // Loads validation rules from byte data (for embedding in client services)
@@ -68,7 +69,7 @@ func LoadConfigWithData(data []byte) {
 	loadOnce.Do(func() {
 		rt, patterns, err := parseConfigFromData(data)
 		if err != nil {
-			logger.PrintError("Failed to parse validation rules from embedded config", err)
+			logger.Error("Failed to parse validation rules from embedded config", err)
 			configLoaded = false
 			return
 		}
@@ -77,7 +78,7 @@ func LoadConfigWithData(data []byte) {
 		patternRoutes = patterns
 		configLoaded = true
 
-		logger.PrintInfo("Successfully loaded validation rules from embedded config")
+		logger.Info("Successfully loaded validation rules from embedded config")
 	})
 }
 	
@@ -147,7 +148,7 @@ func parseConfigFromData(data []byte) (map[string]map[string]evalrules.EvalRule,
 	}
 
 	if err := yaml.Unmarshal(data, &root); err != nil {
-		logger.PrintError("Failed to parse validation rules from embedded config", err)
+		logger.Error("Failed to parse validation rules from embedded config", err)
 		return nil, nil, fmt.Errorf("invalid yaml: %w", err)
 	}
 
@@ -155,7 +156,7 @@ func parseConfigFromData(data []byte) (map[string]map[string]evalrules.EvalRule,
 	
 	// Validate and normalize the configuration
 	if err := validateAndNormalizeConfig(cfg); err != nil {
-		logger.PrintError("Validation rules configuration is invalid", err)
+		logger.Error("Validation rules configuration is invalid", err)
 		return nil, nil, err
 	}
 	
@@ -167,7 +168,7 @@ func parseConfigFromData(data []byte) (map[string]map[string]evalrules.EvalRule,
 			reStr, keys := templateToRegex(tpl)
 			re, err := regexp.Compile("^" + reStr + "$")
 			if err != nil {
-				logger.PrintError(fmt.Sprintf("Invalid route pattern %s", tpl), err)
+				logger.Error("Invalid route pattern " + tpl, err)
 				return nil, nil, fmt.Errorf("invalid route pattern %s: %w", tpl, err)
 			}
 

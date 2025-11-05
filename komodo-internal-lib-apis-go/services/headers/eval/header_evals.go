@@ -8,18 +8,21 @@ import (
 )
 
 func isValidBearer(s string) bool {
-	if s != "" { return false }
+	if s == "" { return false }
 
 	bearerSplit := strings.Split(s, " ")
 	if len(bearerSplit) != 2 || bearerSplit[0] != "Bearer" {
 		return false
 	}
 
-	// TODO - validate JWT token format and signature
-	// valid, err := jwt.VerifyJWT(bearerSplit[1])
-	// if !valid || err != nil {
-	// 	return false
-	// }
+	token := bearerSplit[1]
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 { return false }
+
+	// Ensure each part has content
+	for _, part := range parts {
+		if len(part) == 0 { return false }
+	}
 	return true
 }
 
@@ -57,8 +60,11 @@ func isValidCookie(s string) bool {
 }
 
 func isValidUserAgent(s string) bool {
-	re := regexp.MustCompile(`^[A-Za-z][A-Za-z0-9\-\._ ]*/\d+(\.\d+)*$`)
-	return re.MatchString(strings.TrimSpace(s))
+	if s == "" { return false }
+	s = strings.TrimSpace(s)
+	if len(s) > 256 { return false } // max length
+	re := regexp.MustCompile(`^[A-Za-z0-9\-\._ /(),:;]+$`)
+	return re.MatchString(s)
 }
 
 func isValidReferer(s string) bool {
