@@ -51,10 +51,11 @@ func TokenDeleteHandler(wtr http.ResponseWriter, req *http.Request) {
 	}
 
 	// Extract JTI and client ID
-	jti, hasJTI := jwtUtils.ExtractStringClaim(claims, "jti")
-	clientID, _ := jwtUtils.ExtractStringClaim(claims, "client_id")
+	claimValues := jwtUtils.ExtractStringClaims(claims, []string{"jti", "client_id"})
+	jti, _ := claimValues["jti"].(string)
+	clientID, _ := claimValues["client_id"].(string)
 
-	if !hasJTI || jti == "" {
+	if jti == "" {
 		logger.Error("Token missing JTI claim - cannot revoke")
 		errUtils.WriteErrorResponse(
 			wtr,

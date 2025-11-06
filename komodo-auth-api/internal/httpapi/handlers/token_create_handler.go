@@ -101,9 +101,15 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Use default TTL for access token (1 hour)
+	// Token TTL
 	now := time.Now()
 	accessExpiresIn := int64(jwtUtils.DefaultTokenTTL)
+
+	// Determine client type based on grant_type
+	clientType := "browser"
+	if reqBody.GrantType == "client_credentials" {
+		clientType = "api"
+	}
 
 	// Create access token with JTI
 	accessClaims := jwtUtils.CreateStandardClaims(
@@ -112,10 +118,11 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 		"komodo-apis",
 		accessExpiresIn,
 		map[string]interface{}{
-			"scope":      reqBody.Scope,
-			"grant_type": reqBody.GrantType,
-			"client_id":  reqBody.ClientID,
-			"token_use":  "access",
+			"scope":       reqBody.Scope,
+			"grant_type":  reqBody.GrantType,
+			"client_id":   reqBody.ClientID,
+			"token_use":   "access",
+			"client_type": clientType,
 		},
 	)
 
@@ -146,9 +153,10 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 		"komodo-apis",
 		int64(refreshExpiresIn),
 		map[string]interface{}{
-			"scope":     reqBody.Scope,
-			"client_id": reqBody.ClientID,
-			"token_use": "refresh",
+			"scope":       reqBody.Scope,
+			"client_id":   reqBody.ClientID,
+			"token_use":   "refresh",
+			"client_type": clientType,
 		},
 	)
 

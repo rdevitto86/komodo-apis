@@ -25,23 +25,11 @@ func ContextMiddleware(next http.Handler) http.Handler {
 		} else {
 			reqID = utils.GenerateRequestId()
 		}
-
-		authHeader := req.Header.Get("Authorization")
-		hasReferer := req.Header.Get("Referer") != ""
-		hasCookie := req.Header.Get("Cookie") != ""
-
-		var clientType string
-		if authHeader != "" && !hasReferer && !hasCookie {
-			clientType = "api"
-		} else {
-			clientType = "browser"
-		}
-
-		req.Header.Set("X-Request-ID", reqID)
-		wtr.Header().Set("X-Request-ID", reqID)
-	
 		ctx = context.WithValue(ctx, chimw.RequestIDKey, reqID)
 		ctx = context.WithValue(ctx, ctxKeys.RequestIDKey, reqID)
+		req.Header.Set("X-Request-ID", reqID)
+		wtr.Header().Set("X-Request-ID", reqID)
+
 		ctx = context.WithValue(ctx, ctxKeys.StartTimeKey, time.Now().UTC())
 		ctx = context.WithValue(ctx, ctxKeys.VersionKey, utils.GetAPIVersion(req))
 		ctx = context.WithValue(ctx, ctxKeys.UriKey, utils.GetAPIRoute(req))
@@ -49,8 +37,8 @@ func ContextMiddleware(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, ctxKeys.PathParamsKey, utils.GetPathParams(req))
 		ctx = context.WithValue(ctx, ctxKeys.QueryParamsKey, utils.GetQueryParams(req))
 		// ctx = context.WithValue(ctx, ctxKeys.ClientIPKey, utils.GetClientIP(req))
+		ctx = context.WithValue(ctx, ctxKeys.ClientTypeKey, utils.GetClientType(req))
 		ctx = context.WithValue(ctx, ctxKeys.UserAgentKey, req.UserAgent())
-		ctx = context.WithValue(ctx, ctxKeys.ClientTypeKey, clientType)
 
 		next.ServeHTTP(wtr, req.WithContext(ctx))
 	})

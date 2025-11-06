@@ -18,7 +18,7 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 			case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 				clientType := req.Context().Value(ctxKeys.ClientTypeKey)
 				if clientType == nil {
-					clientType = httpUtils.GetClientType(req) == "api"
+					clientType = httpUtils.GetClientType(req)
 				}
 
 				if clientType == "api" {

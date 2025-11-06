@@ -16,6 +16,10 @@ rules:
     POST:
       level: "lenient"
       headers:
+        "Accept":
+          required: true
+          type: "string"
+          value: "application/json"
         "Content-Type":
           required: true
           type: "string"
@@ -32,6 +36,10 @@ rules:
     POST:
       level: "lenient"
       headers:
+        "Accept":
+          required: true
+          type: "string"
+          value: "application/json"
         "Content-Type":
           required: true
           type: "string"
@@ -48,6 +56,10 @@ rules:
     POST:
       level: "strict"
       headers:
+        "Accept":
+          required: true
+          type: "string"
+          value: "application/json"
         "Content-Type":
           required: true
           type: "string"
@@ -89,6 +101,10 @@ rules:
     POST:
       level: "strict"
       headers:
+        "Accept":
+          required: true
+          type: "string"
+          value: "application/json"
         "Content-Type":
           required: true
           type: "string"
@@ -108,4 +124,28 @@ rules:
           required: true
           type: "string"
           value: "refresh_token"
+      requiredVersion: 1
+  "/auth/token/verify":
+    POST:
+      level: "strict"
+      headers:
+        "Accept":
+          required: true
+          type: "string"
+          value: "application/json"
+        "Authorization":
+          required: true
+          type: "string"
+          value: "Bearer *"
+        "Content-Type":
+          required: true
+          type: "string"
+          value: "application/json"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          type: "string"
+        "Referer":
+          type: "string"
       requiredVersion: 1

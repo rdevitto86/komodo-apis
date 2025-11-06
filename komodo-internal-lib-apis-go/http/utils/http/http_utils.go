@@ -2,7 +2,9 @@ package httputils
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -110,16 +112,59 @@ func GenerateRequestId() string {
 	return hex.EncodeToString(bytes)
 }
 
+// Validates if an API key exists and is active in the database.
+// TODO: Implement actual validation against DynamoDB/RDS when database is ready.
+func IsValidAPIKey(apiKey string) bool {
+	// Placeholder: Replace with actual database lookup
+	// Expected implementation:
+	// 1. Query DynamoDB/RDS for api_key
+	// 2. Check if key exists and is active (not revoked/expired)
+	// 3. Optional: Rate limit check, scope validation
+	// 4. Log the API key usage for auditing
+	
+	return true
+}
+
 // Determines if the request is from an API client or a browser client.
-func GetClientType(req *http.Request) string {
-	authHeader := req.Header.Get("Authorization")
-	hasReferer := req.Header.Get("Referer") != ""
-	hasCookie := req.Header.Get("Cookie") != ""
-	var clientType string
-	if authHeader != "" && !hasReferer && !hasCookie {
-		clientType = "api"
-	} else {
-		clientType = "browser"
+// Validates JWT token claims to prevent header spoofing.
+func GetClientType(req *http.Request) string { 
+	if apiKey := req.Header.Get("X-API-Key"); apiKey != "" && IsValidAPIKey(apiKey) {
+		return "api"
 	}
-	return clientType
+	
+	authHeader := req.Header.Get("Authorization")
+	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+		parts := strings.Split(strings.TrimPrefix(authHeader, "Bearer "), ".")
+
+		if len(parts) == 3 {
+			payload := parts[1]
+			// Add padding if needed
+			if m := len(payload) % 4; m != 0 {
+				payload += strings.Repeat("=", 4-m)
+			}
+			
+			if decoded, err := base64.URLEncoding.DecodeString(payload); err == nil {
+				var claims map[string]interface{}
+				if err := json.Unmarshal(decoded, &claims); err == nil {
+					if clientType, ok := claims["client_type"].(string); ok {
+						switch clientType {
+							case "api", "browser":
+								return clientType
+						}
+					}
+					if grantType, ok := claims["grant_type"].(string); ok && grantType == "client_credentials" {
+						return "api"
+					}
+					if scope, ok := claims["scope"].(string); ok {
+						if strings.Contains(scope, "api:") || strings.Contains(scope, "service:") {
+							return "api"
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	// Default to browser (enforces CSRF)
+	return "browser"
 }

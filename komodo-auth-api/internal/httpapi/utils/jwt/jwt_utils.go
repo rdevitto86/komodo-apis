@@ -169,15 +169,39 @@ func SignToken(claims jwt.MapClaims) (string, error) {
 	return signedToken, nil
 }
 
-// Extracts a string claim
-func ExtractStringClaim(claims jwt.MapClaims, key string) (string, bool) {
-	if value, exists := claims[key]; exists {
-		if str, ok := value.(string); ok {
-			return str, true
+// Extracts multiple claims and returns them as a map with type-safe conversions.
+// Converts float64 to int64 when the value has no decimal component to preserve precision.
+// Returns strings, int64, bool, or original value for other types.
+func ExtractStringClaims(claims jwt.MapClaims, keys []string) map[string]any {
+	clms := map[string]any{}
+	for _, k := range keys {
+		if value, exists := claims[k]; exists {
+			switch v := value.(type) {
+				case float64:
+					if v == float64(int64(v)) {
+						clms[k] = int64(v)
+					} else {
+						clms[k] = v
+					}
+				case string, bool:
+					clms[k] = v
+				default:
+					clms[k] = value
+			}
 		}
 	}
-	return "", false
+	return clms
 }
+
+// Extracts a single string claim safely
+func ExtractStringClaim(claims jwt.MapClaims, key string) string {
+	if value, exists := claims[key]; exists {
+		if str, ok := value.(string); ok {
+			return str
+		}
+	}
+	return ""
+}	
 
 // Extracts an int64 claim (useful for timestamps)
 func ExtractInt64Claim(claims jwt.MapClaims, key string) (int64, bool) {

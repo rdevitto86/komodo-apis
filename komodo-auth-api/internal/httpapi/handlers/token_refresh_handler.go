@@ -85,10 +85,11 @@ func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Extract client_id and scope from original token
-	clientID, _ := jwtUtils.ExtractStringClaim(claims, "client_id")
-	scope, _ := jwtUtils.ExtractStringClaim(claims, "scope")
-	tokenUse, _ := jwtUtils.ExtractStringClaim(claims, "token_use")
+	claimValues := jwtUtils.ExtractStringClaims(claims, []string{"client_id", "scope", "token_use", "client_type"})
+	clientID, _ := claimValues["client_id"].(string)
+	scope, _ := claimValues["scope"].(string)
+	tokenUse, _ := claimValues["token_use"].(string)
+	clientType, _ := claimValues["client_type"].(string)
 
 	if clientID == "" {
 		logger.Error("No client_id in refresh token")
@@ -130,6 +131,8 @@ func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
 		expiresIn = jwtUtils.ClampTTL(reqBody.ExpiresIn, clientID)
 	}
 
+	if clientType == "" { clientType = "browser" }
+
 	// Create new access token with JTI
 	newClaims := jwtUtils.CreateStandardClaims(
 		"komodo-auth-api",
@@ -137,10 +140,11 @@ func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
 		"komodo-apis",
 		int64(expiresIn),
 		map[string]interface{}{
-			"scope":      scope,
-			"grant_type": "refresh_token",
-			"client_id":  clientID,
-			"token_use":  "access",
+			"scope":       scope,
+			"grant_type":  "refresh_token",
+			"client_id":   clientID,
+			"token_use":   "access",
+			"client_type": clientType,
 		},
 	)
 
@@ -166,9 +170,10 @@ func TokenRefreshHandler(wtr http.ResponseWriter, req *http.Request) {
 		"komodo-apis",
 		refreshExpiresIn,
 		map[string]interface{}{
-			"scope":      scope,
-			"client_id":  clientID,
-			"token_use":  "refresh",
+			"scope":       scope,
+			"client_id":   clientID,
+			"token_use":   "refresh",
+			"client_type": clientType,
 		},
 	)
 

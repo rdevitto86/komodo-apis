@@ -30,7 +30,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 		
 		clientType := req.Context().Value(ctxKeys.ClientTypeKey)
 		if clientType == nil {
-			clientType = httpUtils.GetClientType(req) == "api"
+			clientType = httpUtils.GetClientType(req)
 		}
 		
 		if clientType == "api" {
