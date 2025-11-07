@@ -13,17 +13,55 @@ import (
 	"time"
 )
 
-// Extracts version, route, path parameters, and query parameters from the request URL.
+// Extracts API version from Accept or Content-Type headers (primary) or URL path (fallback).
+// Header format: "application/json;v=1" or "application/json; version=2"
+// URL format: "/v1/resource" (fallback for backwards compatibility)
 func GetAPIVersion(req *http.Request) string {
-	if req == nil || req.URL == nil {
-		return ""
+	if req == nil { return "" }
+
+	// Priority 1: Check Accept header for version parameter
+	if accept := req.Header.Get("Accept"); accept != "" {
+		if version := extractVersionFromMediaType(accept); version != "" {
+			return version
+		}
 	}
 
-	trimmed := strings.TrimPrefix(req.URL.Path, "/")
-	segments := strings.Split(trimmed, "/")
+	// Priority 2: Check Content-Type header for version parameter
+	if contentType := req.Header.Get("Content-Type"); contentType != "" {
+		if version := extractVersionFromMediaType(contentType); version != "" {
+			return version
+		}
+	}
 
-	if len(segments) > 0 && len(segments[0]) > 0 && segments[0][0] == 'v' {
-		return "/" + segments[0]
+	// Priority 3: Fallback to URL path versioning (e.g., /v1/resource)
+	if req.URL != nil {
+		trimmed := strings.TrimPrefix(req.URL.Path, "/")
+		segments := strings.Split(trimmed, "/")
+
+		if len(segments) > 0 && len(segments[0]) > 0 && segments[0][0] == 'v' {
+			return "/" + segments[0]
+		}
+	}
+	return ""
+}
+
+// Extracts version from media type header (e.g., "application/json;v=1" or "application/json; version=2")
+func extractVersionFromMediaType(mediaType string) string {
+	parts := strings.Split(mediaType, ";")
+	if len(parts) < 2 { return "" }
+
+	for _, part := range parts[1:] {
+		param := strings.TrimSpace(part)
+		
+		// Support both "v=1" and "version=1" formats
+		if strings.HasPrefix(param, "v=") {
+			version := strings.TrimPrefix(param, "v=")
+			return "/v" + strings.TrimSpace(version)
+		}
+		if strings.HasPrefix(param, "version=") {
+			version := strings.TrimPrefix(param, "version=")
+			return "/v" + strings.TrimSpace(version)
+		}
 	}
 	return ""
 }

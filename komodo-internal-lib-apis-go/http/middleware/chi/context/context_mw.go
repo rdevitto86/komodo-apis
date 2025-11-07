@@ -2,8 +2,8 @@ package context
 
 import (
 	"context"
+	ctxKeys "komodo-internal-lib-apis-go/common/context"
 	utils "komodo-internal-lib-apis-go/http/utils/http"
-	ctxKeys "komodo-internal-lib-apis-go/types/context"
 	"net/http"
 	"time"
 

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	evalRules "komodo-internal-lib-apis-go/common/eval-rules"
 	httpUtils "komodo-internal-lib-apis-go/http/utils/http"
 	headers "komodo-internal-lib-apis-go/services/headers/eval"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
-	evalRules "komodo-internal-lib-apis-go/types/eval-rules"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -17,23 +17,95 @@ import (
 
 // Checks if the request complies with all aspects of the provided EvalRule.
 func IsRuleValid(req *http.Request, rule *evalRules.EvalRule) bool {
-	if req == nil || rule == nil { return false }
-	if rule.Level == evalRules.LevelIgnore { return true }
+	if req == nil || rule == nil {
+		logger.Error("api request or eval rule is nil")
+		return false
+	}
+	if rule.Level == evalRules.LevelIgnore {
+		logger.Info("rule level is IGNORE - skipping all validations")
+		return true
+	}
 
-	return AreValidHeaders(req, rule) &&
-		AreValidPathParams(req, rule) &&
-		AreValidQueryParams(req, rule) &&
-		IsValidBody(req, rule)
+	if !isValidVersion(req, rule) {
+		logger.Error("validation failed: version check")
+		return false
+	}
+	if !areValidHeaders(req, rule) {
+		logger.Error("validation failed: headers check")
+		return false
+	}
+	if !areValidPathParams(req, rule) {
+		logger.Error("validation failed: path params check")
+		return false
+	}
+	if !areValidQueryParams(req, rule) {
+		logger.Error("validation failed: query params check")
+		return false
+	}
+	if !isValidBody(req, rule) {
+		logger.Error("validation failed: body check")
+		return false
+	}
+	
+	logger.Info("all validations passed")
+	return true
 }
 
-// Checks if the request headers comply with the provided EvalRule.
-func AreValidHeaders(req *http.Request, rule *evalRules.EvalRule) bool {
-	if req == nil || rule == nil {
-		logger.Error("request or rule is nil")
+// Checks if the request version matches the required version in the rule.
+func isValidVersion(req *http.Request, rule *evalRules.EvalRule) bool {
+	// Lenient mode: version validation is optional
+	if rule.Level == evalRules.LevelLenient {
+		versionStr := httpUtils.GetAPIVersion(req)
+		if versionStr == "" {
+			logger.Warn("version not provided in request using lenient mode - allowing")
+			return true
+		}
+
+		versionStr = strings.TrimPrefix(versionStr, "/v")
+		version, err := strconv.Atoi(versionStr)
+		if err != nil {
+			logger.Warn(fmt.Sprintf("invalid version format: %s (lenient mode - allowing)", versionStr))
+			return true
+		}
+		if rule.RequiredVersion > 0 && version != rule.RequiredVersion {
+			logger.Warn(fmt.Sprintf("version mismatch: required %d, got %d (lenient mode - allowing)", rule.RequiredVersion, version))
+			return true
+		}
+		logger.Info(fmt.Sprintf("version validation passed (lenient): v%d", version))
+		return true
+	}
+
+	// Strict mode: version is mandatory
+	if rule.RequiredVersion <= 0 {
+		logger.Error("rule configuration error: requiredVersion must be >= 1 for strict validation")
 		return false
 	}
 
-	// iterate rule headers and validate
+	versionStr := httpUtils.GetAPIVersion(req)
+	if versionStr == "" {
+		logger.Error(fmt.Sprintf("version required (v%d) but not found in request", rule.RequiredVersion))
+		return false
+	}
+
+	// Parse version number (e.g., "/v1" -> 1)
+	versionStr = strings.TrimPrefix(versionStr, "/v")
+	version, err := strconv.Atoi(versionStr)
+	if err != nil {
+		logger.Error(fmt.Sprintf("invalid version format: %s", versionStr))
+		return false
+	}
+
+	if version != rule.RequiredVersion {
+		logger.Error(fmt.Sprintf("version mismatch: required %d, got %d", rule.RequiredVersion, version))
+		return false
+	}
+
+	logger.Info(fmt.Sprintf("version validation passed (strict): v%d", version))
+	return true
+}
+
+// Checks if the request headers comply with the provided EvalRule.
+func areValidHeaders(req *http.Request, rule *evalRules.EvalRule) bool {
 	for hName, spec := range rule.Headers {
 		val := req.Header.Get(hName)
 
@@ -103,12 +175,7 @@ func AreValidHeaders(req *http.Request, rule *evalRules.EvalRule) bool {
 }
 
 // Checks if the request path parameters comply with the provided EvalRule.
-func AreValidPathParams(req *http.Request, rule *evalRules.EvalRule) bool {
-	if req == nil || rule == nil {
-		logger.Error("request or rule is nil")
-		return false
-	}
-
+func areValidPathParams(req *http.Request, rule *evalRules.EvalRule) bool {
 	// find matching pattern and extract params
 	_, params := matchRouteAndExtractParams(req.URL.Path)
 	if params == nil {
@@ -188,12 +255,7 @@ func AreValidPathParams(req *http.Request, rule *evalRules.EvalRule) bool {
 }
 
 // Checks if the request query parameters comply with the provided EvalRule.
-func AreValidQueryParams(req *http.Request, rule *evalRules.EvalRule) bool {
-	if req == nil || rule == nil {
-		logger.Error("request or rule is nil")
-		return false
-	}
-
+func areValidQueryParams(req *http.Request, rule *evalRules.EvalRule) bool {
 	params := httpUtils.GetQueryParams(req)
 
 	for name, spec := range rule.QueryParams {
@@ -238,12 +300,7 @@ func AreValidQueryParams(req *http.Request, rule *evalRules.EvalRule) bool {
 }
 
 // Checks if the request body complies with the provided EvalRule.
-func IsValidBody(req *http.Request, rule *evalRules.EvalRule) bool {
-	if req == nil || rule == nil {
-		logger.Error("request or rule is nil")
-		return false
-	}
-
+func isValidBody(req *http.Request, rule *evalRules.EvalRule) bool {
 	switch req.Method {
 		case http.MethodGet, http.MethodHead, http.MethodOptions:
 			return true

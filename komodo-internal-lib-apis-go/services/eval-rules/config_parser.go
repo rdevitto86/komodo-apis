@@ -2,8 +2,8 @@ package evalrules
 
 import (
 	"fmt"
+	evalrules "komodo-internal-lib-apis-go/common/eval-rules"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
-	evalrules "komodo-internal-lib-apis-go/types/eval-rules"
 	"os"
 	"regexp"
 	"strings"

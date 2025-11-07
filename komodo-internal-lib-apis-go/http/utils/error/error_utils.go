@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	errorType "komodo-internal-lib-apis-go/types/error"
+	errorType "komodo-internal-lib-apis-go/common/error"
 )
 
 // Writes a standardized error response

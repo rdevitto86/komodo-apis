@@ -2,11 +2,11 @@ package csrf
 
 import (
 	"context"
+	ctxKeys "komodo-internal-lib-apis-go/common/context"
+	hdrTypes "komodo-internal-lib-apis-go/common/http"
 	httpUtils "komodo-internal-lib-apis-go/http/utils/http"
 	hdrSrv "komodo-internal-lib-apis-go/services/headers/eval"
 	logger "komodo-internal-lib-apis-go/services/logger/runtime"
-	ctxKeys "komodo-internal-lib-apis-go/types/context"
-	hdrTypes "komodo-internal-lib-apis-go/types/headers"
 	"net/http"
 )
 

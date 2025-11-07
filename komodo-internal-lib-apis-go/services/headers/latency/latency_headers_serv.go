@@ -1,7 +1,7 @@
 package latency
 
 import (
-	ctxKeys "komodo-internal-lib-apis-go/types/context"
+	ctxKeys "komodo-internal-lib-apis-go/common/context"
 	"net/http"
 	"time"
 )

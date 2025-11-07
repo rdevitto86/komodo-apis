@@ -4,8 +4,8 @@ set -e  # Exit immediately if a command exits with a non-zero status
 set -u  # Treat unset variables as an error
 
 # Variables
-AUTH_API_IMAGE="local/komodo-auth-api:latest"
-AUTH_API_CONTAINER="komodo-auth-api"
+AUTH_API_IMAGE="local/komodo-auth-internal-api:latest"
+AUTH_API_CONTAINER="komodo-auth-internal-api"
 AUTH_API_PORT=7001
 AUTH_SERVICE_VALIDATE_URL="http://localhost:$AUTH_API_PORT"
 

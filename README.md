@@ -13,7 +13,7 @@ A single repo showcasing a complete, production-style backend for a modern e-com
 - [Local Development](#local-development)  
 - [Conventions](#conventions)  
 - [Services](#services)
-  - [komodo-auth-api](#komodo-auth-api)
+  - [komodo-auth-internal-api](#komodo-auth-internal-api)
   - [komodo-address-api](#komodo-address-api)
   - [komodo-ai-chatbot-api](#komodo-ai-chatbot-api)
   - [komodo-ai-summary-api](#komodo-ai-summary-api)
@@ -83,7 +83,7 @@ make up SERVICE=komodo-catalog-api
 ## Conventions
 
 - **API Style:** JSON over HTTP; REST first; gRPC optional for internal calls.  
-- **Auth:** JWT access tokens via `komodo-auth-api`. Service-to-service via mTLS or signed service tokens.  
+- **Auth:** JWT access tokens via `komodo-auth-internal-api`. Service-to-service via mTLS or signed service tokens.  
 - **Tracing:** OpenTelemetry (OTLP) → collector (Jaeger/Tempo).  
 - **Logging:** Structured JSON, request IDs, 12-factor log to stdout.  
 - **Errors:** RFC 7807 (Problem+JSON) recommended.  
@@ -106,7 +106,7 @@ Each service uses the template:
 
 ---
 
-### komodo-auth-api
+### komodo-auth-internal-api
 
 **Overview**  
 Authentication, authorization, MFA, etc.
