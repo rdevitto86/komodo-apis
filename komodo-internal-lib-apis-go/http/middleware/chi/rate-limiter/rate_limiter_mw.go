@@ -2,8 +2,8 @@ package ratelimiting
 
 import (
 	utils "komodo-internal-lib-apis-go/http/utils/http"
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
-	rl "komodo-internal-lib-apis-go/services/rate_limiter"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
+	rl "komodo-internal-lib-apis-go/security/rate_limiter"
 	"net/http"
 	"strconv"
 )
@@ -20,7 +20,7 @@ func RateLimiterMiddleware(next http.Handler) http.Handler {
 			if rl.ShouldFailOpen() {
 				logger.Error("rate limiter failing open for client: "+key, req)
 			} else {
-				http.Error(wtr, "Service unavailable", http.StatusServiceUnavailable)
+				http.Error(wtr, "service unavailable", http.StatusServiceUnavailable)
 				return
 			}
 		} else if !allowed {

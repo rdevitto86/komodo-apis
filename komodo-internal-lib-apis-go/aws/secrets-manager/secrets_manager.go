@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"komodo-internal-lib-apis-go/config"
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
@@ -44,17 +44,17 @@ func init() {
 		}
 
 		secretsManagerClient = secretsmanager.NewFromConfig(cfg)
-		logger.Info("AWS Secrets Manager client initialized")
+		logger.Info("aws secrets manager client initialized")
 	} else {
-		logger.Info("AWS Secrets Manager failed to initialize or is disabled")
+		logger.Info("aws secrets manager failed to initialize or is disabled")
 	}
 }
 
 // Loads multiple secrets using AWS Secrets Manager or from .env.secrets
 func LoadSecrets(keys []string) error {
 	if !IsUsingAWS() {
-		logger.Error("AWS Secrets Manager not configured")
-		return fmt.Errorf("AWS Secrets Manager not configured")
+		logger.Error("aws secrets manager not configured")
+		return fmt.Errorf("aws secrets manager not configured")
 	}
 	_, err := GetSecrets(keys)
 	return err
@@ -81,7 +81,7 @@ func GetSecret(key string) (string, error) {
 		config.SetConfigValue(key, *result.SecretString)
 		return *result.SecretString, nil
 	}
-	return "", fmt.Errorf("AWS Secrets Manager not configured")
+	return "", fmt.Errorf("aws secrets manager not configured")
 }
 
 // Retrieves multiple secrets using AWS batch call (single JSON secret) or from local secrets
@@ -130,7 +130,7 @@ func GetSecrets(keys []string) (map[string]string, error) {
 		logger.Info(fmt.Sprintf("successfully retrieved %d secrets from AWS batch", len(secrets)))
 		return secrets, nil
 	}
-	return nil, fmt.Errorf("AWS Secrets Manager not configured")
+	return nil, fmt.Errorf("aws secrets manager not configured")
 }
 
 // Checks if the client is configured to use AWS Secrets Manager

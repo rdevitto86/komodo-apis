@@ -1,13 +1,13 @@
 package main
 
 import (
-	"komodo-auth-internal-api/internal/httpapi/handlers"
-	jwtUtils "komodo-auth-internal-api/internal/httpapi/utils/jwt"
+	"komodo-auth-internal-api/internal/handlers"
+	jwtUtils "komodo-internal-lib-apis-go/auth/jwt"
 	elasticache "komodo-internal-lib-apis-go/aws/elasticache"
 	secretsManager "komodo-internal-lib-apis-go/aws/secrets-manager"
 	"komodo-internal-lib-apis-go/config"
 	mw "komodo-internal-lib-apis-go/http/middleware/chi"
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 	moxtox "komodo-internal-lib-apis-go/test/moxtox"
 	"net/http"
 	"os"
@@ -21,17 +21,17 @@ func main() {
 	logger.InitLogger()
 
 	env := config.GetConfigValue("ENV")
-	logger.Info("Starting komodo-auth-internal-api in " + env + " environment")
+	logger.Info("starting komodo-auth-internal-api in " + env + " environment")
 
 	switch strings.ToLower(env) {
 		case "local":
-			logger.Info("Running in local environment - skipping AWS Secrets Manager integration")
+			logger.Info("running in local environment - skipping AWS Secrets Manager integration")
 		case "dev", "staging", "prod":
 			if !secretsManager.IsUsingAWS() {
-				logger.Fatal("AWS Secrets Manager integration disabled")
+				logger.Fatal("aws secrets manager integration disabled")
 				os.Exit(1)
 			}
-			logger.Info("AWS Secrets Manager integration enabled")
+			logger.Info("aws secrets manager integration enabled")
 
 			secrets := []string{
 				"JWT_PUBLIC_KEY",
@@ -44,11 +44,11 @@ func main() {
 
 			// load AWS Secrets
 			if err := secretsManager.LoadSecrets(secrets); err != nil {
-				logger.Fatal("Failed to get secrets", err)
+				logger.Fatal("failed to get secrets", err)
 				os.Exit(1)
 			}
 		default:
-			logger.Fatal("Environment variable ENV invalid or not set")
+			logger.Fatal("environment variable ENV invalid or not set")
 			os.Exit(1)
 	}
 
@@ -57,10 +57,10 @@ func main() {
 
 	// initialize JWT keys
 	if err := jwtUtils.InitializeKeys(); err != nil {
-		logger.Fatal("Failed to initialize JWT keys", err)
+		logger.Fatal("failed to initialize JWT keys", err)
 		os.Exit(1)
 	}
-	logger.Info("JWT keys initialized successfully")
+	logger.Info("jwt keys initialized successfully")
 
 	// initialize router
 	rtr := chi.NewRouter()
@@ -76,15 +76,13 @@ func main() {
 
 	// initialize moxtox response handler
 	if env != "prod" && os.Getenv("USE_MOCKS") == "true" {
-		logger.Info("Using mocks in non-production environment")
+		logger.Info("using mocks in non-production environment")
 		rtr.Use(moxtox.InitMoxtoxMiddleware(env))
 	}
 
-	// unprotected public routes
 	rtr.Get("/health", handlers.HealthHandler)
 
 	rtr.Route("/token", func(token chi.Router) {
-		// public endpoint(s) that require no auth
 		token.With(mw.RateLimiterMiddleware).Post("/", handlers.TokenCreateHandler)
 		
 		// protected endpoint(s) that require valid JWT
@@ -99,7 +97,7 @@ func main() {
 
 	port := config.GetConfigValue("PORT")
 	if port == "" { port =	 "7001" }
-	logger.Info("Server starting on port " + port)
+	logger.Info("server starting on port " + port)
 
 	server := &http.Server{
 		Addr:         			":" + port,
@@ -113,7 +111,7 @@ func main() {
 
 	// start server
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Fatal("Server failed to start", err)
+		logger.Fatal("server failed to start", err)
 		os.Exit(1)
   }
 }

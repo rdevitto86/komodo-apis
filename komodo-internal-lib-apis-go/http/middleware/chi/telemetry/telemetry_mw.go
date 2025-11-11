@@ -1,7 +1,7 @@
 package telemetry
 
 import (
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
 	"time"
 

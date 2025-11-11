@@ -18,6 +18,7 @@ import (
 	evalrules "komodo-internal-lib-apis-go/http/middleware/chi/rule-validation"
 	"komodo-internal-lib-apis-go/http/middleware/chi/sanitization"
 	securityheaders "komodo-internal-lib-apis-go/http/middleware/chi/security-headers"
+	"komodo-internal-lib-apis-go/http/middleware/chi/session"
 	"komodo-internal-lib-apis-go/http/middleware/chi/telemetry"
 	evalheaders "komodo-internal-lib-apis-go/http/middleware/chi/validate-headers"
 )
@@ -39,5 +40,6 @@ var RedactionMiddleware = redaction.RedactionMiddleware
 var RuleValidationMiddleware = evalrules.RuleValidationMiddleware
 var SanitizationMiddleware = sanitization.SanitizationMiddleware
 var SecurityHeadersMiddleware = securityheaders.SecurityHeadersMiddleware
+var SessionMiddleware = session.SessionMiddleware
 var TelemetryMiddleware = telemetry.TelemetryMiddleware
 var ValidateHeadersMiddleware = evalheaders.ValidateHeadersMiddleware

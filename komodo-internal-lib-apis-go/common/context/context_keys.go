@@ -17,4 +17,5 @@ const (
 	UserAgentKey     			ctxKey = "user_agent"
 	MethodKey         		ctxKey = "method"
 	ClientTypeKey			 		ctxKey = "client_type"
+	UserIDKey             ctxKey = "user_id"
 )

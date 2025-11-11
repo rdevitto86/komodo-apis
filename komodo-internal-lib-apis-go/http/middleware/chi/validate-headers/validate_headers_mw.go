@@ -1,8 +1,8 @@
 package validateheaders
 
 import (
-	hdrSrv "komodo-internal-lib-apis-go/services/headers/eval"
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	hdrSrv "komodo-internal-lib-apis-go/http/headers/eval"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
 )
 
@@ -11,14 +11,14 @@ func ValidateHeadersMiddleware(next http.Handler) http.Handler {
 		headers := req.Header
 		if headers == nil {
 			logger.Error("no headers found", req)
-			http.Error(wtr, "No headers found", http.StatusBadRequest)
+			http.Error(wtr, "no headers found", http.StatusBadRequest)
 			return
 		}
 
 		for header := range headers {
-			if !hdrSrv.ValidateHeaderValue(header, req) {
-				logger.Error("missing or invalid header: " + header, req)
-				http.Error(wtr, "Missing or invalid header: "+header, http.StatusBadRequest)
+			if ok, err := hdrSrv.ValidateHeaderValue(header, req); !ok || err != nil {
+				logger.Error("missing or invalid header: " + header, err)
+				http.Error(wtr, "missing or invalid header: " + header, http.StatusBadRequest)
 				return
 			}
 		}

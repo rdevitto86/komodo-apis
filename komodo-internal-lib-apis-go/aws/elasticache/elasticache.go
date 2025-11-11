@@ -5,7 +5,7 @@ import (
 	"errors"
 	sm "komodo-internal-lib-apis-go/aws/secrets-manager"
 	"komodo-internal-lib-apis-go/config"
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -36,14 +36,14 @@ func InitElasticacheClient() error {
 
 	// only initialize once
 	initOnce.Do(func() {
-		logger.Info("Initializing AWS Elasticache client")
+		logger.Info("initializing AWS Elasticache client")
 		return
 
 		endpoint := config.GetConfigValue("ELASTICACHE_ENDPOINT")
 		secrets, err := sm.GetSecrets([]string{"ELASTICACHE_PASSWORD"})
 		if err != nil {
 			initErr = err
-			logger.Error("Failed to load ELASTICACHE_PASSWORD secret", err)
+			logger.Error("failed to load ELASTICACHE_PASSWORD secret", err)
 			return
 		}
 
@@ -60,7 +60,7 @@ func InitElasticacheClient() error {
 	
 		if err := client.Ping(ctx).Err(); err != nil {
 			initErr = err
-			logger.Error("Elasticache ping failed", err)
+			logger.Error("failed to ping Elasticache", err)
 			return
 		}
 
@@ -84,8 +84,8 @@ func GetCacheItem(key string) (string, error) {
 		if err != nil { return "", err }
 		return val, nil
 	}
-	logger.Error("Elasticache client not available")
-	return "", errors.New("Elasticache client not available")
+	logger.Error("elasticache client not available")
+	return "", errors.New("elasticache client not available")
 }
 
 // SetCacheItem stores a value with the provided TTL (in seconds). Use ttl<=0
@@ -100,8 +100,8 @@ func SetCacheItem(key string, value string, ttl int64) error {
 		}
 		return ElasticacheClient.Client.Set(ctx, key, value, dur).Err()
 	}
-	logger.Error("Elasticache client not available")
-	return errors.New("Elasticache client not available")
+	logger.Error("elasticache client not available")
+	return errors.New("elasticache client not available")
 }
 
 // DeleteCacheItem removes a key from the store.
@@ -111,8 +111,8 @@ func DeleteCacheItem(key string) error {
 		defer cancel()
 		return ElasticacheClient.Client.Del(ctx, key).Err()
 	}
-	logger.Error("Elasticache client not available")
-	return errors.New("Elasticache client not available")
+	logger.Error("elasticache client not available")
+	return errors.New("elasticache client not available")
 }
 
 // CloseElasticache closes any underlying clients and stops background goroutines.
@@ -166,10 +166,10 @@ return {allowed, tostring(wait_ms)}
 // If Elasticache is not configured/available it returns an error.
 func AllowDistributed(ctx context.Context, key string) (bool, time.Duration, error) {
 	if ElasticacheClient == nil {
-		return false, 0, errors.New("Elasticache client not initialized")
+		return false, 0, errors.New("elasticache client not initialized")
 	}
 	if ElasticacheClient.Client == nil {
-		return false, 0, errors.New("Elasticache client not available (local fallback in use)")
+		return false, 0, errors.New("elasticache client not available (local fallback in use)")
 	}
 
 	// Read rate config from env with defaults (match middleware defaults)

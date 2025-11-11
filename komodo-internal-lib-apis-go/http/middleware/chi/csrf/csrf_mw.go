@@ -3,10 +3,10 @@ package csrf
 import (
 	"context"
 	ctxKeys "komodo-internal-lib-apis-go/common/context"
-	hdrTypes "komodo-internal-lib-apis-go/common/http"
+	hdrSrv "komodo-internal-lib-apis-go/http/headers/eval"
+	hdrTypes "komodo-internal-lib-apis-go/http/types"
 	httpUtils "komodo-internal-lib-apis-go/http/utils/http"
-	hdrSrv "komodo-internal-lib-apis-go/services/headers/eval"
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
 )
 
@@ -29,10 +29,10 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 					return
 				}
 				
-				// Browser client: Require CSRF token
-				if !hdrSrv.ValidateHeaderValue(hdrTypes.HEADER_X_CSRF_TOKEN, req) {
-					logger.Error("invalid or missing CSRF token for browser client")
-					http.Error(wtr, "Invalid CSRF token", http.StatusBadRequest)
+				// Browser client - require CSRF token
+				if ok, err := hdrSrv.ValidateHeaderValue(hdrTypes.HEADER_X_CSRF_TOKEN, req); !ok || err != nil {
+					logger.Error("invalid or missing CSRF token for browser client", err)
+					http.Error(wtr, "invalid CSRF token", http.StatusBadRequest)
 					return
 				}
 		}

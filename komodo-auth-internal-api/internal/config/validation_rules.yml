@@ -1,4 +1,14 @@
-# TODO provide instructions
+#  ____        _        ____             __ _       
+# |  _ \ _   _| | ___  / ___|___  _ __  / _(_) __ _ 
+# | |_) | | | | |/ _ \| |   / _ \| '_ \| |_| |/ _` |
+# |  _ <| |_| | |  __/| |__| (_) | | | |  _| | (_| |
+# |_| \_\\__,_|_|\___| \____\___/|_| |_|_| |_|\__, |
+#                                             |___/ 
+#
+# Validation Levels: ignore | lenient | strict
+# Public Routes: No authentication required
+# Protected Routes: Require AuthJWT + Rate Limiting
+#
 
 rules:
   "/health":

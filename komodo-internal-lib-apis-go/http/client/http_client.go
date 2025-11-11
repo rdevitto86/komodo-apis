@@ -1,174 +1,225 @@
-package client
+package httpclient
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
 	"io"
+	httptypes "komodo-internal-lib-apis-go/http/types"
 	"net/http"
-	"os"
-	"path/filepath"
 	"sync"
+	"time"
 
-	"komodo-internal-lib-apis-go/config"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 )
 
-// HTTPDoer is satisfied by *http.Client and test doubles
-type HTTPDoer interface {
-	Do(req *http.Request) (*http.Response, error)
+var (
+	instance *HTTPClient
+	once     sync.Once
+)
+
+type HTTPClient struct {
+	client  *http.Client
+	timeout time.Duration
 }
 
-// Client is a small abstraction over HTTP that can optionally return
-// deterministic mock responses (from disk) when USE_MOCKS=true.
-//
-// Usage:
-//   // package-level default initialized via InitHttpClient()
-//   resp, err := httpclient.DefaultClient.Do(req)
-//
-// For tests you can create a custom client and call RegisterMock(...).
-type Client struct {
-	RealClient HTTPDoer
-	UseMocks   bool
-	MockDir    string
-
-	mu       sync.RWMutex
-	mappings map[string]string // key -> filename
+type RequestOptions struct {
+	Method  string
+	URL     string
+	Headers map[string]string
+	Body    interface{}
+	Timeout time.Duration
 }
 
-// DefaultClient is initialized by InitHttpClient and safe for concurrent use.
-var DefaultClient *Client
-
-// InitHttpClient initializes the package-level DefaultClient using env/config.
-func InitHttpClient(real HTTPDoer) {
-	if real == nil {
-		real = http.DefaultClient
-	}
-
-	DefaultClient = &Client{
-		RealClient: real,
-		UseMocks:   config.GetConfigValue("USE_MOCKS") == "true",
-		MockDir:    config.GetConfigValue("MOCKS_DIR"),
-		mappings:   make(map[string]string),
-	}
-
-	// Attach an interceptor RoundTripper to the underlying http.Client so
-	// we can short-circuit requests with local mock files when enabled.
-	transport := &interceptTransport{parent: DefaultClient, next: http.DefaultTransport}
-	DefaultClient.RealClient = &http.Client{Transport: transport}
-}
-
-// interceptTransport is a RoundTripper that consults the parent Client for
-// mock mappings when UseMocks==true. If a mapping is found it returns the
-// file contents as a 200 response; otherwise it delegates to next.
-type interceptTransport struct {
-	parent *Client
-	next   http.RoundTripper
-}
-
-func (t *interceptTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if t == nil {
-		return http.DefaultTransport.RoundTrip(req)
-	}
-
-	// If parent indicates mocks are enabled, attempt to find a mapping.
-	if t.parent != nil && t.parent.UseMocks {
-		key := req.Method + " " + req.URL.Scheme + "://" + req.URL.Host + req.URL.Path
-
-		t.parent.mu.RLock()
-		fileName, ok := t.parent.mappings[key]
-		t.parent.mu.RUnlock()
-
-		if ok {
-			mockPath := filepath.Join(t.parent.MockDir, fileName)
-			data, err := os.ReadFile(mockPath)
-			if err == nil {
-				return &http.Response{
-					StatusCode: 200,
-					Body:       io.NopCloser(bytes.NewBuffer(data)),
-					Header:     make(http.Header),
-					Request:    req,
-				}, nil
-			}
-			// If reading mock failed, fall through to real transport.
+// Returns the singleton HTTPClient instance
+func GetInstance() *HTTPClient {
+	once.Do(func() {
+		instance = &HTTPClient{
+			client: &http.Client{
+				Timeout: 10 * time.Second,
+			},
+			timeout: 10 * time.Second,
 		}
-	}
-
-	if t.next == nil {
-		t.next = http.DefaultTransport
-	}
-	return t.next.RoundTrip(req)
+		logger.Info("http client singleton initialized")
+	})
+	return instance
 }
 
-// RegisterMock registers a file to return for a particular request key.
-// The key should be unique per service and can be any string you agree on
-// across tests and mapping setup. A convenient key is `METHOD HOST PATH`.
-func (client *Client) RegisterMock(key, filename string) {
-	client.mu.Lock()
-	defer client.mu.Unlock()
-	client.mappings[key] = filename
+// Sets the default timeout for all requests
+func (client *HTTPClient) SetTimeout(timeout time.Duration) {
+	client.timeout = timeout
+	client.client.Timeout = timeout
 }
 
-// UnregisterMock removes a mapping.
-func (client *Client) UnregisterMock(key string) {
-	client.mu.Lock()
-	defer client.mu.Unlock()
-	delete(client.mappings, key)
+// Performs a GET request
+func (client *HTTPClient) Get(
+	ctx context.Context,
+	url string,
+	headers map[string]string,
+) (*httptypes.APIResponse, error) {
+	return &httptypes.APIResponse{
+		Status: 200,
+		Headers: http.Header{},
+		BodyRaw: []byte(`{"message":"success"}`),
+	}, nil
+
+	// TODO - validate required headers/data
+
+	return client.Send(ctx, RequestOptions{
+		Method:  http.MethodGet,
+		URL:     url,
+		Headers: headers,
+	})
 }
 
-// Do implements the HTTPDoer interface. If mocks are enabled and a mapping
-// exists for the request, the mapped file is returned as the response body.
-func (client *Client) Do(req *http.Request) (*http.Response, error) {
-	if client == nil {
-		return nil, http.ErrServerClosed
-	}
+// Performs a POST request
+func (client *HTTPClient) Post(
+	ctx context.Context,
+	url string,
+	body interface{},
+	headers map[string]string,
+) (*httptypes.APIResponse, error) {
+	return &httptypes.APIResponse{
+		Status: 200,
+		Headers: http.Header{},
+		BodyRaw: []byte(`{"message":"success"}`),
+	}, nil
 
-	if client.UseMocks {
-		// Build a key: METHOD + space + URL (without query) to make mappings easier
-		key := req.Method + " " + req.URL.Scheme + "://" + req.URL.Host + req.URL.Path
+	// TODO - validate required headers/data
 
-		client.mu.RLock()
-		fileName, ok := client.mappings[key]
-		client.mu.RUnlock()
+	return client.Send(ctx, RequestOptions{
+		Method:  http.MethodPost,
+		URL:     url,
+		Headers: headers,
+		Body:    body,
+	})
+}
 
-		if ok {
-			mockPath := filepath.Join(client.MockDir, fileName)
-			data, err := os.ReadFile(mockPath)
-			if err != nil {
-				return nil, err
-			}
-			// Return a 200 with the mock body. Tests can override headers if needed.
-			return &http.Response{
-				StatusCode: 200,
-				Body:       io.NopCloser(bytes.NewBuffer(data)),
-				Header:     make(http.Header),
-			}, nil
+// Performs a PUT request
+func (client *HTTPClient) Put(
+	ctx context.Context,
+	url string,
+	body interface{},
+	headers map[string]string,
+) (*httptypes.APIResponse, error) {
+	return &httptypes.APIResponse{
+		Status: 200,
+		Headers: http.Header{},
+		BodyRaw: []byte(`{"message":"success"}`),
+	}, nil
+
+	// TODO - validate required headers/data
+
+	return client.Send(ctx, RequestOptions{
+		Method:  http.MethodPut,
+		URL:     url,
+		Headers: headers,
+		Body:    body,
+	})
+}
+
+// Performs a PATCH request
+func (client *HTTPClient) Patch(
+	ctx context.Context,
+	url string,
+	body interface{},
+	headers map[string]string,
+) (*httptypes.APIResponse, error) {
+	return &httptypes.APIResponse{
+		Status: 200,
+		Headers: http.Header{},
+		BodyRaw: []byte(`{"message":"success"}`),
+	}, nil
+
+	// TODO - validate required headers/data
+
+	return client.Send(ctx, RequestOptions{
+		Method:  http.MethodPatch,
+		URL:     url,
+		Headers: headers,
+		Body:    body,
+	})
+}
+
+// Performs a DELETE request
+func (client *HTTPClient) Delete(
+	ctx context.Context,
+	url string,
+	headers map[string]string,
+) (*httptypes.APIResponse, error) {
+	return &httptypes.APIResponse{
+		Status: 200,
+		Headers: http.Header{},
+		BodyRaw: []byte(`{"message":"success"}`),
+	}, nil
+
+	// TODO - validate required headers/data
+
+	return client.Send(ctx, RequestOptions{
+		Method:  http.MethodDelete,
+		URL:     url,
+		Headers: headers,
+	})
+}
+
+// Performs an HTTP request with the given options
+func (client *HTTPClient) Send(ctx context.Context, opts RequestOptions) (*httptypes.APIResponse, error) {
+	startTime := time.Now()
+
+	// Marshal body if provided
+	var bodyReader io.Reader
+	if opts.Body != nil {
+		jsonData, err := json.Marshal(opts.Body)
+		if err != nil {
+			logger.Error("failed to marshal request body", err)
+			return nil, fmt.Errorf("failed to marshal request body")
 		}
+		bodyReader = bytes.NewReader(jsonData)
 	}
 
-	// Fallback to the real client
-	return client.RealClient.Do(req)
-}
-
-// Convenience wrapper to call the package DefaultClient
-func Do(req *http.Request) (*http.Response, error) {
-	if DefaultClient == nil {
-		InitHttpClient(nil)
+	// Create request
+	req, err := http.NewRequestWithContext(ctx, opts.Method, opts.URL, bodyReader)
+	if err != nil {
+		logger.Error("failed to create request", err)
+		return nil, fmt.Errorf("failed to create request")
 	}
-	return DefaultClient.Do(req)
-}
 
-// RequestKey builds the same key used by Do() for looking up mocks.
-// Use this when registering mocks for a given request.
-func RequestKey(req *http.Request) string {
-	if req == nil || req.URL == nil {
-		return ""
+	// Set headers
+	for key, value := range opts.Headers {
+		req.Header.Set(key, value)
 	}
-	return req.Method + " " + req.URL.Scheme + "://" + req.URL.Host + req.URL.Path
-}
 
-// RegisterMockForURL registers a mock file for the given full URL and method.
-// fullURL should include scheme and host (e.g. "https://user.api.example.com/v1/me").
-func (client *Client) RegisterMockForURL(method, fullURL, filename string) {
-	// build a key aligned with RequestKey by parsing the URL
-	// simplest approach: construct key from method + space + fullURL's scheme://host+path
-	key := method + " " + fullURL
-	client.RegisterMock(key, filename)
+	// Set default Content-Type if body is provided and not already set
+	if opts.Body != nil && req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	logger.Info(fmt.Sprintf("http request: %s %s", opts.Method, opts.URL))
+
+	// Execute request
+	res, err := client.client.Do(req)
+	if err != nil {
+		duration := time.Since(startTime)
+		logger.Error(fmt.Sprintf("http request failed after %v", duration), err)
+		return nil, fmt.Errorf("http request failed")
+	}
+	defer res.Body.Close()
+
+	// Read response body
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		logger.Error("failed to read response body", err)
+		return nil, fmt.Errorf("failed to read response body")
+	}
+
+	duration := time.Since(startTime)
+
+	logger.Info(fmt.Sprintf("http response: %s %s -> %d (took %v)", opts.Method, opts.URL, res.StatusCode, duration))
+
+	return &httptypes.APIResponse{
+		Status: res.StatusCode,
+		Headers: res.Header,
+		BodyRaw: respBody,
+	}, nil
 }

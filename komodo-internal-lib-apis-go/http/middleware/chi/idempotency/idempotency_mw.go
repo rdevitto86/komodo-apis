@@ -4,11 +4,11 @@ import (
 	"context"
 	elasticacheClient "komodo-internal-lib-apis-go/aws/elasticache"
 	ctxKeys "komodo-internal-lib-apis-go/common/context"
-	hdrTypes "komodo-internal-lib-apis-go/common/http"
 	"komodo-internal-lib-apis-go/config"
+	hdrSrv "komodo-internal-lib-apis-go/http/headers/eval"
+	hdrTypes "komodo-internal-lib-apis-go/http/types"
 	httpUtils "komodo-internal-lib-apis-go/http/utils/http"
-	hdrSrv "komodo-internal-lib-apis-go/services/headers/eval"
-	logger "komodo-internal-lib-apis-go/services/logger/runtime"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
 	"sync"
 	"time"
@@ -42,9 +42,9 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 
 		key := req.Header.Get("Idempotency-Key")
 
-		if !hdrSrv.ValidateHeaderValue(hdrTypes.HEADER_IDEMPOTENCY, req) {
-			logger.Error("invalid idempotency key for browser client: " + key)
-			http.Error(wtr, "Invalid Idempotency-Key", http.StatusBadRequest)
+		if ok, err := hdrSrv.ValidateHeaderValue(hdrTypes.HEADER_IDEMPOTENCY, req); !ok || err != nil {
+			logger.Error("invalid idempotency key for browser client: " + key, err)
+			http.Error(wtr, "invalid Idempotency-Key", http.StatusBadRequest)
 			return
 		} 
 
@@ -54,7 +54,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 			if until, _ := exp.(int64); until > time.Now().Unix() {
 				wtr.Header().Set("Idempotency-Replayed", "true")
 				logger.Error("duplicate request: " + key, req)
-				http.Error(wtr, "Duplicate request", http.StatusConflict)
+				http.Error(wtr, "duplicate request", http.StatusConflict)
 				return
 			}
 			idemStore.Delete(key)
