@@ -1,6 +1,7 @@
 package rulevalidation
 
 import (
+	errors "komodo-internal-lib-apis-go/common/errors"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 	evalRules "komodo-internal-lib-apis-go/rule-validation"
 	"net/http"
@@ -17,12 +18,12 @@ func RuleValidationMiddleware(next http.Handler) http.Handler {
 		if rule := evalRules.GetRule(req.URL.Path, req.Method); rule != nil {
 			if !evalRules.IsRuleValid(req, rule) {
 				logger.Error("request does not comply with validation rule", req)
-				http.Error(wtr, "request contents invalid", http.StatusBadRequest)
+				errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, "request contents invalid", errors.ERR_INVALID_REQUEST)
 				return
 			}
 		} else {
 			logger.Error("no validation rule found", req)
-			http.Error(wtr, "failed to validate request", http.StatusBadRequest)
+			errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, "failed to validate request", errors.ERR_INVALID_REQUEST)
 			return
 		}
 		next.ServeHTTP(wtr, req)

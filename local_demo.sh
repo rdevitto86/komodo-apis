@@ -4,12 +4,12 @@ set -e  # Exit immediately if a command exits with a non-zero status
 set -u  # Treat unset variables as an error
 
 # Variables
-AUTH_API_IMAGE="local/komodo-auth-internal-api:latest"
-AUTH_API_CONTAINER="komodo-auth-internal-api"
-AUTH_INTERNAL_PORT=7001
-AUTH_INTERNAL_URL="http://localhost:$AUTH_INTERNAL_PORT"
-AUTH_PUBLIC_PORT=7002
-AUTH_PUBLIC_URL="http://localhost:$AUTH_PUBLIC_PORT"
+AUTH_API_IMAGE="local/komodo-auth-service-api:latest"
+AUTH_API_CONTAINER="komodo-auth-service-api"
+AUTH_SRVC_PORT=7002
+AUTH_SRVC_URL="http://localhost:$AUTH_SRVC_PORT"
+AUTH_USER_PORT=7001
+AUTH_USER_URL="http://localhost:$AUTH_USER_PORT"
 
 ADDRESS_API_IMAGE="local/komodo-address-api:latest"
 ADDRESS_API_CONTAINER="komodo-address-api"
@@ -42,12 +42,12 @@ function start_api() {
 }
 
 function start_auth_api() {
-  start_api "$AUTH_API_IMAGE" "$AUTH_API_CONTAINER" "$AUTH_INTERNAL_PORT" \
+  start_api "$AUTH_API_IMAGE" "$AUTH_API_CONTAINER" "$AUTH_SRVC_PORT" \
 }
 
 function start_address_api() {
   start_api "$ADDRESS_API_IMAGE" "$ADDRESS_API_CONTAINER" "$ADDRESS_API_PORT" \
-    "-e GEOCODER=mock -e AUTH_INTERNAL_URL=$AUTH_INTERNAL_URL"
+    "-e GEOCODER=mock -e AUTH_SRVC_URL=$AUTH_SRVC_URL"
 }
 
 function stop_all() {

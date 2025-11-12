@@ -1,0 +1,21 @@
+version: "3.9"
+name: komodo-auth-user-api
+
+services:
+  auth-user-api:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    container_name: komodo-auth-user-api-prod
+    environment:
+      - EVAL_RULES_PATH=/app/config/validation_rules.yml
+    env_file:
+      - ../env/.env.prod
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:7001/health"]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+    image: komodo-auth-user-api:prod
+    ports:
+      - "7001:7001"

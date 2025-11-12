@@ -18,10 +18,10 @@ var (
 
 func init() {
 	if client = httpclient.GetInstance(); client == nil {
-		logger.Error("failed to initialize HTTP client")
+		logger.Error("failed to initialize http client")
 	}
 	if userAPIEndpoint = os.Getenv("USER_API_URL"); userAPIEndpoint == "" {
-		logger.Error("USER_API_URL environment variable not set")
+		logger.Error("user api endpoint environment variable not set")
 	}
 }
 
@@ -43,7 +43,7 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 		return httptypes.ErrorResponse(
 			http.StatusInternalServerError,
 			errors.ERR_INTERNAL_SERVER,
-			"USER_API_URL not configured",
+			"user api endpoint not configured",
 			"",
 			requestID,
 		)
@@ -91,8 +91,7 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 	res = res.ParseBody(&profile)
 
 	if !res.IsSuccess() {
-		errMsg := res.ErrorMessage()
-		logger.Error("failed to fetch user profile", errMsg)
+		logger.Error("failed to fetch user profile", res.Error)
 		
 		code := errors.ERR_EXTERNAL_API_CALL_FAILED
 		switch res.Status {
@@ -101,7 +100,7 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 			case http.StatusUnauthorized:
 				code = errors.ERR_INVALID_TOKEN
 		}
-		return httptypes.ErrorResponse(res.Status, code, errMsg, "", requestID)
+		return httptypes.ErrorResponse(res.Status, code, res.ErrorMessage(), "", requestID)
 	}
 
 	// TODO - move into proper mocking framework until User API is available
@@ -132,12 +131,11 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 			requestID,
 		)
 	}
-
 	if userAPIEndpoint == "" {
 		return httptypes.ErrorResponse(
 			http.StatusInternalServerError,
 			errors.ERR_INTERNAL_SERVER,
-			"USER_API_URL not configured",
+			"user api endpoint not configured",
 			"",
 			requestID,
 		)
@@ -177,8 +175,7 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 		)
 	}
 	if !res.IsSuccess() {
-		errMsg := res.ErrorMessage()
-		logger.Error("failed to update user profile", errMsg)
+		logger.Error("failed to update user profile", res.Error)
 
 		code := errors.ERR_RESOURCE_UPDATE_FAILED
 		switch res.Status {
@@ -189,7 +186,7 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 			case http.StatusBadRequest:
 				code = errors.ERR_VALIDATION_FAILED
 		}
-		return httptypes.ErrorResponse(res.Status, code, errMsg, "", requestID)
+		return httptypes.ErrorResponse(res.Status, code, res.ErrorMessage(), "", requestID)
 	}
 
 	logger.Info("successfully updated user profile")

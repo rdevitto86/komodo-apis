@@ -2,6 +2,7 @@ package moxtox
 
 import (
 	"fmt"
+	"komodo-internal-lib-apis-go/common/errors"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -93,14 +94,14 @@ func mockResponseHandler() func(http.Handler) http.Handler {
 			// Use LookupMap for lookup
 			if scenario, ok := matchesRequest(r); ok {
 				if err := injectMock(w, r, scenario); err != nil {
-					http.Error(w, "Mock injection failed", http.StatusInternalServerError)
+					errors.WriteErrorResponse(w, r, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Mock injection failed")
 					return
 				}
 				return
 			}
 
 			// No match: return 418 Teapot error
-			http.Error(w, "No mocks found", http.StatusTeapot)
+			errors.WriteErrorResponse(w, r, http.StatusTeapot, errors.ERR_NOT_FOUND, "No mocks found")
 		})
 	}
 }

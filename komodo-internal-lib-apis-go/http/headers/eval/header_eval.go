@@ -1,9 +1,9 @@
 package headerEval
 
 import (
-	jwtUtils "komodo-internal-lib-apis-go/auth/jwt"
-	sessionUtils "komodo-internal-lib-apis-go/auth/session"
 	"komodo-internal-lib-apis-go/config"
+	"komodo-internal-lib-apis-go/crypto/jwt"
+	userauth "komodo-internal-lib-apis-go/domains/auth/user"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -17,7 +17,7 @@ func ValidateHeaderValue(hdr string, req *http.Request) (bool, error) {
 		case "access-control-allow-origin":
 			return isValidCORS(val), nil
 		case "authorization":
-			return jwtUtils.ValidateBearerToken(val)
+			return jwt.ValidateBearerToken(val)
 		case "cache-control":
 			return isValidCacheControl(val), nil
 		case "cookie":
@@ -31,7 +31,7 @@ func ValidateHeaderValue(hdr string, req *http.Request) (bool, error) {
 		case "referer", "referrer":
 			return isValidReferer(val), nil
 		case "session", "x-session-token":
-			return sessionUtils.ValidateSession(val)
+			return userauth.ValidateSession(val)
 		case "user-agent":
 			return isValidUserAgent(val), nil
 		case "x-csrf-token":

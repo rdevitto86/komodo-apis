@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 
+	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/config"
 	utils "komodo-internal-lib-apis-go/http/utils/http"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
@@ -39,7 +40,7 @@ func IPAccessMiddleware(next http.Handler) http.Handler {
 		client := utils.GetClientKey(req)
 		if client == "" {
 			logger.Error("unable to determine client IP", req)
-			http.Error(wtr, "forbidden", http.StatusForbidden)
+			errors.WriteErrorResponse(wtr, req, http.StatusForbidden, errors.ERR_ACCESS_DENIED, "forbidden")
 			return
 		}
 
@@ -53,14 +54,14 @@ func IPAccessMiddleware(next http.Handler) http.Handler {
 		}
 		if ip == nil {
 			logger.Error("invalid client IP: "+client, req)
-			http.Error(wtr, "forbidden", http.StatusForbidden)
+			errors.WriteErrorResponse(wtr, req, http.StatusForbidden, errors.ERR_ACCESS_DENIED, "forbidden")
 			return
 		}
 
 		allowed := ipsvc.Evaluate(ip, &lists)
 		if !allowed {
 			logger.Error("access denied for client ip: "+client, req)
-			http.Error(wtr, "forbidden", http.StatusForbidden)
+			errors.WriteErrorResponse(wtr, req, http.StatusForbidden, errors.ERR_ACCESS_DENIED, "forbidden")
 			return
 		}
 

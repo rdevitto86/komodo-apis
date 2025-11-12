@@ -1,0 +1,97 @@
+# AWSTemplateFormatVersion: '2010-09-09'
+# Description: Komodo Auth API - Production ECS Fargate Service
+
+# Parameters:
+#   VpcId:
+#     Type: AWS::EC2::VPC::Id
+#     Description: VPC to deploy into
+#   Subnets:
+#     Type: List<AWS::EC2::Subnet::Id>
+#     Description: Subnets for ECS tasks and Load Balancer
+
+# Resources:
+#   KomodoApiTaskRole:
+#     Type: AWS::IAM::Role
+#     Properties:
+#       AssumeRolePolicyDocument:
+#         Version: '2012-10-17'
+#         Statement:
+#           - Effect: Allow
+#             Principal:
+#               Service: ecs-tasks.amazonaws.com
+#             Action: sts:AssumeRole
+#       ManagedPolicyArns:
+#         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+#   KomodoApiCluster:
+#     Type: AWS::ECS::Cluster
+#     Properties:
+#       ClusterName: komodo-auth-service-api-prod
+
+#   KomodoApiTaskDefinition:
+#     Type: AWS::ECS::TaskDefinition
+#     Properties:
+#       Family: komodo-auth-service-api-prod
+#       Cpu: '256'
+#       Memory: '512'
+#       NetworkMode: awsvpc
+#       RequiresCompatibilities: [FARGATE]
+#       ExecutionRoleArn: !GetAtt KomodoApiTaskRole.Arn
+#       ContainerDefinitions:
+#         - Name: komodo-auth-service-api
+#           Image: <your-ecr-repo-url>:latest
+#           PortMappings:
+#             - ContainerPort: 7010
+#           Environment:
+#             - Name: ENV
+#               Value: prod
+#             # Add other env vars as needed
+
+#   KomodoApiService:
+#     Type: AWS::ECS::Service
+#     Properties:
+#       Cluster: !Ref KomodoApiCluster
+#       DesiredCount: 1
+#       LaunchType: FARGATE
+#       TaskDefinition: !Ref KomodoApiTaskDefinition
+#       NetworkConfiguration:
+#         AwsvpcConfiguration:
+#           AssignPublicIp: ENABLED
+#           Subnets: !Ref Subnets
+#           SecurityGroups: []
+#       LoadBalancers:
+#         - ContainerName: komodo-auth-service-api
+#           ContainerPort: 7010
+#           TargetGroupArn: !Ref KomodoApiTargetGroup
+
+#   KomodoApiLB:
+#     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+#     Properties:
+#       Name: komodo-auth-service-api-lb
+#       Subnets: !Ref Subnets
+#       Scheme: internet-facing
+#       Type: application
+
+#   KomodoApiTargetGroup:
+#     Type: AWS::ElasticLoadBalancingV2::TargetGroup
+#     Properties:
+#       VpcId: !Ref VpcId
+#       Port: 7010
+#       Protocol: HTTP
+#       TargetType: ip
+#       HealthCheckPath: /health
+
+#   KomodoApiListener:
+#     Type: AWS::ElasticLoadBalancingV2::Listener
+#     Properties:
+#       LoadBalancerArn: !Ref KomodoApiLB
+#       Port: 80
+#       Protocol: HTTP
+#       DefaultActions:
+#         - Type: forward
+#           TargetGroupArn: !Ref KomodoApiTargetGroup
+
+# Outputs:
+#   LoadBalancerDNS:
+#     Description: DNS name of the Application Load Balancer
+#     Value: !GetAtt KomodoApiLB.DNSName
