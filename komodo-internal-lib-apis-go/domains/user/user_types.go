@@ -33,33 +33,50 @@ const (
 )
 
 type UserProfileGetRequest struct {
-	UserID string
-	Size   ProfileSize
+	UserID      string
+	Size        ProfileSize
+	BearerToken string
 }
 
-type UserProfileGetResponse struct {
+type UserProfileGetResponseBasic struct {
 	UserID       	string
-	Username 			string
-	PasswordHash 	string
+	FirstName 		string
+	LastName  		string
+}
+
+type UserProfileGetResponseMinimal struct {
+	UserID       	string
 	Email    			string
 	Phone					string
 	FirstName 		string
-	MiddleInitial string
 	LastName  		string
-	Address				UserAddress
-	Preferences 	UserPreferences
-	Metadata    	UserMetadata
+	PasswordHash 	string
+}
+
+type UserProfileGetResponseFull struct {
+	UserID        string
+	Username      string
+	Email         string
+	Phone         string
+	FirstName     string
+	MiddleInitial string
+	LastName      string
+	PasswordHash  string
+	Address       UserAddress
+	Preferences   UserPreferences
+	Metadata      UserMetadata
 }
 
 type UserProfileUpdateRequest struct {
-	UserID       	string
-	Username 			string
-	Email    			string
-	Phone					string
-	FirstName 		string
+	UserID        string
+	Username      string
+	Email         string
+	Phone         string
+	FirstName     string
 	MiddleInitial string
-	LastName  		string
-	Address				UserAddress
-	Preferences 	UserPreferences
-	Metadata    	UserMetadata
+	LastName      string
+	Address       UserAddress
+	Preferences   UserPreferences
+	Metadata      UserMetadata
+	BearerToken   string
 }

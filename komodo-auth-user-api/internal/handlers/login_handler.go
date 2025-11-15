@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/crypto/jwt"
@@ -22,7 +23,6 @@ type LoginResponse struct {
 	Token string `json:"token"`
 	TokenType string `json:"token_type"`
 	ExpiresIn int64  `json:"expires_in"`
-	User userServ.UserProfileGetResponse `json:"user"`
 }
 
 // Handles user login requests
@@ -32,60 +32,62 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 
 	var loginReq LoginRequest
 	if err := json.NewDecoder(req.Body).Decode(&loginReq); err != nil {
-		logger.Error("failed to parse login request payload")
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Failed to parse request payload")
+		logger.Error("failed to parse login request payload", err)
+		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse request payload", errors.ERR_INTERNAL_SERVER)
 		return
 	}
 	if loginReq.Email == "" || loginReq.Password == "" {
 		logger.Error("invalid login request payload")
-		errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, errors.ERR_INVALID_REQUEST, "Invalid request payload")
+		errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, "invalid request payload", errors.ERR_INVALID_REQUEST)
 		return
 	}
 
 	// Get service token for User API
-	res := authServ.GetServiceToken(req, &authServ.ServiceTokenRequest{
-		ClientID:     "komodo-auth-user-api",
-		ClientSecret: "super-secret-key",
+	res := authServ.TokenGenerate(req, &authServ.TokenGenerateRequest{
+		ClientID:     os.Getenv("AUTH_USER_CLIENT_ID"),
+		ClientSecret: os.Getenv("AUTH_USER_CLIENT_SECRET"),
 		Scope:        "user.read",
 	})
+
 	if res.IsError() {
 		logger.Error("failed to get service token from internal auth service", res.Error)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Failed to authenticate service")
+		errors.WriteErrorResponse(wtr, req, res.Status, "failed to authenticate service", errors.ERR_INTERNAL_API_CALL_FAILED)
 		return
 	}
 
-	// Parse response and set bearer token
-	bearer, ok := res.BodyParsed.(*authServ.ServiceTokenResponse)
+	// Parse response and extract service token
+	bearer, ok := res.BodyParsed.(*authServ.TokenGenerateResponse)
 	if !ok || bearer == nil {
 		logger.Error("failed to type assert service token response")
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Failed to parse service token")
+		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse service token", errors.ERR_INTERNAL_SERVER)
 		return
 	}
-	wtr.Header().Set("Authorization", "Bearer " + bearer.Token)
 
-	// Fetch user details from User API
+	// Fetch user details from User API with service token
 	res = userServ.GetUserProfile(req, &userServ.UserProfileGetRequest{
-		UserID: loginReq.Email,
-		Size:   userServ.ProfileSizeMinimal,
+		UserID:      loginReq.Email,
+		Size:        userServ.ProfileSizeMinimal,
+		BearerToken: "Bearer " + bearer.Token,
 	})
+
 	if (res.IsError()) {
-		logger.Error("failed to fetch user profile")
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Failed to fetch user profile")
+		logger.Error("failed to fetch user profile", res.Error)
+		errors.WriteErrorResponse(wtr, req, res.Status, "failed to fetch user profile", errors.ERR_INTERNAL_API_CALL_FAILED)
 		return
 	}
 
 	// Parse user profile response
-	profile, ok := res.BodyParsed.(*userServ.UserProfileGetResponse)
+	profile, ok := res.BodyParsed.(*userServ.UserProfileGetResponseMinimal)
 	if !ok || profile == nil {
 		logger.Error("failed to type assert user profile response", res.Error)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Failed to parse user profile")
+		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse user profile", errors.ERR_INTERNAL_SERVER)
 		return
 	}
 
 	// Verify password
 	if err := bcrypt.CompareHashAndPassword([]byte(profile.PasswordHash), []byte(loginReq.Password)); err != nil {
 		logger.Error("invalid password attempt for email: " + loginReq.Email)
-		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, errors.ERR_ACCESS_DENIED, "invalid email or password")
+		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "invalid email or password", errors.ERR_ACCESS_DENIED)
 		return
 	}
 
@@ -108,7 +110,7 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 	token, signErr := jwt.SignToken(claims)
 	if signErr != nil {
 		logger.Error("failed to sign JWT token for login", signErr)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "failed to generate authentication token")
+		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to generate authentication token", errors.ERR_INTERNAL_SERVER)
 		return
 	}
 
@@ -116,7 +118,6 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 		Token:     token,
 		TokenType: "Bearer",
 		ExpiresIn: expiresIn,
-		User:      *profile,
 	}
 
 	wtr.WriteHeader(http.StatusOK)

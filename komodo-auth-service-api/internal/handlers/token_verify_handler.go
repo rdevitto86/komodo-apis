@@ -9,12 +9,9 @@ import (
 )
 
 type TokenVerifyResponse struct {
-	Active     bool   `json:"active"`               // Required: whether token is valid and not expired
-	ClientID   string `json:"client_id,omitempty"`  // Client identifier (service making the request)
-	Scope      string `json:"scope,omitempty"`      // Space-separated permissions/scopes
-	ClientType string `json:"client_type,omitempty"` // Type: api (service) or browser (user session)
-	Exp        int64  `json:"exp,omitempty"`        // Token expiration timestamp (Unix seconds)
-	Jti        string `json:"jti,omitempty"`        // JWT ID (for revocation checking)
+	Active   bool   `json:"active"`              // Is token valid (signature, expiry, not revoked)?
+	ClientID string `json:"client_id,omitempty"` // Which service is making the request?
+	Scope    string `json:"scope,omitempty"`     // What permissions does it have?
 }
 
 // Handles internal JWT token verification for service-to-service authentication
@@ -49,18 +46,16 @@ func TokenVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Extract relevant claims for M2M validation
+	// Extract minimal claims needed for authorization decisions
 	claimValues := jwt.ExtractStringClaims(claims, []string{
-		"client_id", "scope", "client_type", "exp", "jti",
+		"client_id", "scope", "jti",
 	})
 	
 	clientID, _ := claimValues["client_id"].(string)
 	scope, _ := claimValues["scope"].(string)
-	clientType, _ := claimValues["client_type"].(string)
-	exp, _ := claimValues["exp"].(int64)
-	jti, _ := claimValues["jti"].(string)
 
 	// TODO: Check if token is revoked in Elasticache
+	// jti, _ := claimValues["jti"].(string)
 	// if jti != "" && redisClient.Exists("revoked:token:" + jti) {
 	//     logger.Info("token has been revoked: " + jti)
 	//     wtr.WriteHeader(http.StatusOK)
@@ -70,14 +65,11 @@ func TokenVerifyHandler(wtr http.ResponseWriter, req *http.Request) {
 
 	logger.Info("token verification successful for client: " + clientID)
 
-	// Return minimal response for service-to-service validation
+	// Return only what's needed: valid + who + what permissions
 	wtr.WriteHeader(http.StatusOK)
 	json.NewEncoder(wtr).Encode(TokenVerifyResponse{
-		Active:     true,
-		ClientID:   clientID,
-		Scope:      scope,
-		ClientType: clientType,
-		Exp:        exp,
-		Jti:        jti,
+		Active:   true,
+		ClientID: clientID,
+		Scope:    scope,
 	})
 }

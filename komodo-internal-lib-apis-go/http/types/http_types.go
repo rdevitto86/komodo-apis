@@ -82,6 +82,12 @@ func (res *APIResponse) ParseBody(parsed interface{}) *APIResponse {
 }
 
 func (res *APIResponse) Stringify() string {
+	if res.Error != nil {
+		errBytes, err := json.Marshal(res.Error)
+		if err != nil { return "" }
+		return string(errBytes)
+	}
+	if len(res.BodyRaw) == 0 { return "" }
 	return string(res.BodyRaw)
 }
 

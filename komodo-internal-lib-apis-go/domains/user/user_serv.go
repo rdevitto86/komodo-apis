@@ -48,24 +48,21 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 			requestID,
 		)
 	}
-
-	bearer := req.Header.Get("Authorization")
-	if bearer == "" {
+	if payload.BearerToken == "" {
 		return httptypes.ErrorResponse(
 			http.StatusUnauthorized,
 			errors.ERR_INVALID_TOKEN,
-			"missing authorization token in request",
+			"missing bearer token for internal API authentication",
 			"",
 			requestID,
 		)
 	}
-
 	if payload.Size == "" {
 		payload.Size = ProfileSizeBasic
 	}
 
 	headers := map[string]string{
-		"Authorization": 	bearer,
+		"Authorization": 	payload.BearerToken,
 		"X-Request-ID":  	requestID,
 		"Accept":        	req.Header.Get("Accept"),
 		"Content-Type":  	req.Header.Get("Content-Type"),
@@ -86,13 +83,9 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 			requestID,
 		)
 	}
-
-	var profile UserProfileGetResponse
-	res = res.ParseBody(&profile)
-
 	if !res.IsSuccess() {
 		logger.Error("failed to fetch user profile", res.Error)
-		
+
 		code := errors.ERR_EXTERNAL_API_CALL_FAILED
 		switch res.Status {
 			case http.StatusNotFound:
@@ -103,17 +96,47 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 		return httptypes.ErrorResponse(res.Status, code, res.ErrorMessage(), "", requestID)
 	}
 
-	// TODO - move into proper mocking framework until User API is available
-	res.BodyParsed = UserProfileGetResponse{
-		UserID:       "12345",
-		FirstName:    "Test",
-		LastName:     "User",
-		Email:        "testuser@example.com",
-		Phone: 				"+1234567890",		
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", // "password123"
+	// Parse into the appropriate struct based on size
+	var userID string
+	switch payload.Size {
+		case ProfileSizeBasic:
+			// TODO - move to proper mocking framework until User API is available
+			profile := &UserProfileGetResponseBasic{
+				UserID:    "12345",
+				FirstName: "Test",
+				LastName:  "User",
+			}
+			res.BodyParsed = profile
+			userID = profile.UserID
+		case ProfileSizeMinimal:
+			// TODO - move to proper mocking framework until User API is available
+			profile := &UserProfileGetResponseMinimal{
+				UserID:       "12345",
+				Email:        "testuser@example.com",
+				Phone:        "+1234567890",
+				FirstName:    "Test",
+				LastName:     "User",
+				PasswordHash: "$2a$10$zlk59g8mBlztf7E7EPI7r.dRKHckONCsmGo6vUv6SoGiTSbjG842K", // "password123"
+			}
+			res.BodyParsed = profile
+			userID = profile.UserID
+		case ProfileSizeFull:
+			// TODO - move to proper mocking framework until User API is available
+			profile := &UserProfileGetResponseFull{
+				UserID:       "12345",
+				Username:     "testuser",
+				Email:        "testuser@example.com",
+				Phone:        "+1234567890",
+				FirstName:    "Test",
+				MiddleInitial: "T",
+				LastName:     "User",
+				PasswordHash: "$2a$10$zlk59g8mBlztf7E7EPI7r.dRKHckONCsmGo6vUv6SoGiTSbjG842K", // "password123"
+			}
+			res.BodyParsed = profile
+			userID = profile.UserID
 	}
 
-	logger.Info(fmt.Sprintf("successfully fetched profile for user: %s", profile.UserID))
+	logger.Info(fmt.Sprintf("successfully fetched profile for user: %s", userID))
 	return res.Forward("successfully fetched profile", requestID)
 }
 
@@ -140,20 +163,18 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 			requestID,
 		)
 	}
-
-	bearer := req.Header.Get("Authorization")
-	if bearer == "" {
+	if payload.BearerToken == "" {
 		return httptypes.ErrorResponse(
 			http.StatusUnauthorized,
 			errors.ERR_INVALID_TOKEN,
-			"missing authorization token in request",
+			"missing bearer token for internal API authentication",
 			"",
 			requestID,
 		)
 	}
 
 	headers := map[string]string{
-		"Authorization": 	bearer,
+		"Authorization": 	payload.BearerToken,
 		"X-Request-ID":  	requestID,
 		"Accept":        	req.Header.Get("Accept"),
 		"Content-Type":  	req.Header.Get("Content-Type"),
