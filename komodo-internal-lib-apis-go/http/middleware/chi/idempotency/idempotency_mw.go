@@ -44,7 +44,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 		key := req.Header.Get("Idempotency-Key")
 
 		if ok, err := hdrSrv.ValidateHeaderValue(hdrTypes.HEADER_IDEMPOTENCY, req); !ok || err != nil {
-			logger.Error("invalid idempotency key for browser client: " + key, err)
+			logger.Error("invalid idempotency key for browser client: " + key)
 			errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, errors.ERR_INVALID_REQUEST, "invalid idempotency key")
 			return
 		} 
@@ -54,7 +54,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 			// If expired, evict and continue; else reject as duplicate
 			if until, _ := exp.(int64); until > time.Now().Unix() {
 				wtr.Header().Set("Idempotency-Replayed", "true")
-				logger.Error("duplicate request: " + key, req)
+				logger.Error("duplicate request: " + key)
 				errors.WriteErrorResponse(wtr, req, http.StatusConflict, errors.ERR_ACCESS_DENIED, "duplicate request")
 				return
 			}

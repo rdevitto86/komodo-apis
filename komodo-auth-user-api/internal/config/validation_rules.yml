@@ -37,6 +37,35 @@ rules:
           required: true
           type: "string"
       requiredVersion: 1
+  "/auth/logout":
+    POST:
+      level: "strict"
+      headers:
+        "Accept":
+          required: true
+          type: "string"
+          pattern: "^application/json(;\\s*(v|version)=\\d+)?$"
+        "Content-Type":
+          required: true
+          type: "string"
+          pattern: "^application/json(;\\s*(v|version)=\\d+)?$"
+        "Authorization":
+          required: true
+          type: "string"
+          pattern: "^Bearer\\s+[A-Za-z0-9\\-_\\.]+$"
+        "Cookie":
+          required: true
+          type: "string"
+        "X-CSRF-Token":
+          required: true
+          type: "string"
+        "Idempotency-Key":
+          required: true
+          type: "string"
+        "User-Agent":
+          required: true
+          type: "string"
+      requiredVersion: 1
   "/auth/register":
     POST:
       level: "strict"
@@ -147,24 +176,6 @@ rules:
           required: true
           type: "string"
         "credential_response":
-          required: true
-          type: "string"
-      requiredVersion: 1
-  "/auth/logout":
-    POST:
-      level: "strict"
-      headers:
-        "Accept":
-          required: true
-          type: "string"
-          pattern: "^application/json(;\\s*(v|version)=\\d+)?$"
-        "Cookie":
-          required: true
-          type: "string"
-        "X-CSRF-Token":
-          required: true
-          type: "string"
-        "User-Agent":
           required: true
           type: "string"
       requiredVersion: 1

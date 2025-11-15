@@ -75,7 +75,7 @@ func InitElasticacheClient() error {
 
 // GetCacheItem returns the string value stored at key. If the key does not exist, it returns an error.
 func GetCacheItem(key string) (string, error) {
-	if ElasticacheClient.Client != nil {
+	if ElasticacheClient != nil && ElasticacheClient.Client != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
 		defer cancel()
 		val, err := ElasticacheClient.Client.Get(ctx, key).Result()
@@ -90,7 +90,7 @@ func GetCacheItem(key string) (string, error) {
 
 // SetCacheItem stores a value with the provided TTL (in seconds). Use ttl<=0
 func SetCacheItem(key string, value string, ttl int64) error {
-	if ElasticacheClient.Client != nil {
+	if ElasticacheClient != nil && ElasticacheClient.Client != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
 		defer cancel()
 
@@ -106,7 +106,7 @@ func SetCacheItem(key string, value string, ttl int64) error {
 
 // DeleteCacheItem removes a key from the store.
 func DeleteCacheItem(key string) error {
-	if ElasticacheClient.Client != nil {
+	if ElasticacheClient != nil && ElasticacheClient.Client != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
 		defer cancel()
 		return ElasticacheClient.Client.Del(ctx, key).Err()

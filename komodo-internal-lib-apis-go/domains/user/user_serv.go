@@ -30,20 +30,11 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 	requestID := req.Header.Get("X-Request-ID")
 	if requestID == "" { requestID = "unknown" }
 
-	if client == nil {
+	if client == nil || userAPIEndpoint == "" {
 		return httptypes.ErrorResponse(
 			http.StatusInternalServerError,
 			errors.ERR_INTERNAL_SERVER,
-			"http client not initialized",
-			"",
-			requestID,
-		)
-	}
-	if userAPIEndpoint == "" {
-		return httptypes.ErrorResponse(
-			http.StatusInternalServerError,
-			errors.ERR_INTERNAL_SERVER,
-			"user api endpoint not configured",
+			"service not initialized",
 			"",
 			requestID,
 		)

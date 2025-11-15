@@ -4,6 +4,7 @@ import (
 	"komodo-internal-lib-apis-go/common/errors"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	chimw "github.com/go-chi/chi/v5/middleware"
@@ -17,29 +18,28 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			ms := time.Since(start).Milliseconds()
 
-			// Recover from panics and ensure a 500 is sent if nothing written.
-			if rec := recover(); rec != nil {
-				// Get request ID safely
-				reqID := chimw.GetReqID(req.Context())
-				if reqID == "" { reqID = "unknown" }
-				
-				// Safely check status
-				status := 0
-				if ww != nil {
-					status = ww.Status()
-				}
-				if status == 0 {
-					errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "internal server error")
-				}
-				
-				logger.Error("telemetry panicked!", map[string]any{
-					"request_id": reqID,
-					"err":        rec,
-				})
-				return // Don't continue after panic
+		// Recover from panics and ensure a 500 is sent if nothing written.
+		if rec := recover(); rec != nil {
+			// Get request ID safely
+			reqID := chimw.GetReqID(req.Context())
+			if reqID == "" { reqID = "unknown" }
+			
+			// Safely check status
+			status := 0
+			if ww != nil {
+				status = ww.Status()
 			}
-
-			// Get status safely
+			if status == 0 {
+				errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "internal server error")
+			}
+			
+			logger.Error("telemetry panicked!", map[string]any{
+				"request_id": reqID,
+				"err":        rec,
+				"stack":      string(debug.Stack()),
+			})
+			return // Don't continue after panic
+		}
 			status := 0
 			bytesWritten := 0
 			if ww != nil {
