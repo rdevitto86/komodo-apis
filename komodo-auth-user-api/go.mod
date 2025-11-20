@@ -5,7 +5,7 @@ go 1.25
 require github.com/go-chi/chi/v5 v5.2.3
 
 require (
-	golang.org/x/crypto v0.43.0
+	golang.org/x/crypto v0.45.0
 	komodo-internal-lib-apis-go v0.0.0-00010101000000-000000000000
 // komodo-internal-lib-apis-go v0.1.0
 )
