@@ -42,6 +42,7 @@ type UserProfileGetResponseBasic struct {
 	UserID       	string
 	FirstName 		string
 	LastName  		string
+	AvatarURL     string
 }
 
 type UserProfileGetResponseMinimal struct {
@@ -51,6 +52,7 @@ type UserProfileGetResponseMinimal struct {
 	FirstName 		string
 	LastName  		string
 	PasswordHash 	string
+	AvatarURL     string
 }
 
 type UserProfileGetResponseFull struct {
@@ -65,6 +67,7 @@ type UserProfileGetResponseFull struct {
 	Address       UserAddress
 	Preferences   UserPreferences
 	Metadata      UserMetadata
+	AvatarURL     string
 }
 
 type UserProfileUpdateRequest struct {

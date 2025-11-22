@@ -163,14 +163,16 @@ func sanitizeMeta(meta ...any) any {
 	return nil // unsupported type
 }
 
-func InitLogger(cfg ...LoggerConfig) {
+func InitLogger(config ...LoggerConfig) {
 	ensureInitialized() 
 
-	if len(cfg) > 0 {
-		c := cfg[0]
-		enableRemoteLogs = c.EnableRemoteLogs
-		host = c.Host
-		if c.LogLevel != "" { logLevel = strings.ToUpper(c.LogLevel) }
+	if len(config) > 0 {
+		cfg := config[0]
+		enableRemoteLogs = cfg.EnableRemoteLogs
+		host = cfg.Host
+		if cfg.LogLevel != "" {
+			logLevel = strings.ToUpper(cfg.LogLevel)
+		}
 	}
 }
 

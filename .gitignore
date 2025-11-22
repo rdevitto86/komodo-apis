@@ -1,14 +1,13 @@
-# Binaries for programs and plugins
+# Compiled
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+*.bin
+*.build
 
-# Dependancies
-*/node_modules
-
-# Local secrets
+# Environments
 .env
 .env.*
 *.secrets.*
@@ -16,8 +15,66 @@
 /secrets
 /env
 
-# Test binary, build with `go test -c`
-*.test
+# Go
+go.work
+go.work.sum
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+pip-log.txt
+venv/
+ENV/
+env.bak/
+
+# Node
+*/node_modules
+node_modules/
+
+# Tests & Coverage
+*.test
+coverage/
+*.coverprofile
+htmlcov/
+.nyc_output/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+
+# Builds
 *.out
+dist/
+build/
+vendor/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Mac
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary
+*.tmp
+*.temp
+*.bak
+*.cache
+.cache/
+.pnp.*
+.yarn/

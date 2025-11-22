@@ -29,8 +29,7 @@ var (
 
 // Initializes a singleton Elasticache client. In
 // prod/staging it will connect to the configured Redis/ElastiCache
-// endpoint. 
-// fallback that implements GET/SET/DELETE semantics with TTLs.
+// endpoint.
 func InitElasticacheClient() error {
 	var initErr error
 
@@ -73,35 +72,37 @@ func InitElasticacheClient() error {
 	return initErr
 }
 
-// GetCacheItem returns the string value stored at key. If the key does not exist, it returns an error.
+// Returns the string value stored at key. If the key does not exist, it returns an error.
 func GetCacheItem(key string) (string, error) {
-	if ElasticacheClient != nil && ElasticacheClient.Client != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
-		defer cancel()
-		val, err := ElasticacheClient.Client.Get(ctx, key).Result()
-
-		if err == redis.Nil { return "", nil }
-		if err != nil { return "", err }
-		return val, nil
+	if ElasticacheClient == nil || ElasticacheClient.Client == nil {
+		logger.Error("elasticache client not available")
+		return "", errors.New("elasticache client not available")
 	}
-	logger.Error("elasticache client not available")
-	return "", errors.New("elasticache client not available")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
+	defer cancel()
+	val, err := ElasticacheClient.Client.Get(ctx, key).Result()
+
+	if err == redis.Nil { return "", nil }
+	if err != nil { return "", err }
+	return val, nil
 }
 
-// SetCacheItem stores a value with the provided TTL (in seconds). Use ttl<=0
+// Stores a value with the provided TTL (in seconds). Use ttl<=0
 func SetCacheItem(key string, value string, ttl int64) error {
-	if ElasticacheClient != nil && ElasticacheClient.Client != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
-		defer cancel()
-
-		var dur time.Duration
-		if ttl > 0 {
-			dur = time.Duration(ttl) * time.Second
-		}
-		return ElasticacheClient.Client.Set(ctx, key, value, dur).Err()
+	if ElasticacheClient == nil || ElasticacheClient.Client == nil {
+		logger.Error("elasticache client not available")
+		return errors.New("elasticache client not available")
 	}
-	logger.Error("elasticache client not available")
-	return errors.New("elasticache client not available")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
+	defer cancel()
+
+	var dur time.Duration
+	if ttl > 0 {
+		dur = time.Duration(ttl) * time.Second
+	}
+	return ElasticacheClient.Client.Set(ctx, key, value, dur).Err()
 }
 
 // DeleteCacheItem removes a key from the store.
@@ -115,13 +116,10 @@ func DeleteCacheItem(key string) error {
 	return errors.New("elasticache client not available")
 }
 
-// CloseElasticache closes any underlying clients and stops background goroutines.
+// Closes any underlying clients and stops background goroutines.
 func CloseElasticache() error {
-	if ElasticacheClient == nil { return nil }
-	if ElasticacheClient.Client != nil {
-		return ElasticacheClient.Client.Close()
-	}
-	return nil
+	if ElasticacheClient == nil || ElasticacheClient.Client == nil { return nil }
+	return ElasticacheClient.Client.Close()
 }
 
 // token bucket Lua script (atomic): returns {allowed, wait_ms}
@@ -161,7 +159,7 @@ redis.call('EXPIRE', KEYS[1], ttl)
 return {allowed, tostring(wait_ms)}
 `)
 
-// AllowDistributed attempts to consume a single token from a distributed
+// Attempts to consume a single token from a distributed
 // token bucket stored in Elasticache/Redis. It returns (allowed, retryAfter, err).
 // If Elasticache is not configured/available it returns an error.
 func AllowDistributed(ctx context.Context, key string) (bool, time.Duration, error) {

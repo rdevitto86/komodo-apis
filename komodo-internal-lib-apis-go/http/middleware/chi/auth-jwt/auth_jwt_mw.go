@@ -4,13 +4,6 @@ import (
 	"net/http"
 )
 
-type authCtxKey string
-
-const (
-	AuthValidCtxKey    authCtxKey = "Authorization_valid"
-	SessionValidCtxKey authCtxKey = "X-Session-Token_valid"
-)
-
 func AuthnJWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
 		// TODO: implement JWT handling

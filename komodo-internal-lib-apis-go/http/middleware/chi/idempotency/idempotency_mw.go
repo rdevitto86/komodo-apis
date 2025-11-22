@@ -2,7 +2,6 @@ package idempotency
 
 import (
 	"context"
-	elasticacheClient "komodo-internal-lib-apis-go/aws/elasticache"
 	ctxKeys "komodo-internal-lib-apis-go/common/context"
 	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/config"
@@ -15,10 +14,9 @@ import (
 	"time"
 )
 
-var idemStore sync.Map
+const DEFAULT_IDEM_TTL_SEC int64 = 300 // 5 minutes
 
-type idemCtxKey string
-const IdempotencyValidCtxKey idemCtxKey = "Idempotency-Key_valid"
+var idemStore sync.Map
 
 func IdempotencyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
@@ -29,13 +27,13 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 				return
 		}
 		
-		clientType := req.Context().Value(ctxKeys.ClientTypeKey)
+		clientType := req.Context().Value(ctxKeys.CLIENT_TYPE_KEY)
 		if clientType == nil {
 			clientType = httpUtils.GetClientType(req)
 		}
 		
 		if clientType == "api" {
-			ctx := context.WithValue(req.Context(), IdempotencyValidCtxKey, true)
+			ctx := context.WithValue(req.Context(), ctxKeys.IDEMPOTENCY_VALID_KEY, true)
 			req = req.WithContext(ctx)
 			next.ServeHTTP(wtr, req)
 			return
@@ -62,11 +60,11 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 		}
 
 		req = req.WithContext(context.WithValue(
-			req.Context(), IdempotencyValidCtxKey, true,
+			req.Context(), ctxKeys.IDEMPOTENCY_VALID_KEY, true,
 		))
 
 		// Store key with expiration
-		elasticacheClient.SetCacheItem("idem-" + key, "1", getIdemTTL())
+		// elasticacheClient.SetCacheItem("idem-" + key, "1", getIdemTTL())
 
 		next.ServeHTTP(wtr, req)
 	})
@@ -80,5 +78,5 @@ func getIdemTTL() int64 {
 			return int64(dur.Seconds())
 		}
 	}
-	return 300 // default: 5 minutes
+	return DEFAULT_IDEM_TTL_SEC
 }

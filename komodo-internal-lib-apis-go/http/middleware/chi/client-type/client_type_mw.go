@@ -2,15 +2,13 @@ package clienttype
 
 import (
 	"context"
+	ctxKeys "komodo-internal-lib-apis-go/common/context"
 	"net/http"
 )
 
-type clientTypeCtxKey string
-
 const (
-	ClientTypeKey     clientTypeCtxKey = "client_type"
-	ClientTypeAPI     string           = "api"
-	ClientTypeBrowser string           = "browser"
+	ClientTypeAPI string = "api"
+	ClientTypeBrowser string = "browser"
 )
 
 // ClientTypeMiddleware detects whether request is from API client or browser
@@ -29,7 +27,7 @@ func ClientTypeMiddleware(next http.Handler) http.Handler {
 		}
 		
 		// Store in context for downstream middleware
-		ctx := context.WithValue(req.Context(), ClientTypeKey, clientType)
+		ctx := context.WithValue(req.Context(), ctxKeys.CLIENT_TYPE_KEY, clientType)
 		next.ServeHTTP(wtr, req.WithContext(ctx))
 	})
 }

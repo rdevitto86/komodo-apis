@@ -9,7 +9,7 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
-// RequestIDMiddleware ensures each request has a unique X-Request-ID in both header and context
+// Ensures each request has a unique X-Request-ID in both header and context
 // Priority: Header (external) > Context (middleware) > Generated (new)
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
@@ -24,7 +24,7 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 
 		req.Header.Set("X-Request-ID", reqID)
 		ctx := context.WithValue(req.Context(), chimw.RequestIDKey, reqID)
-		ctx = context.WithValue(ctx, ctxKeys.RequestIDKey, reqID)
+		ctx = context.WithValue(ctx, ctxKeys.REQUEST_ID_KEY, reqID)
 		wtr.Header().Set("X-Request-ID", reqID)
 
 		next.ServeHTTP(wtr, req.WithContext(ctx))

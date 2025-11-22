@@ -45,13 +45,13 @@ func WriteErrorVerboseResponse(wtr http.ResponseWriter, req *http.Request, statu
 }
 
 // Forwards an existing APIResponse error to the http.ResponseWriter
-func ForwardErrorResponse(wtr http.ResponseWriter, resp *httptypes.APIResponse) {
-	wtr.WriteHeader(resp.Status)
+func ForwardErrorResponse(wtr http.ResponseWriter, res *httptypes.APIResponse) {
+	wtr.WriteHeader(res.Status)
 	json.NewEncoder(wtr).Encode(ErrorStandard{
-		Status: 	 resp.Status,
-		Code:      resp.Error.Code,
-		Message:   resp.Error.Message,
-		RequestId: resp.RequestID,
-		Timestamp: resp.Timestamp,
+		Status: 	 res.Status,
+		Code:      res.Error.Code,
+		Message:   res.Error.Message,
+		RequestId: res.RequestID,
+		Timestamp: res.Timestamp,
 	})
 }

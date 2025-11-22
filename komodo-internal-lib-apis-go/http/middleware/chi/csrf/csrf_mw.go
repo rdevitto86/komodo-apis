@@ -11,20 +11,18 @@ import (
 	"net/http"
 )
 
-type csrfCtxKey string
-
 func CSRFMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
 		switch req.Method {
 			case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
-				clientType := req.Context().Value(ctxKeys.ClientTypeKey)
+				clientType := req.Context().Value(ctxKeys.CLIENT_TYPE_KEY)
 				if clientType == nil {
 					clientType = httpUtils.GetClientType(req)
 				}
 
 				if clientType == "api" {
-					ctx := context.WithValue(req.Context(), csrfCtxKey("X-CSRF"), "api-client-exempt")
-					ctx = context.WithValue(ctx, csrfCtxKey("X-CSRF_valid"), true)
+					ctx := context.WithValue(req.Context(), ctxKeys.CSRF_TOKEN_KEY, "api-client-exempt")
+					ctx = context.WithValue(ctx, ctxKeys.CSRF_VALID_KEY, true)
 					req = req.WithContext(ctx)
 					next.ServeHTTP(wtr, req)
 					return
@@ -38,8 +36,8 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 				}
 		}
 
-		ctx := context.WithValue(req.Context(), csrfCtxKey("X-CSRF"), "")
-		ctx = context.WithValue(ctx, csrfCtxKey("X-CSRF_valid"), true)
+		ctx := context.WithValue(req.Context(), ctxKeys.CSRF_TOKEN_KEY, "")
+		ctx = context.WithValue(ctx, ctxKeys.CSRF_VALID_KEY, true)
 		req = req.WithContext(ctx)
 
 		next.ServeHTTP(wtr, req)
