@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	ctxKeys "komodo-internal-lib-apis-go/common/context"
-	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/crypto/jwt"
+	ctxKeys "komodo-internal-lib-apis-go/http/common/context"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 )
 
@@ -75,6 +76,6 @@ func SessionMiddleware(next http.Handler) http.Handler {
 
 		// No valid session or token found
 		logger.Warn("no valid session or token found in request")
-		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "unauthorized - no valid session", errors.ERR_SESSION_NOT_FOUND)
+		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "unauthorized - no valid session", errCodes.ERR_SESSION_NOT_FOUND)
 	})
 }

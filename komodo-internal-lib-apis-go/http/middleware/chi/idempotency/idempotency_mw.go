@@ -2,9 +2,10 @@ package idempotency
 
 import (
 	"context"
-	ctxKeys "komodo-internal-lib-apis-go/common/context"
-	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/config"
+	ctxKeys "komodo-internal-lib-apis-go/http/common/context"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	hdrSrv "komodo-internal-lib-apis-go/http/headers/eval"
 	hdrTypes "komodo-internal-lib-apis-go/http/types"
 	httpUtils "komodo-internal-lib-apis-go/http/utils/http"
@@ -43,7 +44,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 
 		if ok, err := hdrSrv.ValidateHeaderValue(hdrTypes.HEADER_IDEMPOTENCY, req); !ok || err != nil {
 			logger.Error("invalid idempotency key for browser client: " + key)
-			errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, errors.ERR_INVALID_REQUEST, "invalid idempotency key")
+			errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, errCodes.ERR_INVALID_REQUEST, "invalid idempotency key")
 			return
 		} 
 
@@ -53,7 +54,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 			if until, _ := exp.(int64); until > time.Now().Unix() {
 				wtr.Header().Set("Idempotency-Replayed", "true")
 				logger.Error("duplicate request: " + key)
-				errors.WriteErrorResponse(wtr, req, http.StatusConflict, errors.ERR_ACCESS_DENIED, "duplicate request")
+				errors.WriteErrorResponse(wtr, req, http.StatusConflict, errCodes.ERR_ACCESS_DENIED, "duplicate request")
 				return
 			}
 			idemStore.Delete(key)

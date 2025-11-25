@@ -3,8 +3,8 @@ package user
 import (
 	"fmt"
 
-	"komodo-internal-lib-apis-go/common/errors"
 	httpclient "komodo-internal-lib-apis-go/http/client"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
 	httptypes "komodo-internal-lib-apis-go/http/types"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
@@ -33,7 +33,7 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 	if client == nil || userAPIEndpoint == "" {
 		return httptypes.ErrorResponse(
 			http.StatusInternalServerError,
-			errors.ERR_INTERNAL_SERVER,
+			errCodes.ERR_INTERNAL_SERVER,
 			"service not initialized",
 			"",
 			requestID,
@@ -42,7 +42,7 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 	if payload.BearerToken == "" {
 		return httptypes.ErrorResponse(
 			http.StatusUnauthorized,
-			errors.ERR_INVALID_TOKEN,
+			errCodes.ERR_INVALID_TOKEN,
 			"missing bearer token for internal API authentication",
 			"",
 			requestID,
@@ -68,7 +68,7 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 		logger.Error("failed to call User API", err)
 		return httptypes.ErrorResponse(
 			http.StatusServiceUnavailable,
-			errors.ERR_EXTERNAL_API_CALL_FAILED,
+			errCodes.ERR_EXTERNAL_API_CALL_FAILED,
 			"failed to fetch user profile",
 			err.Error(),
 			requestID,
@@ -77,12 +77,12 @@ func GetUserProfile(req *http.Request, payload *UserProfileGetRequest) *httptype
 	if !res.IsSuccess() {
 		logger.Error("failed to fetch user profile", res.Error)
 
-		code := errors.ERR_EXTERNAL_API_CALL_FAILED
+		code := errCodes.ERR_EXTERNAL_API_CALL_FAILED
 		switch res.Status {
 			case http.StatusNotFound:
-				code = errors.ERR_RESOURCE_NOT_FOUND
+				code = errCodes.ERR_RESOURCE_NOT_FOUND
 			case http.StatusUnauthorized:
-				code = errors.ERR_INVALID_TOKEN
+				code = errCodes.ERR_INVALID_TOKEN
 		}
 		return httptypes.ErrorResponse(res.Status, code, res.ErrorMessage(), "", requestID)
 	}
@@ -139,7 +139,7 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 	if client == nil {
 		return httptypes.ErrorResponse(
 			http.StatusInternalServerError,
-			errors.ERR_INTERNAL_SERVER,
+			errCodes.ERR_INTERNAL_SERVER,
 			"http client not initialized",
 			"",
 			requestID,
@@ -148,7 +148,7 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 	if userAPIEndpoint == "" {
 		return httptypes.ErrorResponse(
 			http.StatusInternalServerError,
-			errors.ERR_INTERNAL_SERVER,
+			errCodes.ERR_INTERNAL_SERVER,
 			"user api endpoint not configured",
 			"",
 			requestID,
@@ -157,7 +157,7 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 	if payload.BearerToken == "" {
 		return httptypes.ErrorResponse(
 			http.StatusUnauthorized,
-			errors.ERR_INVALID_TOKEN,
+			errCodes.ERR_INVALID_TOKEN,
 			"missing bearer token for internal API authentication",
 			"",
 			requestID,
@@ -180,7 +180,7 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 		logger.Error("failed to call User API", err)
 		return httptypes.ErrorResponse(
 			http.StatusServiceUnavailable,
-			errors.ERR_EXTERNAL_API_CALL_FAILED,
+			errCodes.ERR_EXTERNAL_API_CALL_FAILED,
 			"failed to update user profile",
 			err.Error(),
 			requestID,
@@ -189,14 +189,14 @@ func UpdateUserProfile(req *http.Request, payload *UserProfileUpdateRequest) *ht
 	if !res.IsSuccess() {
 		logger.Error("failed to update user profile", res.Error)
 
-		code := errors.ERR_RESOURCE_UPDATE_FAILED
+		code := errCodes.ERR_RESOURCE_UPDATE_FAILED
 		switch res.Status {
 			case http.StatusNotFound:
-				code = errors.ERR_RESOURCE_NOT_FOUND
+				code = errCodes.ERR_RESOURCE_NOT_FOUND
 			case http.StatusUnauthorized:
-				code = errors.ERR_INVALID_TOKEN
+				code = errCodes.ERR_INVALID_TOKEN
 			case http.StatusBadRequest:
-				code = errors.ERR_VALIDATION_FAILED
+				code = errCodes.ERR_VALIDATION_FAILED
 		}
 		return httptypes.ErrorResponse(res.Status, code, res.ErrorMessage(), "", requestID)
 	}

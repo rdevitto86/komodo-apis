@@ -1,8 +1,9 @@
-package errors
+package chierrors
 
 import (
 	"encoding/json"
 	"fmt"
+	errorTypes "komodo-internal-lib-apis-go/http/common/errors"
 	httptypes "komodo-internal-lib-apis-go/http/types"
 	"net/http"
 	"time"
@@ -16,7 +17,7 @@ func WriteErrorResponse(wtr http.ResponseWriter, req *http.Request, status int, 
 	}
 
 	wtr.WriteHeader(status)
-	json.NewEncoder(wtr).Encode(ErrorStandard{
+	json.NewEncoder(wtr).Encode(errorTypes.ErrorStandard{
 		Status: 	 status,
 		Code:      errCode,
 		Message:   message,
@@ -33,7 +34,7 @@ func WriteErrorVerboseResponse(wtr http.ResponseWriter, req *http.Request, statu
 	}
 
 	wtr.WriteHeader(status)
-	json.NewEncoder(wtr).Encode(ErrorVerbose{
+	json.NewEncoder(wtr).Encode(errorTypes.ErrorVerbose{
 		Status: 	 status,
 		Code:      errCode,
 		Message:   message,
@@ -47,7 +48,7 @@ func WriteErrorVerboseResponse(wtr http.ResponseWriter, req *http.Request, statu
 // Forwards an existing APIResponse error to the http.ResponseWriter
 func ForwardErrorResponse(wtr http.ResponseWriter, res *httptypes.APIResponse) {
 	wtr.WriteHeader(res.Status)
-	json.NewEncoder(wtr).Encode(ErrorStandard{
+	json.NewEncoder(wtr).Encode(errorTypes.ErrorStandard{
 		Status: 	 res.Status,
 		Code:      res.Error.Code,
 		Message:   res.Error.Message,

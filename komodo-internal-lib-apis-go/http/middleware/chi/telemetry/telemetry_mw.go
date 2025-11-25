@@ -1,7 +1,8 @@
 package telemetry
 
 import (
-	"komodo-internal-lib-apis-go/common/errors"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
 	"runtime/debug"
@@ -30,7 +31,7 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 				status = ww.Status()
 			}
 			if status == 0 {
-				errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "internal server error")
+				errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errCodes.ERR_INTERNAL_SERVER, "internal server error")
 			}
 			
 			logger.Error("telemetry panicked!", map[string]any{

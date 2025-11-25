@@ -75,7 +75,7 @@ func main() {
 	rtr.Use(mw.RuleValidationMiddleware)
 
 	// initialize moxtox response handler
-	if env != "prod" && os.Getenv("USE_MOCKS") == "true" {
+	if env != "prod" && config.GetConfigValue("USE_MOCKS") == "true" {
 		logger.Info("using mocks in non-production environment")
 		rtr.Use(moxtox.InitMoxtoxMiddleware(env))
 	}
@@ -96,7 +96,6 @@ func main() {
 	})
 
 	port := config.GetConfigValue("PORT")
-	if port == "" { port =	 "7001" }
 	logger.Info("server starting on port " + port)
 
 	server := &http.Server{

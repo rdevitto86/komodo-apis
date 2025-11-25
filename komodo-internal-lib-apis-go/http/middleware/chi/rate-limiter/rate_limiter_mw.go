@@ -1,7 +1,8 @@
 package ratelimiting
 
 import (
-	"komodo-internal-lib-apis-go/common/errors"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	utils "komodo-internal-lib-apis-go/http/utils/http"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 	rl "komodo-internal-lib-apis-go/security/rate_limiter"
@@ -21,7 +22,7 @@ func RateLimiterMiddleware(next http.Handler) http.Handler {
 			if rl.ShouldFailOpen() {
 				logger.Error("rate limiter failing open for client: "+key, req)
 			} else {
-				errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "internal rate limiter error")
+				errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errCodes.ERR_INTERNAL_SERVER, "internal rate limiter error")
 				return
 			}
 		} else if !allowed {
@@ -29,7 +30,7 @@ func RateLimiterMiddleware(next http.Handler) http.Handler {
 				wtr.Header().Set("Retry-After", strconv.Itoa(int(wait.Seconds()+0.5)))
 			}
 			logger.Error("rate limit exceeded for client: "+key, req)
-			errors.WriteErrorResponse(wtr, req, http.StatusTooManyRequests, errors.ERR_ACCESS_DENIED, "rate limit exceeded")
+			errors.WriteErrorResponse(wtr, req, http.StatusTooManyRequests, errCodes.ERR_ACCESS_DENIED, "rate limit exceeded")
 			return
 		}
 

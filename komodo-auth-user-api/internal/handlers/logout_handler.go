@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/crypto/jwt"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 )
 
@@ -22,7 +23,9 @@ func LogoutHandler(wtr http.ResponseWriter, req *http.Request) {
 	tokenString, err := jwt.ExtractTokenFromRequest(req)
 	if err != nil {
 		logger.Error("no token found in logout request", err)
-		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "missing authorization token", errors.ERR_INVALID_TOKEN)
+		errors.WriteErrorResponse(
+			wtr, req, http.StatusUnauthorized, "missing authorization token", errCodes.ERR_INVALID_TOKEN,
+		)
 		return
 	}
 
@@ -30,7 +33,9 @@ func LogoutHandler(wtr http.ResponseWriter, req *http.Request) {
 	_, claims, err := jwt.VerifyToken(tokenString)
 	if err != nil {
 		logger.Error("invalid token in logout request", err)
-		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "invalid token", errors.ERR_INVALID_TOKEN)
+		errors.WriteErrorResponse(
+			wtr, req, http.StatusUnauthorized, "invalid token", errCodes.ERR_INVALID_TOKEN,
+		)
 		return
 	}
 
@@ -41,7 +46,9 @@ func LogoutHandler(wtr http.ResponseWriter, req *http.Request) {
 
 	if jti == "" {
 		logger.Error("token missing jti claim for revocation")
-		errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, "token cannot be revoked", errors.ERR_INVALID_TOKEN)
+		errors.WriteErrorResponse(
+			wtr, req, http.StatusBadRequest, "token cannot be revoked", errCodes.ERR_INVALID_TOKEN,
+		)
 		return
 	}
 

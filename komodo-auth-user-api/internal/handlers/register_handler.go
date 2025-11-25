@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"komodo-internal-lib-apis-go/common/errors"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
 )
@@ -21,7 +22,13 @@ func RegisterHandler(wtr http.ResponseWriter, req *http.Request) {
 	var registerReq RegisterRequest
 	if err := json.NewDecoder(req.Body).Decode(&registerReq); err != nil {
 		logger.Error("failed to parse register request payload")
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Failed to parse request payload")
+		errors.WriteErrorResponse(
+			wtr,
+			req,
+			http.StatusInternalServerError,
+			errCodes.ERR_INTERNAL_SERVER,
+			"Failed to parse request payload",
+		)
 		return
 	}
 
@@ -35,7 +42,13 @@ func RegisterHandler(wtr http.ResponseWriter, req *http.Request) {
 	wtr.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(wtr).Encode(resp); err != nil {
 		logger.Error("failed to encode response", err)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Failed to encode response")
+		errors.WriteErrorResponse(
+			wtr,
+			req,
+			http.StatusInternalServerError,
+			errCodes.ERR_INTERNAL_SERVER,
+			"Failed to encode response",
+		)
 		return
 	}
 }

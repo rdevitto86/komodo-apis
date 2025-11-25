@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"komodo-internal-lib-apis-go/common/errors"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 
 	"komodo-internal-lib-apis-go/crypto/jwt"
@@ -31,7 +32,7 @@ func TokenRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusUnauthorized,
 			"missing or invalid Authorization header",
-			errors.ERR_INVALID_TOKEN,
+			errCodes.ERR_INVALID_TOKEN,
 		)
 		return
 	}
@@ -45,7 +46,7 @@ func TokenRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusUnauthorized,
 			"invalid or expired token",
-			errors.ERR_INVALID_TOKEN,
+			errCodes.ERR_INVALID_TOKEN,
 		)
 		return
 	}
@@ -62,7 +63,7 @@ func TokenRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusBadRequest,
 			"token does not support revocation (missing JTI)",
-			errors.ERR_INVALID_REQUEST,
+			errCodes.ERR_INVALID_REQUEST,
 		)
 		return
 	}

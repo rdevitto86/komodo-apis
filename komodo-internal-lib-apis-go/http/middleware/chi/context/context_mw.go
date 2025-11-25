@@ -2,7 +2,7 @@ package context
 
 import (
 	"context"
-	ctxKeys "komodo-internal-lib-apis-go/common/context"
+	ctxKeys "komodo-internal-lib-apis-go/http/common/context"
 	utils "komodo-internal-lib-apis-go/http/utils/http"
 	"net/http"
 	"time"

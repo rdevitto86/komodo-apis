@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/crypto/oauth"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 
 	jwt "komodo-internal-lib-apis-go/crypto/jwt"
@@ -42,7 +43,7 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusBadRequest,
 			"failed to parse request body",
-			errors.ERR_INVALID_REQUEST,
+			errCodes.ERR_INVALID_REQUEST,
 		)
 		return
 	}
@@ -55,7 +56,7 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusBadRequest,
 			"missing client credentials",
-			errors.ERR_INVALID_REQUEST,
+			errCodes.ERR_INVALID_REQUEST,
 		)
 		return
 	}
@@ -69,7 +70,7 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusUnauthorized,
 			"invalid client credentials",
-			errors.ERR_INVALID_REQUEST,
+			errCodes.ERR_INVALID_REQUEST,
 		)
 		return
 	}
@@ -82,7 +83,7 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusBadRequest,
 			"unsupported grant_type",
-			errors.ERR_INVALID_REQUEST,
+			errCodes.ERR_INVALID_REQUEST,
 		)
 		return
 	}
@@ -95,7 +96,7 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusBadRequest,
 			"invalid scope",
-			errors.ERR_INVALID_REQUEST,
+			errCodes.ERR_INVALID_REQUEST,
 		)
 		return
 	}
@@ -134,7 +135,7 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 			req,
 			http.StatusInternalServerError,
 			"Token signing failed",
-			errors.ERR_INTERNAL_SERVER,
+			errCodes.ERR_INTERNAL_SERVER,
 		)
 		return
 	}
@@ -172,7 +173,7 @@ func TokenCreateHandler(wtr http.ResponseWriter, req *http.Request) {
 				req,
 				http.StatusInternalServerError,
 				"Token signing failed",
-				errors.ERR_INTERNAL_SERVER,
+				errCodes.ERR_INTERNAL_SERVER,
 			)
 			return
 		}

@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"os"
 
-	"komodo-internal-lib-apis-go/common/errors"
 	"komodo-internal-lib-apis-go/crypto/jwt"
 	authServ "komodo-internal-lib-apis-go/domains/auth/service"
 	userServ "komodo-internal-lib-apis-go/domains/user"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 
 	"golang.org/x/crypto/bcrypt"
@@ -33,12 +34,20 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 	var loginReq LoginRequest
 	if err := json.NewDecoder(req.Body).Decode(&loginReq); err != nil {
 		logger.Error("failed to parse login request payload", err)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse request payload", errors.ERR_INTERNAL_SERVER)
+		errors.WriteErrorResponse(
+			wtr,
+			req,
+			http.StatusInternalServerError,
+			"failed to parse request payload",
+			errCodes.ERR_INTERNAL_SERVER,
+		)
 		return
 	}
 	if loginReq.Email == "" || loginReq.Password == "" {
 		logger.Error("invalid login request payload")
-		errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, "invalid request payload", errors.ERR_INVALID_REQUEST)
+		errors.WriteErrorResponse(
+			wtr, req, http.StatusBadRequest, "invalid request payload", errCodes.ERR_INVALID_REQUEST,
+		)
 		return
 	}
 
@@ -51,7 +60,9 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 
 	if res.IsError() {
 		logger.Error("failed to get service token from internal auth service", res.Error)
-		errors.WriteErrorResponse(wtr, req, res.Status, "failed to authenticate service", errors.ERR_INTERNAL_API_CALL_FAILED)
+		errors.WriteErrorResponse(
+			wtr, req, res.Status, "failed to authenticate service", errCodes.ERR_INTERNAL_API_CALL_FAILED,
+		)
 		return
 	}
 
@@ -59,7 +70,13 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 	bearer, ok := res.BodyParsed.(*authServ.TokenGenerateResponse)
 	if !ok || bearer == nil {
 		logger.Error("failed to type assert service token response")
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse service token", errors.ERR_INTERNAL_SERVER)
+		errors.WriteErrorResponse(
+			wtr,
+			req,
+			http.StatusInternalServerError,
+			"failed to parse service token",
+			errCodes.ERR_INTERNAL_SERVER,
+		)
 		return
 	}
 
@@ -72,7 +89,9 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 
 	if (res.IsError()) {
 		logger.Error("failed to fetch user profile", res.Error)
-		errors.WriteErrorResponse(wtr, req, res.Status, "failed to fetch user profile", errors.ERR_INTERNAL_API_CALL_FAILED)
+		errors.WriteErrorResponse(
+			wtr, req, res.Status, "failed to fetch user profile", errCodes.ERR_INTERNAL_API_CALL_FAILED,
+		)
 		return
 	}
 
@@ -80,14 +99,22 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 	profile, ok := res.BodyParsed.(*userServ.UserProfileGetResponseMinimal)
 	if !ok || profile == nil {
 		logger.Error("failed to type assert user profile response", res.Error)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse user profile", errors.ERR_INTERNAL_SERVER)
+		errors.WriteErrorResponse(
+			wtr,
+			req,
+			http.StatusInternalServerError,
+			"failed to parse user profile",
+			errCodes.ERR_INTERNAL_SERVER,
+		)
 		return
 	}
 
 	// Verify password
 	if err := bcrypt.CompareHashAndPassword([]byte(profile.PasswordHash), []byte(loginReq.Password)); err != nil {
 		logger.Error("invalid password attempt for email: " + loginReq.Email)
-		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "invalid email or password", errors.ERR_ACCESS_DENIED)
+		errors.WriteErrorResponse(
+			wtr, req, http.StatusUnauthorized, "invalid email or password", errCodes.ERR_ACCESS_DENIED,
+		)
 		return
 	}
 
@@ -110,7 +137,13 @@ func LoginHandler(wtr http.ResponseWriter, req *http.Request) {
 	token, signErr := jwt.SignToken(claims)
 	if signErr != nil {
 		logger.Error("failed to sign JWT token for login", signErr)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to generate authentication token", errors.ERR_INTERNAL_SERVER)
+		errors.WriteErrorResponse(
+			wtr,
+			req,
+			http.StatusInternalServerError,
+			"failed to generate authentication token",
+			errCodes.ERR_INTERNAL_SERVER,
+		)
 		return
 	}
 

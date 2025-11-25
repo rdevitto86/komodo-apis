@@ -2,7 +2,7 @@ package clienttype
 
 import (
 	"context"
-	ctxKeys "komodo-internal-lib-apis-go/common/context"
+	ctxKeys "komodo-internal-lib-apis-go/http/common/context"
 	"net/http"
 )
 

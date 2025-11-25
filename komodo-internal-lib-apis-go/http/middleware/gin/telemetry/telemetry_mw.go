@@ -1,4 +1,4 @@
-package gin
+package telemetry
 
 import "net/http"
 

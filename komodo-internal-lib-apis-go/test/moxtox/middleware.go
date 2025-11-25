@@ -1,8 +1,9 @@
 package moxtox
 
 import (
-	"fmt"
-	"komodo-internal-lib-apis-go/common/errors"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
+	logger "komodo-internal-lib-apis-go/logging/runtime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -25,7 +26,7 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 		if len(configPath) == 0 || configPath[0] == "" {
 			cwd, err := os.Getwd()
 			if err != nil {
-				fmt.Println("[::Moxtox::] error getting current working directory:", err)
+				logger.Error("[::Moxtox::] unable to determine current working directory", err)
 				allowMocks = false
 				return
 			}
@@ -37,17 +38,17 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 		// Load the Moxtox config
 		if data, err := os.ReadFile(filepath.Join(dir, "moxtox_config.yml")); err == nil {
 			if err := yaml.Unmarshal(data, &config); err != nil {
-				fmt.Println("[::Moxtox::] error loading moxtox config:", err)
+				logger.Error("[::Moxtox::] error loading moxtox config", err)
 				allowMocks = false
 				return
 			}
 			if !config.EnableMoxtox {
-				fmt.Printf("[::Moxtox::] mocks disabled - using default behavior\n")
+				logger.Info("[::Moxtox::] mocks disabled - using default behavior")
 				allowMocks = false
 				return
 			}
 			if !contains(config.AllowedEnvironments, env) {
-				fmt.Printf("[::Moxtox::] mocks not allowed in this environment\n")
+				logger.Info("[::Moxtox::] mocks not allowed in this environment")
 				allowMocks = false
 				return
 			}
@@ -67,9 +68,9 @@ func InitMoxtoxMiddleware(env string, configPath ...string) func(http.Handler) h
 					config.buildSliceLookupMap()
 			}
 
-			fmt.Printf("[::Moxtox::] mocks enabled\n")
+			logger.Info("[::Moxtox::] mocks enabled successfully")
 		} else {
-			fmt.Println("[::Moxtox::] error loading moxtox config:", err)
+			logger.Error("[::Moxtox::] error loading moxtox config", err)
 			allowMocks = false
 		}
 	})
@@ -94,14 +95,14 @@ func mockResponseHandler() func(http.Handler) http.Handler {
 			// Use LookupMap for lookup
 			if scenario, ok := matchesRequest(r); ok {
 				if err := injectMock(w, r, scenario); err != nil {
-					errors.WriteErrorResponse(w, r, http.StatusInternalServerError, errors.ERR_INTERNAL_SERVER, "Mock injection failed")
+					errors.WriteErrorResponse(w, r, http.StatusInternalServerError, errCodes.ERR_INTERNAL_SERVER, "Mock injection failed")
 					return
 				}
 				return
 			}
 
 			// No match: return 418 Teapot error
-			errors.WriteErrorResponse(w, r, http.StatusTeapot, errors.ERR_NOT_FOUND, "No mocks found")
+			errors.WriteErrorResponse(w, r, http.StatusTeapot, errCodes.ERR_NOT_FOUND, "No mocks found")
 		})
 	}
 }

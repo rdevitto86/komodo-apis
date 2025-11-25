@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"os"
 
-	ctxKeys "komodo-internal-lib-apis-go/common/context"
-	"komodo-internal-lib-apis-go/common/errors"
 	authServ "komodo-internal-lib-apis-go/domains/auth/service"
 	userServ "komodo-internal-lib-apis-go/domains/user"
+	ctxKeys "komodo-internal-lib-apis-go/http/common/context"
+	errCodes "komodo-internal-lib-apis-go/http/common/errors"
+	errors "komodo-internal-lib-apis-go/http/common/errors/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 )
 
@@ -21,7 +22,7 @@ func AuthMeGetHandler(wtr http.ResponseWriter, req *http.Request) {
 	userID, ok := req.Context().Value(ctxKeys.USER_ID_KEY).(string)
 	if !ok || userID == "" {
 		logger.Error("user_id not found in request context")
-		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "unauthorized", errors.ERR_INVALID_TOKEN)
+		errors.WriteErrorResponse(wtr, req, http.StatusUnauthorized, "unauthorized", errCodes.ERR_INVALID_TOKEN)
 		return
 	}
 
@@ -35,7 +36,7 @@ func AuthMeGetHandler(wtr http.ResponseWriter, req *http.Request) {
 	})
 	if res.IsError() {
 		logger.Error("failed to get service token from internal auth service", res.Error)
-		errors.WriteErrorResponse(wtr, req, res.Status, "failed to authenticate service", errors.ERR_INTERNAL_API_CALL_FAILED)
+		errors.WriteErrorResponse(wtr, req, res.Status, "failed to authenticate service", errCodes.ERR_INTERNAL_API_CALL_FAILED)
 		return
 	}
 
@@ -43,7 +44,7 @@ func AuthMeGetHandler(wtr http.ResponseWriter, req *http.Request) {
 	bearer, ok := res.BodyParsed.(*authServ.TokenGenerateResponse)
 	if !ok || bearer == nil {
 		logger.Error("failed to type assert service token response")
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse service token", errors.ERR_INTERNAL_SERVER)
+		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse service token", errCodes.ERR_INTERNAL_SERVER)
 		return
 	}
 
@@ -57,7 +58,7 @@ func AuthMeGetHandler(wtr http.ResponseWriter, req *http.Request) {
 	})
 	if res.IsError() {
 		logger.Error("failed to fetch user profile", res.Error)
-		errors.WriteErrorResponse(wtr, req, res.Status, "failed to fetch user profile", errors.ERR_INTERNAL_API_CALL_FAILED)
+		errors.WriteErrorResponse(wtr, req, res.Status, "failed to fetch user profile", errCodes.ERR_INTERNAL_API_CALL_FAILED)
 		return
 	}
 
@@ -65,7 +66,7 @@ func AuthMeGetHandler(wtr http.ResponseWriter, req *http.Request) {
 	profile, ok := res.BodyParsed.(*userServ.UserProfileGetResponseBasic)
 	if !ok || profile == nil {
 		logger.Error("failed to type assert user profile response", res.Error)
-		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse user profile", errors.ERR_INTERNAL_SERVER)
+		errors.WriteErrorResponse(wtr, req, http.StatusInternalServerError, "failed to parse user profile", errCodes.ERR_INTERNAL_SERVER)
 		return
 	}
 
