@@ -13,16 +13,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ServiceAuthMiddleware validates service tokens (JWT or OAuth)
-// Strategy 1: Try JWT verification (fast path for internal services)
-// Strategy 2: Fall back to OAuth introspection (for external partners)
+// Validates service tokens (JWT or OAuth)
 func ServiceAuthMiddleware() gin.HandlerFunc {
-	return func(gctx *gin.Context) {
-		authHeader := gctx.GetHeader("Authorization")
+	return func(g *gin.Context) {
+		authHeader := g.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			logger.Warn("missing or invalid authorization header")
-			gctx.JSON(http.StatusUnauthorized, gin.H{"error": "missing authorization header"})
-			gctx.Abort()
+			g.JSON(http.StatusUnauthorized, gin.H{"error": "missing authorization header"})
+			g.Abort()
 			return
 		}
 
@@ -38,11 +36,11 @@ func ServiceAuthMiddleware() gin.HandlerFunc {
 				scope, _ := claims["scope"].(string)
 
 				// Set context values for downstream handlers
-				gctx.Set("client_id", clientID)
-				gctx.Set("scope", scope)
-				gctx.Set("auth_method", "jwt")
+				g.Set("client_id", clientID)
+				g.Set("scope", scope)
+				g.Set("auth_method", "jwt")
 
-				gctx.Next()
+				g.Next()
 				return
 			}
 		}
@@ -54,11 +52,11 @@ func ServiceAuthMiddleware() gin.HandlerFunc {
 		res := authServ.TokenVerify(req)
 		if res.IsError() {
 			logger.Warn("OAuth token verification failed", res.Error)
-			gctx.JSON(res.Status, gin.H{
+			g.JSON(res.Status, gin.H{
 				"error": "invalid or expired token",
 				"error_code": errCodes.ERR_INVALID_TOKEN,
 			})
-			gctx.Abort()
+			g.Abort()
 			return
 		}
 
@@ -66,19 +64,19 @@ func ServiceAuthMiddleware() gin.HandlerFunc {
 		verified, ok := res.BodyParsed.(*authServ.TokenVerifyResponse)
 		if !ok || verified == nil || !verified.Active {
 			logger.Warn("OAuth token not active")
-			gctx.JSON(http.StatusUnauthorized, gin.H{
+			g.JSON(http.StatusUnauthorized, gin.H{
 				"error": "invalid token",
 				"error_code": errCodes.ERR_INVALID_TOKEN,
 			})
-			gctx.Abort()
+			g.Abort()
 			return
 		}
 
 		// Set context values for downstream handlers
-		gctx.Set("client_id", verified.ClientID)
-		gctx.Set("scope", verified.Scope)
-		gctx.Set("auth_method", "oauth")
+		g.Set("client_id", verified.ClientID)
+		g.Set("scope", verified.Scope)
+		g.Set("auth_method", "oauth")
 
-		gctx.Next()
+		g.Next()
 	}
 }

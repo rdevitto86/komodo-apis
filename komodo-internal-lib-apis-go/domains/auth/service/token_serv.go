@@ -17,7 +17,7 @@ func init() {
 	if client = httpclient.GetInstance(); client == nil {
 		logger.Error("failed to initialize http client")
 	}
-	if authAPIEndpoint = os.Getenv("AUTH_API_URL"); authAPIEndpoint == "" {
+	if authAPIEndpoint = os.Getenv("URL_AUTH_SERVICE_API"); authAPIEndpoint == "" {
 		logger.Error("auth api endpoint environment variable not set")
 	}
 }

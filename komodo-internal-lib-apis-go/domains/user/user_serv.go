@@ -20,7 +20,7 @@ func init() {
 	if client = httpclient.GetInstance(); client == nil {
 		logger.Error("failed to initialize http client")
 	}
-	if userAPIEndpoint = os.Getenv("USER_API_URL"); userAPIEndpoint == "" {
+	if userAPIEndpoint = os.Getenv("URL_USER_API"); userAPIEndpoint == "" {
 		logger.Error("user api endpoint environment variable not set")
 	}
 }

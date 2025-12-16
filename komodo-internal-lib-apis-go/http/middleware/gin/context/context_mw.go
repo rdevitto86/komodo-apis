@@ -5,7 +5,7 @@ import (
 )
 
 func ContextMiddleware() gin.HandlerFunc {
-	return func(gctx *gin.Context) {
-		gctx.Next()
+	return func(g *gin.Context) {
+		g.Next()
 	}
 }

@@ -17,7 +17,9 @@ var (
 
 func init() {
 	once.Do(func() {
-		instance = &Config{ data: make(map[string]string) }
+		instance = &Config{
+			data: make(map[string]string),
+		}
 	})
 }
 

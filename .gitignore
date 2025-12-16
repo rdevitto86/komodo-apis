@@ -46,7 +46,6 @@ htmlcov/
 # Builds
 *.out
 dist/
-build/
 vendor/
 
 # Logs

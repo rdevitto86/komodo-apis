@@ -3,54 +3,32 @@ package main
 import (
 	"komodo-auth-service-api/internal/handlers"
 	elasticache "komodo-internal-lib-apis-go/aws/elasticache"
-	secretsManager "komodo-internal-lib-apis-go/aws/secrets-manager"
 	"komodo-internal-lib-apis-go/config"
 	"komodo-internal-lib-apis-go/crypto/jwt"
+	bootstrap "komodo-internal-lib-apis-go/http/common/bootstrap"
 	mw "komodo-internal-lib-apis-go/http/middleware/chi"
 	logger "komodo-internal-lib-apis-go/logging/runtime"
 	moxtox "komodo-internal-lib-apis-go/test/moxtox"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func main() {
-	logger.InitLogger()
-
-	env := config.GetConfigValue("ENV")
-	logger.Info("starting komodo-auth-service-api in " + env + " environment")
-
-	switch strings.ToLower(env) {
-		case "local":
-			logger.Info("running in local environment - skipping AWS Secrets Manager integration")
-		case "dev", "staging", "prod":
-			if !secretsManager.IsUsingAWS() {
-				logger.Fatal("aws secrets manager integration disabled")
-				os.Exit(1)
-			}
-			logger.Info("aws secrets manager integration enabled")
-
-			secrets := []string{
-				"JWT_PUBLIC_KEY",
-				"JWT_PRIVATE_KEY",
-				"JWT_ENC_KEY",
-				"JWT_HMAC_SECRET",
-				"IP_WHITELIST",
-				"IP_BLACKLIST",
-			}
-
-			// load AWS Secrets
-			if err := secretsManager.LoadSecrets(secrets); err != nil {
-				logger.Fatal("failed to get secrets", err)
-				os.Exit(1)
-			}
-		default:
-			logger.Fatal("environment variable ENV invalid or not set")
-			os.Exit(1)
-	}
+	init := bootstrap.Initialize(bootstrap.Options{
+		AppName: "komodo-auth-service-api",
+		Secrets: []string{
+			"JWT_PUBLIC_KEY",
+			"JWT_PRIVATE_KEY",
+			"JWT_ENC_KEY",
+			"JWT_HMAC_SECRET",
+			"IP_WHITELIST",
+			"IP_BLACKLIST",
+		},
+	})
+	env, port := init.Env, init.Port
 
 	// initialize Elasticache client
 	elasticache.InitElasticacheClient()
@@ -60,7 +38,6 @@ func main() {
 		logger.Fatal("failed to initialize JWT keys", err)
 		os.Exit(1)
 	}
-	logger.Info("jwt keys initialized successfully")
 
 	// initialize router
 	rtr := chi.NewRouter()
@@ -95,7 +72,6 @@ func main() {
 		})
 	})
 
-	port := config.GetConfigValue("PORT")
 	logger.Info("server starting on port " + port)
 
 	server := &http.Server{

@@ -17,9 +17,14 @@ BUILD_DIR := build
 # Determine which compose file to use
 ifeq ($(ENV),prod)
 	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.prod.yaml
+else ifeq ($(ENV),staging)
+	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.staging.yaml
+else ifeq ($(ENV),dev)
+	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.dev.yaml
+else ifeq ($(ENV),local)
+	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.dev.yaml
 else
-	# local, dev, staging all use nonprod compose
-	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.nonprod.yaml
+	$(error Invalid environment: $(ENV). Valid options are: local, dev, staging, prod)
 endif
 
 .PHONY: help build run bootstrap stop restart clean test_all test_unit test_int test_e2e fmt
