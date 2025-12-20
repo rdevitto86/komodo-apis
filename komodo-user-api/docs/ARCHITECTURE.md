@@ -158,7 +158,7 @@ We use `POST` for profile retrieval (instead of `GET`) to:
 
 ## Data Structures
 
-See `komodo-internal-lib-apis-go/domains/user/user_types.go` for complete type definitions:
+See `komodo-forge-apis-go/domains/user/user_types.go` for complete type definitions:
 
 - `UserProfileGetResponseBasic` - Basic profile fields
 - `UserProfileGetResponseMinimal` - Minimal profile fields

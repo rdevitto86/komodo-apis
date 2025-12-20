@@ -7,7 +7,7 @@
 *.bin
 *.build
 
-# Environments
+# Sensitive
 .env
 .env.*
 *.secrets.*
@@ -34,7 +34,6 @@ env.bak/
 node_modules/
 
 # Tests & Coverage
-*.test
 coverage/
 *.coverprofile
 htmlcov/

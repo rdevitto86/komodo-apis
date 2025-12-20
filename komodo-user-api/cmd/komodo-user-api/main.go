@@ -1,11 +1,11 @@
 package main
 
 import (
-	"komodo-internal-lib-apis-go/aws/elasticache"
-	"komodo-internal-lib-apis-go/config"
-	"komodo-internal-lib-apis-go/http/common/bootstrap"
-	mw "komodo-internal-lib-apis-go/http/middleware/gin"
-	logger "komodo-internal-lib-apis-go/logging/runtime"
+	"komodo-forge-apis-go/aws/elasticache"
+	"komodo-forge-apis-go/config"
+	"komodo-forge-apis-go/http/common/bootstrap"
+	mw "komodo-forge-apis-go/http/middleware/gin"
+	logger "komodo-forge-apis-go/logging/runtime"
 	"komodo-user-api/internal/handlers"
 	"os"
 
@@ -16,9 +16,6 @@ func main() {
 	init := bootstrap.Initialize(bootstrap.Options{
 		AppName: "komodo-user-api",
 		Secrets: []string{
-			"JWT_PUBLIC_KEY",
-			"SESSION_ENCRYPTION_KEY",
-			"CSRF_SECRET",
 			"USER_API_CLIENT_ID",
 			"USER_API_CLIENT_SECRET",
 			"IP_WHITELIST",
@@ -44,50 +41,34 @@ func main() {
 		// router.Use(moxtox.InitMoxtoxMiddleware(env))
 	}
 
-	// health check (public, no auth)
 	router.GET("/health", handlers.HealthHandler)
 
-	// ========================================
-	// M2M Routes (Service-to-Service)
-	// ========================================
-	// Auth: JWT or OAuth service tokens only
-	// Use: Internal microservice communication
-	// Security: No CSRF, higher rate limits
-	m2m := router.Group("/m2m")
-	m2m.Use(mw.ServiceAuthMiddleware())
-	{
-		m2m.POST("/users", handlers.CreateUser)
-		m2m.POST("/users/query", handlers.GetUserByID)
-		m2m.PUT("/users", handlers.UpdateUserByID)
-		m2m.DELETE("/users", handlers.DeleteUserByID)
-	}
+	user := router.Group("/users")
+	user.Use(mw.AuthMiddleware())
 
-	// ========================================
-	// Client Routes (Browser/Mobile Apps)
-	// ========================================
-	// Auth: Session-based (cookies)
-	// Use: End-user interactions from browsers/mobile apps
-	// Security: Full browser protections (CSRF, rate limiting, idempotency)
-	me := router.Group("/users/me")
-	// me.Use(mw.Session())        // TODO: Enable when session middleware is ready
-	// me.Use(mw.CSRF())           // TODO: Enable CSRF protection
-	// me.Use(mw.Idempotency())    // TODO: Enable idempotency for mutations
-	{
-		// Profile management
-		me.POST("/profile/query", handlers.GetMyProfile)
-		me.PUT("/profile", handlers.UpdateMyProfile)
-		me.DELETE("/account", handlers.DeleteMyAccount)
+	// User CRUD
+	user.POST("/", handlers.CreateUser)
+	user.GET("/:user_id", handlers.GetUserByID)
+	user.PUT("/:user_id", handlers.UpdateUserByID)
+	user.DELETE("/:user_id", handlers.DeleteUserByID)
 
-		// Address management
-		me.POST("/addresses/query", handlers.GetMyAddresses)
-		me.POST("/addresses", handlers.AddMyAddress)
-		me.PUT("/addresses", handlers.UpdateMyAddress)
-		me.DELETE("/addresses", handlers.DeleteMyAddress)
+	me := user.Group("/me")
+	me.Use(mw.IdempotencyMiddleware())
 
-		// Preferences management
-		me.POST("/preferences/query", handlers.GetMyPreferences)
-		me.PUT("/preferences", handlers.UpdateMyPreferences)
-	}
+	// Profile management
+	me.POST("/profile", handlers.GetMyProfile)
+	me.PUT("/profile", handlers.UpdateMyProfile)
+	me.DELETE("/", handlers.DeleteMyAccount)
+
+	// Addresses management
+	me.POST("/addresses/query", handlers.GetMyAddresses)
+	me.POST("/addresses", handlers.AddMyAddress)
+	me.PUT("/addresses/:addr_id", handlers.UpdateMyAddress)
+	me.DELETE("/addresses/:addr_id", handlers.DeleteMyAddress)
+
+	// Preferences management
+	me.GET("/preferences", handlers.GetMyPreferences)
+	me.PUT("/preferences", handlers.UpdateMyPreferences)
 
 	logger.Info("server starting on port " + port)
 

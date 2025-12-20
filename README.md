@@ -13,7 +13,7 @@ A single repo showcasing a complete, production-style backend for a modern e-com
 - [Local Development](#local-development)  
 - [Conventions](#conventions)  
 - [Services](#services)
-  - [komodo-auth-service-api](#komodo-auth-service-api)
+  - [komodo-auth-api](#komodo-auth-api)
   - [komodo-address-api](#komodo-address-api)
   - [komodo-ai-chatbot-api](#komodo-ai-chatbot-api)
   - [komodo-ai-summary-api](#komodo-ai-summary-api)
@@ -83,7 +83,7 @@ make up SERVICE=komodo-catalog-api
 ## Conventions
 
 - **API Style:** JSON over HTTP; REST first; gRPC optional for internal API calls.  
-- **Auth:** JWT access tokens via `komodo-auth-service-api`. Service-to-service via mTLS or signed service tokens.  
+- **Auth:** JWT access tokens via `komodo-auth-api`. Service-to-service via mTLS or signed service tokens.  
 - **Tracing:** OpenTelemetry (OTLP) → collector (Jaeger/Tempo).  
 - **Logging:** Structured JSON, request IDs, 12-factor log to stdout.  
 - **Errors:** RFC 7807 (Problem+JSON) recommended.  
@@ -125,11 +125,8 @@ Services are allocated port ranges by business domain, with highest-priority/mos
 
 ### 7001–7020: Authentication & Authorization
 **Priority: CRITICAL** - Core authentication/authorization services that all other services depend on
-
-- **7001** - `komodo-auth-user-api` - Public login, sessions, MFA, passkeys
-- **7002** - `komodo-auth-service-api` - Internal JWT validation, bearer tokens
-- **7003** - `komodo-auth-oauth-api` - OAuth 2.0 flows
-- **7004-7020** - Reserved for future auth services
+- **7001** - `komodo-auth-api` - OAuth 2.0 flows
+- **7002-7020** - Reserved for future auth services
 
 ---
 

@@ -1,0 +1,103 @@
+#  ____        _        ____             __ _       
+# |  _ \ _   _| | ___  / ___|___  _ __  / _(_) __ _ 
+# | |_) | | | | |/ _ \| |   / _ \| '_ \| |_| |/ _` |
+# |  _ <| |_| | |  __/| |__| (_) | | | |  _| | (_| |
+# |_| \_\\__,_|_|\___| \____\___/|_| |_|_| |_|\__, |
+#                                             |___/ 
+#
+# Validation Levels: ignore | lenient | strict
+# Public Routes: No authentication required
+# Protected Routes: Require AuthJWT + Rate Limiting
+#
+
+rules:
+  "/health":
+    GET:
+      level: "ignore"
+  "/.well-known/jwks.json":
+    GET:
+      level: "ignore"
+  "/oauth/token":
+    POST:
+      level: "strict"
+      headers:
+        "Accept":
+          required: true
+          type: "string"
+          pattern: "^application/json(;\\s*(v|version)=\\d+)?$"
+        "Content-Type":
+          required: true
+          type: "string"
+          pattern: "^application/json(;\\s*(v|version)=\\d+)?$"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          type: "string"
+        "Referer":
+          type: "string"
+      body:
+        "client_id":
+          required: true
+          type: "string"
+        "client_secret":
+          required: true
+          type: "string"
+        "grant_type":
+          required: true
+          type: "string"
+      requiredVersion: 1
+  "/oauth/authorize":
+    GET:
+      level: "lenient"
+      query:
+        "response_type":
+          required: true
+          type: "string"
+        "client_id":
+          required: true
+          type: "string"
+        "redirect_uri":
+          required: true
+          type: "string"
+      requiredVersion: 1
+  "/oauth/introspect":
+    POST:
+      level: "strict"
+      headers:
+        "Accept":
+          required: true
+          type: "string"
+          pattern: "^application/json(;\\s*(v|version)=\\d+)?$"
+        "Authorization":
+          required: true
+          type: "string"
+          value: "Bearer *"
+        "Content-Type":
+          required: true
+          type: "string"
+          pattern: "^application/json(;\\s*(v|version)=\\d+)?$"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          type: "string"
+        "Referer":
+          type: "string"
+      requiredVersion: 1
+  "/oauth/revoke":
+    POST:
+      level: "strict"
+      headers:
+        "Authorization":
+          required: true
+          type: "string"
+          value: "Bearer *"
+        "X-Requested-By":
+          required: true
+          type: "string"
+        "User-Agent":
+          type: "string"
+        "Referer":
+          type: "string"
+      requiredVersion: 1
