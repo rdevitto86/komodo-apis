@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"komodo-forge-apis-go/config"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

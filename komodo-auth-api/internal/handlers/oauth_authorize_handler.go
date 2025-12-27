@@ -6,7 +6,7 @@ import (
 
 	errCodes "komodo-forge-apis-go/http/common/errors"
 	errors "komodo-forge-apis-go/http/common/errors/chi"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 )
 
 // Handles OAuth 2.0 authorization endpoint (RFC 6749 Section 3.1).

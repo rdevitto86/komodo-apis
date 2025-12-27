@@ -3,7 +3,6 @@ package headerEval
 import (
 	"komodo-forge-apis-go/config"
 	"komodo-forge-apis-go/crypto/jwt"
-	userauth "komodo-forge-apis-go/domains/auth/user"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -30,8 +29,6 @@ func ValidateHeaderValue(hdr string, req *http.Request) (bool, error) {
 			return isValidIdempotencyKey(val), nil
 		case "referer", "referrer":
 			return isValidReferer(val), nil
-		case "session", "x-session-token":
-			return userauth.ValidateSession(val)
 		case "user-agent":
 			return isValidUserAgent(val), nil
 		case "x-csrf-token":

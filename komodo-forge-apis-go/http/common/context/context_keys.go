@@ -1,4 +1,4 @@
-package config
+package context
 
 type ctxKey string
 
@@ -25,4 +25,6 @@ const (
 	IDEMPOTENCY_VALID_KEY ctxKey = "idempotency_key_valid"
 	CSRF_TOKEN_KEY      	ctxKey = "csrf_token"
 	CSRF_VALID_KEY      	ctxKey = "csrf_token_valid"
+	LOGGER_KEY          	ctxKey = "logger"
+	OTEL_LOGGER_KEY     	ctxKey = "otel_logger"
 )

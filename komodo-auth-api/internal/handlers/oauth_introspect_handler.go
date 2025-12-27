@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"komodo-forge-apis-go/crypto/jwt"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 )
 
 type IntrospectResponse struct {

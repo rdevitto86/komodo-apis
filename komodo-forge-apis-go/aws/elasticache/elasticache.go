@@ -5,7 +5,7 @@ import (
 	"errors"
 	sm "komodo-forge-apis-go/aws/secrets-manager"
 	"komodo-forge-apis-go/config"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 	"strconv"
 	"strings"
 	"sync"

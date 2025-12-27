@@ -1,22 +1,22 @@
-package ginerrors
+package errors
 
 import (
 	"fmt"
-	errorTypes "komodo-forge-apis-go/http/common/errors"
-	httptypes "komodo-forge-apis-go/http/types"
+	httpApi "komodo-forge-apis-go/http"
+	"komodo-forge-apis-go/http/common/errors"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 // Writes a standardized error response for Gin
-func WriteErrorResponse(c *gin.Context, status int, message string, errCode string) {
-	requestID := c.GetHeader("X-Request-ID")
+func WriteErrorResponse(gctx *gin.Context, status int, message string, errCode string) {
+	requestID := gctx.GetHeader("X-Request-ID")
 	if requestID == "" {
 		requestID = "unknown"
 	}
 
-	c.JSON(status, errorTypes.ErrorStandard{
+	gctx.JSON(status, errors.ErrorStandard{
 		Status:    status,
 		Code:      errCode,
 		Message:   message,
@@ -26,17 +26,17 @@ func WriteErrorResponse(c *gin.Context, status int, message string, errCode stri
 }
 
 // Writes a verbose error response with API details for Gin
-func WriteErrorVerboseResponse(c *gin.Context, status int, message string, errCode string, apiError any) {
-	requestID := c.GetHeader("X-Request-ID")
+func WriteErrorVerboseResponse(gctx *gin.Context, status int, message string, errCode string, apiError any) {
+	requestID := gctx.GetHeader("X-Request-ID")
 	if requestID == "" {
 		requestID = "unknown"
 	}
 
-	c.JSON(status, errorTypes.ErrorVerbose{
+	gctx.JSON(status, errors.ErrorVerbose{
 		Status:    status,
 		Code:      errCode,
 		Message:   message,
-		APIName:   c.Request.URL.Path,
+		APIName:   gctx.Request.URL.Path,
 		APIError:  fmt.Sprintf("%v", apiError),
 		RequestId: requestID,
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -44,8 +44,8 @@ func WriteErrorVerboseResponse(c *gin.Context, status int, message string, errCo
 }
 
 // Forwards an existing APIResponse error to Gin context
-func ForwardErrorResponse(c *gin.Context, res *httptypes.APIResponse) {
-	c.JSON(res.Status, errorTypes.ErrorStandard{
+func ForwardErrorResponse(gctx *gin.Context, res *httpApi.APIResponse) {
+	gctx.JSON(res.Status, errors.ErrorStandard{
 		Status:    res.Status,
 		Code:      res.Error.Code,
 		Message:   res.Error.Message,

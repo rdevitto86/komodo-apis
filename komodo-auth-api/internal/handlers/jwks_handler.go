@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"komodo-forge-apis-go/config"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 )
 
 type JWK struct {

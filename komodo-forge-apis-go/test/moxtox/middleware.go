@@ -3,7 +3,7 @@ package moxtox
 import (
 	errCodes "komodo-forge-apis-go/http/common/errors"
 	errors "komodo-forge-apis-go/http/common/errors/chi"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 	"net/http"
 	"os"
 	"path/filepath"

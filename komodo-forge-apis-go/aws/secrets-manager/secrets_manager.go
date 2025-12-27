@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"komodo-forge-apis-go/config"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"

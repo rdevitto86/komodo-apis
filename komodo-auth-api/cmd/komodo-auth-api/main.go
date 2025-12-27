@@ -6,12 +6,13 @@ import (
 	"komodo-forge-apis-go/config"
 	"komodo-forge-apis-go/crypto/jwt"
 	bootstrap "komodo-forge-apis-go/http/common/bootstrap"
-	mw "komodo-forge-apis-go/http/middleware/chi"
-	logger "komodo-forge-apis-go/logging/runtime"
+	mw "komodo-forge-apis-go/http/middleware"
 	moxtox "komodo-forge-apis-go/test/moxtox"
 	"net/http"
 	"os"
 	"time"
+
+	logger "komodo-forge-apis-go/loggers/runtime"
 
 	"github.com/go-chi/chi/v5"
 )

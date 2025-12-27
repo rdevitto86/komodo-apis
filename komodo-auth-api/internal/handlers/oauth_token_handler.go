@@ -8,7 +8,7 @@ import (
 	"komodo-forge-apis-go/crypto/oauth"
 	errCodes "komodo-forge-apis-go/http/common/errors"
 	errors "komodo-forge-apis-go/http/common/errors/chi"
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 )
 
 type TokenRequest struct {

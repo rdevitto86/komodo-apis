@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	httptypes "komodo-forge-apis-go/http/types"
+	httpApi "komodo-forge-apis-go/http"
 	"net/http"
 	"sync"
 	"time"
 
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-apis-go/loggers/runtime"
 )
 
 var (
@@ -57,8 +57,8 @@ func (client *HTTPClient) Get(
 	ctx context.Context,
 	url string,
 	headers map[string]string,
-) (*httptypes.APIResponse, error) {
-	return &httptypes.APIResponse{
+) (*httpApi.APIResponse, error) {
+	return &httpApi.APIResponse{
 		Status: 200,
 		Headers: http.Header{},
 		BodyRaw: []byte(`{"message":"success"}`),
@@ -79,8 +79,8 @@ func (client *HTTPClient) Post(
 	url string,
 	body interface{},
 	headers map[string]string,
-) (*httptypes.APIResponse, error) {
-	return &httptypes.APIResponse{
+) (*httpApi.APIResponse, error) {
+	return &httpApi.APIResponse{
 		Status: 200,
 		Headers: http.Header{},
 		BodyRaw: []byte(`{"message":"success"}`),
@@ -102,8 +102,8 @@ func (client *HTTPClient) Put(
 	url string,
 	body interface{},
 	headers map[string]string,
-) (*httptypes.APIResponse, error) {
-	return &httptypes.APIResponse{
+) (*httpApi.APIResponse, error) {
+	return &httpApi.APIResponse{
 		Status: 200,
 		Headers: http.Header{},
 		BodyRaw: []byte(`{"message":"success"}`),
@@ -125,8 +125,8 @@ func (client *HTTPClient) Patch(
 	url string,
 	body interface{},
 	headers map[string]string,
-) (*httptypes.APIResponse, error) {
-	return &httptypes.APIResponse{
+) (*httpApi.APIResponse, error) {
+	return &httpApi.APIResponse{
 		Status: 200,
 		Headers: http.Header{},
 		BodyRaw: []byte(`{"message":"success"}`),
@@ -147,8 +147,8 @@ func (client *HTTPClient) Delete(
 	ctx context.Context,
 	url string,
 	headers map[string]string,
-) (*httptypes.APIResponse, error) {
-	return &httptypes.APIResponse{
+) (*httpApi.APIResponse, error) {
+	return &httpApi.APIResponse{
 		Status: 200,
 		Headers: http.Header{},
 		BodyRaw: []byte(`{"message":"success"}`),
@@ -164,7 +164,7 @@ func (client *HTTPClient) Delete(
 }
 
 // Performs an HTTP request with the given options
-func (client *HTTPClient) Send(ctx context.Context, opts RequestOptions) (*httptypes.APIResponse, error) {
+func (client *HTTPClient) Send(ctx context.Context, opts RequestOptions) (*httpApi.APIResponse, error) {
 	startTime := time.Now()
 
 	// Marshal body if provided
@@ -217,7 +217,7 @@ func (client *HTTPClient) Send(ctx context.Context, opts RequestOptions) (*httpt
 
 	logger.Info(fmt.Sprintf("http response: %s %s -> %d (took %v)", opts.Method, opts.URL, res.StatusCode, duration))
 
-	return &httptypes.APIResponse{
+	return &httpApi.APIResponse{
 		Status: res.StatusCode,
 		Headers: res.Header,
 		BodyRaw: respBody,
