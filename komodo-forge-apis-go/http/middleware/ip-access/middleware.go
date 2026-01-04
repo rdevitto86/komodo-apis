@@ -6,11 +6,10 @@ import (
 	"sync"
 
 	"komodo-forge-apis-go/config"
-	errCodes "komodo-forge-apis-go/http/common/errors"
-	errors "komodo-forge-apis-go/http/common/errors/chi"
+	httpErr "komodo-forge-apis-go/http/errors"
+	httpReq "komodo-forge-apis-go/http/request"
 	ipsvc "komodo-forge-apis-go/http/services/ip_access"
-	reqUtils "komodo-forge-apis-go/http/utils/request"
-	logger "komodo-forge-apis-go/loggers/runtime"
+	logger "komodo-forge-apis-go/logging/runtime"
 )
 
 // IPAccessMiddleware enforces allow/deny rules based on client IP.
@@ -19,9 +18,6 @@ import (
 // - `IP_WHITELIST`: comma-separated list of IPs or CIDR ranges. If set, only these addresses are allowed.
 // - `IP_BLACKLIST`: comma-separated list of IPs or CIDR ranges. If set and whitelist is empty, listed addresses are denied.
 //
-// Recommendation: Add these variables to your environment configuration (e.g. `env/.env.dev` and deployment
-// system) so they can be centrally managed. For more advanced setups, move them into a config package or
-// use a secrets/config service and inject values at startup.
 
 var (
 	ipOnce sync.Once
@@ -38,10 +34,10 @@ func IPAccessMiddleware(next http.Handler) http.Handler {
 	})
 
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
-		client := reqUtils.GetClientKey(req)
+		client := httpReq.GetClientKey(req)
 		if client == "" {
 			logger.Error("unable to determine client IP", req)
-			errors.WriteErrorResponse(wtr, req, http.StatusForbidden, errCodes.ERR_ACCESS_DENIED, "forbidden")
+			httpErr.SendError(wtr, req, httpErr.Global.Forbidden, httpErr.WithDetail("unable to determine client IP"))
 			return
 		}
 
@@ -54,15 +50,15 @@ func IPAccessMiddleware(next http.Handler) http.Handler {
 			}
 		}
 		if ip == nil {
-			logger.Error("invalid client IP: "+client, req)
-			errors.WriteErrorResponse(wtr, req, http.StatusForbidden, errCodes.ERR_ACCESS_DENIED, "forbidden")
+			logger.Error("invalid client IP: " + client, req)
+			httpErr.SendError(wtr, req, httpErr.Global.Forbidden, httpErr.WithDetail("invalid client IP"))
 			return
 		}
 
 		allowed := ipsvc.Evaluate(ip, &lists)
 		if !allowed {
-			logger.Error("access denied for client ip: "+client, req)
-			errors.WriteErrorResponse(wtr, req, http.StatusForbidden, errCodes.ERR_ACCESS_DENIED, "forbidden")
+			logger.Error("access denied for client ip: " + client, req)
+			httpErr.SendError(wtr, req, httpErr.Global.Forbidden, httpErr.WithDetail("access denied for client IP"))
 			return
 		}
 

@@ -26,31 +26,30 @@ type Service interface {
 	ShouldFailOpen() bool
 }
 
-// Config allows programmatic configuration of the in-process limiter
 type Config struct {
 	RPS             float64
 	Burst           float64
 	BucketTTLSecond int
-	FailOpen        *bool // nil = leave as-is, otherwise override
+	FailOpen        *bool
 }
 
 var (
 	rlOnce    sync.Once
 	rps       float64
 	burst     float64
-	buckets   sync.Map // map[string]*bucket
+	buckets   sync.Map
 	evictOnce sync.Once
 )
 
-// Allow attempts to consume a token for the given client key. It mirrors previous
-// middleware behavior: prefer distributed Elasticache when configured/available
-// and fall back to a local in-process token bucket.
+// Allow attempts to consume a token for the given client key
 func Allow(ctx context.Context, key string) (allowed bool, wait time.Duration, err error) {
 	env := strings.ToLower(config.GetConfigValue("ENV"))
 
 	if !strings.EqualFold(config.GetConfigValue("USE_MOCKS"), "true") && (env == "prod" || env == "staging") {
-		// Try distributed token consume via Elasticache/Redis.
-		return elasticache.AllowDistributed(ctx, key)
+		rpsVal, burstVal := rateConfig()
+		ttl := config.GetConfigValue("BUCKET_TTL_SECOND")
+		ttlSec, _ := strconv.Atoi(ttl)
+		return elasticache.AllowDistributed(ctx, key, rpsVal, burstVal, ttlSec)
 	}
 
 	// local process bucket
@@ -61,10 +60,7 @@ func Allow(ctx context.Context, key string) (allowed bool, wait time.Duration, e
 	return true, 0, nil
 }
 
-// GetUsage returns simple usage metrics for the given key. It's best-effort
-// and based on the in-process bucket state (if present). If the token bucket
-// does not exist yet it will be created and the returned usage will reflect
-// an empty/just-created bucket.
+// Returns simple usage metrics for the given key
 func GetUsage(ctx context.Context, key string) (used int, remaining int, reset time.Time, err error) {
 	b := getBucket(key)
 	// snapshot under lock
@@ -91,23 +87,14 @@ func Reset(ctx context.Context, key string) error {
 	return nil
 }
 
-// LoadConfig programmatically overrides rate limiter settings (RPS/Burst).
-// Note: this updates the package-level cached values. Callers should call
-// this during initialization; concurrent calls are safe but may race with
-// an in-flight rateConfig initialization.
+// Programmatically overrides rate limiter settings (RPS/Burst).
 func LoadConfig(cfg Config) error {
-	if cfg.RPS > 0 {
-		rps = cfg.RPS
-	}
-	if cfg.Burst > 0 {
-		burst = cfg.Burst
-	}
-	// bucket TTL and FailOpen can be supported later; for now we only
-	// override rate values when provided.
+	if cfg.RPS > 0 { rps = cfg.RPS }
+	if cfg.Burst > 0 { burst = cfg.Burst }
 	return nil
 }
 
-// allow checks and updates the bucket token count
+// Checks and updates the bucket token count
 func (bkt *bucket) allow() bool {
 	rps, burst := rateConfig()
 	now := time.Now()
@@ -138,27 +125,22 @@ func (bkt *bucket) allow() bool {
 	return allowed
 }
 
-// retryAfter estimates how long until the next token is available
+// Estimates how long until the next token is available
 func (bkt *bucket) retryAfter() time.Duration {
 	rps, _ := rateConfig()
-	if rps <= 0 {
-		return time.Second
-	}
+	if rps <= 0 { return time.Second }
 
 	bkt.mu.Lock()
 	defer bkt.mu.Unlock()
 	deficit := 1 - bkt.tokens
-	if deficit <= 0 {
-		return 0
-	}
+	if deficit <= 0 { return 0 }
 	secs := deficit / rps
 	return time.Duration(secs * float64(time.Second))
 }
 
-// rateConfig reads and caches rate limit settings from env vars
+// Reads and caches rate limit settings from env vars
 func rateConfig() (float64, float64) {
 	rlOnce.Do(func() {
-		// Helper to parse float env var with default
 		parseFloatEnv := func(key string, dflt float64) float64 {
 			if val := strings.TrimSpace(config.GetConfigValue(key)); val != "" {
 				if f, err := strconv.ParseFloat(val, 64); err == nil {
@@ -172,17 +154,13 @@ func rateConfig() (float64, float64) {
 		burst = parseFloatEnv("RATE_LIMIT_BURST", 20) // default burst 20
 
 		// stricter validation: treat non-positive rps as invalid and reset
-		if rps <= 0 {
-			rps = 10
-		}
-		if burst < 1 {
-			burst = 20
-		}
+		if rps <= 0 { rps = 10 }
+		if burst < 1 { burst = 20 }
 	})
 	return rps, burst
 }
 
-// getBucket retrieves or creates a rate limit bucket for the given key
+// Retrieves or creates a rate limit bucket for the given key
 func getBucket(key string) *bucket {
 	// ensure the background evictor is running
 	evictOnce.Do(startBucketEvictor)
@@ -190,12 +168,12 @@ func getBucket(key string) *bucket {
 	if v, ok := buckets.Load(key); ok {
 		return v.(*bucket)
 	}
-	b := &bucket{tokens: 0, last: time.Time{}, created: time.Now()}
-	actual, _ := buckets.LoadOrStore(key, b)
+	bkt := &bucket{tokens: 0, last: time.Time{}, created: time.Now()}
+	actual, _ := buckets.LoadOrStore(key, bkt)
 	return actual.(*bucket)
 }
 
-// startBucketEvictor removes idle buckets after configured TTL
+// Removes idle buckets after configured TTL
 func startBucketEvictor() {
 	ttlSec := 300
 	if val := strings.TrimSpace(config.GetConfigValue("RATE_LIMIT_BUCKET_TTL_SEC")); val != "" {
@@ -230,11 +208,9 @@ func startBucketEvictor() {
 	}()
 }
 
-// shouldFailOpen decides fail-open vs fail-closed when the distributed store is unavailable
+// Decides fail-open vs fail-closed when the distributed store is unavailable
 func ShouldFailOpen() bool {
 	v := strings.ToLower(strings.TrimSpace(config.GetConfigValue("RATE_LIMIT_FAIL_OPEN")))
-	if v == "" {
-		return true // default to fail-open to reduce customer impact
-	}
+	if v == "" { return true }
 	return v == "true" || v == "1" || v == "yes"
 }

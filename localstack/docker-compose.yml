@@ -1,0 +1,32 @@
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4510-4559:4510-4559"
+    entrypoint: >
+      /bin/sh -c "apt-get update && apt-get install -y jq redis-tools && /usr/local/bin/docker-entrypoint.sh"
+    environment:
+      - AWS_ELASTICACHE_PASSWORD=test-password
+      - DEBUG=0
+      - ENV=local
+      - SERVICES=secretsmanager,s3,dynamodb,rds
+    networks:
+      - komodo-network
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ./init:/etc/localstack/init/ready.d
+  redis:
+    container_name: "komodo-redis"
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - komodo-network
+    command: redis-server --requirepass test-password
+networks:
+  komodo-network:
+    name: komodo-network
+    driver: bridge

@@ -1,40 +1,36 @@
 package oauth
 
-import "strings"
+import (
+	"strings"
+)
+
+// Define allowed scopes as a map for performance and clarity
+var allowedScopes = map[string]bool{
+	"read":           true,
+	"write":          true,
+	"admin":          true,
+	"checkout:read":  true,
+	"checkout:write": true,
+	"orders:read":    true,
+	"users:profile":  true,
+}
 
 // Checks if the provided scope string is valid according to predefined rules.
 func IsValidScope(scope string) bool {
 	if scope == "" { return false }
-
-	// Split by spaces and commas, validate each part
-	for _, part := range strings.Fields(strings.ReplaceAll(scope, ",", " ")) {
-		switch part {
-			case "read", "write", "delete", "admin", "users:read",
-			"users:write", "tokens:create", "tokens:delete":
-				continue
-			default:
-				return false
-		}
+	for _, s := range strings.Fields(strings.ReplaceAll(scope, ",", " ")) {
+		if !allowedScopes[s] { return false }
 	}
 	return true
 }
 
 // Returns a slice of invalid scopes found in the provided scope string.
 func GetInvalidScopes(scope string) []string {
-	invalidScopes := []string{}
-	if scope == "" { return invalidScopes }
-
-	// Split by spaces and commas, validate each part
-	for _, part := range strings.Fields(strings.ReplaceAll(scope, ",", " ")) {
-		switch part {
-			case "read", "write", "delete", "admin", "users:read",
-			"users:write", "tokens:create", "tokens:delete":
-				continue
-			default:
-				invalidScopes = append(invalidScopes, part)
-		}
+	var invalid []string
+	for _, s := range strings.Fields(strings.ReplaceAll(scope, ",", " ")) {
+		if !allowedScopes[s] { invalid = append(invalid, s) }
 	}
-	return invalidScopes
+	return invalid
 }
 
 // Checks if the provided grant type string is valid according to predefined rules.

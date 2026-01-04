@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"komodo-forge-apis-go/crypto/jwt"
-	errCodes "komodo-forge-apis-go/http/common/errors"
-	errors "komodo-forge-apis-go/http/common/errors/chi"
-	logger "komodo-forge-apis-go/loggers/runtime"
+	httpErr "komodo-forge-apis-go/http/errors"
+	logger "komodo-forge-apis-go/logging/runtime"
 )
 
 type RevokeRequest struct {
@@ -26,30 +25,18 @@ func OAuthRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 	var reqBody RevokeRequest
 	if err := json.NewDecoder(req.Body).Decode(&reqBody); err != nil {
 		logger.Error("failed to parse request body", err)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_request",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("failed to parse request body"))
 		return
 	}
 
 	if reqBody.Token == "" {
 		logger.Error("missing token parameter")
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_request: missing token",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("missing token parameter"))
 		return
 	}
 
-	// Verify token signature and parse claims
-	_, claims, err := jwt.VerifyToken(reqBody.Token)
+	// Parse claims from token
+	claims, err := jwt.ParseClaims(reqBody.Token)
 	if err != nil {
 		// Per RFC 7009, return 200 OK even if token is invalid
 		// (prevents information disclosure about token validity)
@@ -59,11 +46,8 @@ func OAuthRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Extract JTI and client ID
-	claimValues := jwt.ExtractStringClaims(claims, []string{"jti", "client_id"})
-	jti, _ := claimValues["jti"].(string)
-	clientID, _ := claimValues["client_id"].(string)
-
+	// Extract JTI (token ID) from claims
+	jti := claims.ID
 	if jti == "" {
 		// Token without JTI cannot be revoked (shouldn't happen in our system)
 		logger.Warn("token missing JTI claim")
@@ -72,8 +56,11 @@ func OAuthRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Calculate TTL
-	ttl := jwt.GetTokenTTL(claims)
+	// Calculate TTL from expiration time
+	ttl := time.Duration(0)
+	if claims.ExpiresAt != nil {
+		ttl = time.Until(claims.ExpiresAt.Time)
+	}
 	if ttl <= 0 {
 		// Token already expired, no need to revoke
 		logger.Info("token already expired, no revocation needed")
@@ -96,7 +83,7 @@ func OAuthRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 	// 	return
 	// }
 
-	logger.Info("token revoked successfully for client: " + clientID + ", JTI: " + jti)
+	logger.Info("token revoked successfully for subject: " + claims.Subject + ", JTI: " + jti)
 
 	// Per RFC 7009, return 200 OK with empty response (or small JSON)
 	wtr.WriteHeader(http.StatusOK)

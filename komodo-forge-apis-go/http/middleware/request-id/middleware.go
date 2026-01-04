@@ -2,8 +2,8 @@ package requestid
 
 import (
 	"context"
-	ctxKeys "komodo-forge-apis-go/http/common/context"
-	reqUtils "komodo-forge-apis-go/http/utils/request"
+	ctxKeys "komodo-forge-apis-go/http/context"
+	httpReq "komodo-forge-apis-go/http/request"
 	"net/http"
 
 	chimw "github.com/go-chi/chi/v5/middleware"
@@ -19,7 +19,7 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 		} else if rid := chimw.GetReqID(req.Context()); rid != "" {
 			reqID = rid
 		} else {
-			reqID = reqUtils.GenerateRequestId()
+			reqID = httpReq.GenerateRequestId()
 		}
 
 		req.Header.Set("X-Request-ID", reqID)

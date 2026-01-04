@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
+	"time"
 
 	"komodo-forge-apis-go/crypto/jwt"
 	"komodo-forge-apis-go/crypto/oauth"
-	errCodes "komodo-forge-apis-go/http/common/errors"
-	errors "komodo-forge-apis-go/http/common/errors/chi"
-	logger "komodo-forge-apis-go/loggers/runtime"
+	httpErr "komodo-forge-apis-go/http/errors"
+	logger "komodo-forge-apis-go/logging/runtime"
 )
 
 type TokenRequest struct {
@@ -41,36 +42,18 @@ func OAuthTokenHandler(wtr http.ResponseWriter, req *http.Request) {
 	var reqBody TokenRequest
 	if err := json.NewDecoder(req.Body).Decode(&reqBody); err != nil {
 		logger.Error("failed to parse request body", err)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_request",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("failed to parse request body"))
 		return
 	}
 
 	if reqBody.GrantType == "" {
-		logger.Error("missing grant_type")
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_request: missing grant_type",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		logger.Error("missing grant type")
+		httpErr.SendError(wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("missing grant type"))
 		return
 	}
 	if !oauth.IsValidGrantType(reqBody.GrantType) {
-		logger.Error("unsupported grant_type: " + reqBody.GrantType)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"unsupported_grant_type",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		logger.Error("unsupported grant type: " + reqBody.GrantType)
+		httpErr.SendError(wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("unsupported grant type"))
 		return
 	}
 
@@ -83,13 +66,8 @@ func OAuthTokenHandler(wtr http.ResponseWriter, req *http.Request) {
 		case "authorization_code":
 			handleAuthorizationCode(wtr, req, &reqBody)
 		default:
-			errors.WriteErrorResponse(
-				wtr,
-				req,
-				http.StatusBadRequest,
-				"unsupported_grant_type",
-				errCodes.ERR_INVALID_REQUEST,
-			)
+			logger.Error("unsupported grant type: " + reqBody.GrantType)
+			httpErr.SendError(wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("unsupported grant type"))
 	}
 }
 
@@ -98,81 +76,54 @@ func handleClientCredentials(wtr http.ResponseWriter, req *http.Request, reqBody
 	// Validate client credentials
 	if reqBody.ClientID == "" || reqBody.ClientSecret == "" {
 		logger.Error("missing client credentials")
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_client",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		httpErr.SendError(wtr, req, httpErr.Auth.InvalidClientCredentials, httpErr.WithDetail("missing client credentials"))
 		return
 	}
 
 	// TODO: Validate client_id and client_secret against database/secrets store
 	if reqBody.ClientID != "test-client" || reqBody.ClientSecret != "test-secret" {
 		logger.Error("invalid client credentials")
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusUnauthorized,
-			"invalid_client",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		httpErr.SendError(wtr, req, httpErr.Auth.InvalidClientCredentials, httpErr.WithDetail("invalid client credentials"))
 		return
 	}
 	if reqBody.Scope != "" && !oauth.IsValidScope(reqBody.Scope) {
-		logger.Error("invalid scope: " + reqBody.Scope)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_scope",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		logger.Error("invalid grant scope: " + reqBody.Scope)
+		httpErr.SendError(wtr, req, httpErr.Auth.InvalidScope, httpErr.WithDetail("invalid grant scope"))
 		return
 	}
 
 	// Issue access token (JWT) - no refresh token for client_credentials
-	accessExpiresIn := int64(jwt.DefaultTokenTTL)
+	accessExpiresIn := int64(3600) // 1 hour
 
-	accessClaims := jwt.CreateStandardClaims(
+	// Parse scopes from space-separated string
+	var scopes []string
+	if reqBody.Scope != "" {
+		scopes = strings.Fields(reqBody.Scope)
+	}
+
+	accessToken, err := jwt.SignToken(
 		"komodo-auth-api",
 		reqBody.ClientID,
 		"komodo-apis:service",
 		accessExpiresIn,
-		map[string]interface{}{
-			"scope":       reqBody.Scope,
-			"grant_type":  "client_credentials",
-			"client_id":   reqBody.ClientID,
-			"token_use":   "access",
-			"client_type": "api",
-		},
+		scopes,
 	)
 
-	accessToken, err := jwt.SignToken(accessClaims)
 	if err != nil {
 		logger.Error("failed to sign access token", err)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusInternalServerError,
-			"server_error",
-			errCodes.ERR_INTERNAL_SERVER,
-		)
+		httpErr.SendError(wtr, req, httpErr.Global.Internal, httpErr.WithDetail("failed to sign access token"))
 		return
 	}
 
 	// TODO: Store token JTI in Elasticache for tracking/revocation
 
-	response := TokenResponse{
+	wtr.WriteHeader(http.StatusOK)
+	json.NewEncoder(wtr).Encode(TokenResponse{
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
 		ExpiresIn:   int(accessExpiresIn),
 		Scope:       reqBody.Scope,
-	}
-
-	wtr.WriteHeader(http.StatusOK)
-	json.NewEncoder(wtr).Encode(response)
+	})
 
 	logger.Info("issued client_credentials token for: " + reqBody.ClientID)
 }
@@ -180,93 +131,58 @@ func handleClientCredentials(wtr http.ResponseWriter, req *http.Request, reqBody
 // Handles token refresh (RFC 6749 Section 6)
 func handleRefreshToken(wtr http.ResponseWriter, req *http.Request, reqBody *TokenRequest) {
 	if reqBody.RefreshToken == "" {
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_request: missing refresh_token",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("missing refresh token"))
 		return
 	}
 
-	// Verify refresh token
-	_, claims, err := jwt.VerifyToken(reqBody.RefreshToken)
-	if err != nil || jwt.IsTokenExpired(claims) {
-		logger.Error("invalid or expired refresh token", err)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusUnauthorized,
-			"invalid_grant",
-			errCodes.ERR_INVALID_TOKEN,
-		)
+	// Parse claims from refresh token
+	claims, err := jwt.ParseClaims(reqBody.RefreshToken)
+	if err != nil {
+		logger.Error("failed to parse refresh token", err)
+		httpErr.SendError(wtr, req, httpErr.Auth.InvalidToken, httpErr.WithDetail("failed to parse refresh token"))
 		return
 	}
 
-	// Ensure token is a refresh token
-	tokenUse, _ := claims["token_use"].(string)
-	if tokenUse != "refresh" {
-		logger.Error("token is not a refresh token")
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_grant",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+	// Check if token is expired
+	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
+		logger.Error("refresh token is expired")
+		httpErr.SendError(wtr, req, httpErr.Auth.InvalidToken, httpErr.WithDetail("refresh token is expired"))
 		return
 	}
 
 	// TODO: Check if refresh token is revoked in Elasticache
 
-	// Extract claims
-	claimValues := jwt.ExtractStringClaims(claims, []string{
-		"client_id", "scope", "client_type",
-	})
-	clientID, _ := claimValues["client_id"].(string)
-	scope, _ := claimValues["scope"].(string)
+	// Extract subject and scopes from claims
+	clientID := claims.Subject
+	scope := ""
+	if len(claims.Scopes) > 0 {
+		scope = strings.Join(claims.Scopes, " ")
+	}
 
 	// Issue new access token
-	accessExpiresIn := int64(jwt.DefaultTokenTTL)
+	accessExpiresIn := int64(3600) // 1 hour
 
-	accessClaims := jwt.CreateStandardClaims(
+	accessToken, err := jwt.SignToken(
 		"komodo-auth-api",
 		clientID,
 		"komodo-apis:user",
 		accessExpiresIn,
-		map[string]interface{}{
-			"scope":       scope,
-			"grant_type":  "refresh_token",
-			"client_id":   clientID,
-			"token_use":   "access",
-			"client_type": "browser",
-		},
+		claims.Scopes,
 	)
-
-	accessToken, err := jwt.SignToken(accessClaims)
 	if err != nil {
 		logger.Error("failed to sign access token", err)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusInternalServerError,
-			"server_error",
-			errCodes.ERR_INTERNAL_SERVER,
-		)
+		httpErr.SendError(wtr, req, httpErr.Global.Internal, httpErr.WithDetail("failed to sign access token"))
 		return
 	}
 
-	response := TokenResponse{
+	wtr.WriteHeader(http.StatusOK)
+	json.NewEncoder(wtr).Encode(TokenResponse{
 		AccessToken:  accessToken,
 		TokenType:    "Bearer",
 		ExpiresIn:    int(accessExpiresIn),
 		Scope:        scope,
 		RefreshToken: reqBody.RefreshToken, // Can optionally rotate
-	}
-
-	wtr.WriteHeader(http.StatusOK)
-	json.NewEncoder(wtr).Encode(response)
+	})
 
 	logger.Info("refreshed token for: " + clientID)
 }
@@ -280,13 +196,5 @@ func handleAuthorizationCode(wtr http.ResponseWriter, req *http.Request, reqBody
 	// 4. Issue access + refresh tokens
 	// 5. Delete used authorization code
 
-	logger.Info("authorization_code grant not yet implemented")
-
-	errors.WriteErrorResponse(
-		wtr,
-		req,
-		http.StatusNotImplemented,
-		"authorization_code grant not yet implemented",
-		errCodes.ERR_INTERNAL_SERVER,
-	)
+	httpErr.SendError(wtr, req, httpErr.Global.NotImplemented, httpErr.WithDetail("authorizationcode grant not yet implemented"))
 }

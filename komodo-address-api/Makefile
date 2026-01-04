@@ -9,7 +9,6 @@ TAG ?= $(ENV)
 
 # Paths
 BUILD_DIR := build
-CONFIG_ENV := env/.env.$(ENV)
 
 # Compose (base + overlay)
 COMPOSE_FILE := $(BUILD_DIR)/docker-compose.$(ENV).yaml
@@ -20,7 +19,7 @@ help:
 	@echo "Targets:"
 	@echo "  build             Build Docker image for ENV ($(ENV))"
 	@echo "  run               Build image and start container via Docker Compose"
-	@echo "  local             Run app locally (no Docker, loads $(CONFIG_ENV))"
+	@echo "  local             Run app locally (no Docker, loads .env)"
 	@echo "  stop              Stop and remove container stack"
 	@echo "  restart           Restart container stack"
 	@echo "  clean             Prune Docker and remove local build artifacts"

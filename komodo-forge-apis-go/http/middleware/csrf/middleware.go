@@ -2,13 +2,12 @@ package csrf
 
 import (
 	"context"
-	ctxKeys "komodo-forge-apis-go/http/common/context"
-	errCodes "komodo-forge-apis-go/http/common/errors"
-	errors "komodo-forge-apis-go/http/common/errors/chi"
+	ctxKeys "komodo-forge-apis-go/http/context"
+	httpErr "komodo-forge-apis-go/http/errors"
 	"komodo-forge-apis-go/http/headers"
 	hdrSrv "komodo-forge-apis-go/http/headers/eval"
-	reqUtils "komodo-forge-apis-go/http/utils/request"
-	logger "komodo-forge-apis-go/loggers/runtime"
+	httpReq "komodo-forge-apis-go/http/request"
+	logger "komodo-forge-apis-go/logging/runtime"
 	"net/http"
 )
 
@@ -18,7 +17,7 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 			case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 				clientType := req.Context().Value(ctxKeys.CLIENT_TYPE_KEY)
 				if clientType == nil {
-					clientType = reqUtils.GetClientType(req)
+					clientType = httpReq.GetClientType(req)
 				}
 
 				if clientType == "api" {
@@ -32,7 +31,7 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 				// Browser client - require CSRF token
 				if ok, err := hdrSrv.ValidateHeaderValue(headers.HEADER_X_CSRF_TOKEN, req); !ok || err != nil {
 					logger.Error("invalid or missing CSRF token for browser client", err)
-					errors.WriteErrorResponse(wtr, req, http.StatusBadRequest, errCodes.ERR_INVALID_REQUEST, "invalid CSRF token")
+					httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("invalid CSRF token"))
 					return
 				}
 		}

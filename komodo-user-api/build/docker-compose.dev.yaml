@@ -1,0 +1,39 @@
+# Docker Compose for DEV environment
+# Use this for local development with shared LocalStack
+# Start LocalStack first: cd ../../localstack && docker-compose up -d
+
+name: komodo-user-api-dev
+
+services:
+  user-api:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+      args:
+        - ENV=${ENV:-dev}
+    container_name: komodo-user-api-${ENV:-dev}
+    environment:
+      - ENV=${ENV:-dev}
+      - VERSION=${VERSION:-1}
+      - PORT=${PORT:-7002}
+      - USE_AWS_SECRETS=true
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_SECRET_PREFIX=${AWS_SECRET_PREFIX:-komodo-user-api/${ENV}/}
+      - AWS_ENDPOINT=http://localstack:4566
+      - DYNAMODB_ENDPOINT=http://localstack:4566
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
+      - USE_MOCKS=${USE_MOCKS:-false}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:7002/health"]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+    image: komodo-user-api:${ENV:-dev}
+    ports:
+      - "${PORT:-7002}:7002"
+    networks:
+      - komodo-network
+
+networks:
+  komodo-network:
+    external: true

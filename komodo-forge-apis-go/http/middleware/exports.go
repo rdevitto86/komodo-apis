@@ -10,6 +10,8 @@ import (
 	ipaccess "komodo-forge-apis-go/http/middleware/ip-access"
 	"komodo-forge-apis-go/http/middleware/normalization"
 	ratelimiter "komodo-forge-apis-go/http/middleware/rate-limiter"
+	"komodo-forge-apis-go/http/middleware/redaction"
+	requestid "komodo-forge-apis-go/http/middleware/request-id"
 	rulevalidation "komodo-forge-apis-go/http/middleware/rule-validation"
 	"komodo-forge-apis-go/http/middleware/sanitization"
 	securityheaders "komodo-forge-apis-go/http/middleware/security-headers"
@@ -26,6 +28,8 @@ var (
 	IPAccessMiddleware = ipaccess.IPAccessMiddleware
 	NormalizationMiddleware = normalization.NormalizationMiddleware
 	RateLimiterMiddleware = ratelimiter.RateLimiterMiddleware
+	RedactionMiddleware = redaction.RedactionMiddleware
+	RequestIDMiddleware = requestid.RequestIDMiddleware
 	RuleValidationMiddleware = rulevalidation.RuleValidationMiddleware
 	SanitizationMiddleware = sanitization.SanitizationMiddleware
 	SecurityHeadersMiddleware = securityheaders.SecurityHeadersMiddleware

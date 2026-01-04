@@ -10,7 +10,8 @@ import (
 	"net/http"
 
 	"komodo-forge-apis-go/config"
-	logger "komodo-forge-apis-go/loggers/runtime"
+	httpErr "komodo-forge-apis-go/http/errors"
+	logger "komodo-forge-apis-go/logging/runtime"
 )
 
 type JWK struct {
@@ -35,10 +36,10 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	publicKeyPEM := config.GetConfigValue("JWT_PUBLIC_KEY")
 	if publicKeyPEM == "" {
 		logger.Error("JWT_PUBLIC_KEY not configured")
-		wtr.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(wtr).Encode(map[string]string{
-			"error": "public key not configured",
-		})
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.InvalidKey,
+			httpErr.WithDetail("public key not configured"),
+		)
 		return
 	}
 
@@ -46,10 +47,10 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	block, _ := pem.Decode([]byte(publicKeyPEM))
 	if block == nil {
 		logger.Error("failed to parse PEM block containing public key")
-		wtr.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(wtr).Encode(map[string]string{
-			"error": "failed to parse public key",
-		})
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.InvalidKey,
+			httpErr.WithDetail("failed to parse public key"),
+		)
 		return
 	}
 
@@ -57,10 +58,10 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
 		logger.Error("failed to parse public key", err)
-		wtr.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(wtr).Encode(map[string]string{
-			"error": "failed to parse public key",
-		})
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.InvalidKey,
+			httpErr.WithDetail("failed to parse public key"),
+		)
 		return
 	}
 
@@ -68,10 +69,10 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	rsaPub, ok := pub.(*rsa.PublicKey)
 	if !ok {
 		logger.Error("public key is not RSA")
-		wtr.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(wtr).Encode(map[string]string{
-			"error": "public key is not RSA",
-		})
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.InvalidKey,
+			httpErr.WithDetail("public key is invalid"),
+		)
 		return
 	}
 
@@ -79,19 +80,16 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	nBytes := rsaPub.N.Bytes()
 	eBytes := big.NewInt(int64(rsaPub.E)).Bytes()
 
-	n := base64.RawURLEncoding.EncodeToString(nBytes)
-	e := base64.RawURLEncoding.EncodeToString(eBytes)
-
 	// Create JWKS response
 	jwks := JWKS{
 		Keys: []JWK{
 			{
 				Kty: "RSA",
 				Use: "sig",
-				Kid: "komodo-jwt-key-1", // TODO: Make this configurable or generate unique ID
+				Kid: config.GetConfigValue("JWT_KID"),
 				Alg: "RS256",
-				N:   n,
-				E:   e,
+				N: base64.RawURLEncoding.EncodeToString(nBytes),
+				E: base64.RawURLEncoding.EncodeToString(eBytes),
 			},
 		},
 	}

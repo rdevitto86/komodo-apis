@@ -1,6 +1,6 @@
-# Docker Compose for LOCAL/DEV environments
-# Use this for local development and testing
-# ENV can be 'local' or 'dev' (defaults to 'local')
+# Docker Compose for DEV environment
+# Use this for local development with shared LocalStack
+# Start LocalStack first: cd ../../localstack && docker-compose up -d
 
 name: komodo-auth-api-dev
 
@@ -10,29 +10,34 @@ services:
       context: ..
       dockerfile: build/Dockerfile
       args:
-        - ENV=${ENV:-local}
-    container_name: komodo-auth-api-${ENV:-local}
+        - ENV=${ENV:-dev}
+    container_name: komodo-auth-api-${ENV:-dev}
     environment:
-      - ENV=${ENV:-local}
+      - ENV=${ENV:-dev}
       - VERSION=${VERSION:-1}
       - PORT=${PORT:-7001}
-      - USE_AWS_SECRETS=false
-      - USE_ELASTICACHE=false
+      - USE_AWS_SECRETS=true
+      - USE_ELASTICACHE=true
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - AWS_SECRET_PREFIX=${AWS_SECRET_PREFIX:-komodo-auth-api/${ENV}/}
+      - AWS_ENDPOINT=http://localstack:4566
+      - ELASTICACHE_ENDPOINT=localstack:6379
       - EVAL_RULES_PATH=/app/config/validation_rules.yml
       - LOG_LEVEL=${LOG_LEVEL:-debug}
-      - USE_MOCKS=${USE_MOCKS:-true}
-    env_file:
-      - path: ../env/.env.${ENV:-local}
-        required: false
+      - USE_MOCKS=${USE_MOCKS:-false}
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:7001/health"]
       interval: 10s
       timeout: 2s
       retries: 5
-    image: komodo-auth-api:${ENV:-local}
+    image: komodo-auth-api:${ENV:-dev}
     ports:
       - "${PORT:-7001}:7001"
     volumes:
       - ../tests/mocks:/tests/mocks
+    networks:
+      - komodo-network
+
+networks:
+  komodo-network:
+    external: true

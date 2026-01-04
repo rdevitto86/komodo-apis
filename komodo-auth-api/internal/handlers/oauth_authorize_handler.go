@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	errCodes "komodo-forge-apis-go/http/common/errors"
-	errors "komodo-forge-apis-go/http/common/errors/chi"
-	logger "komodo-forge-apis-go/loggers/runtime"
+	httpErr "komodo-forge-apis-go/http/errors"
+	logger "komodo-forge-apis-go/logging/runtime"
 )
 
 // Handles OAuth 2.0 authorization endpoint (RFC 6749 Section 3.1).
@@ -22,27 +21,15 @@ func OAuthAuthorizeHandler(wtr http.ResponseWriter, req *http.Request) {
 
 	// Validate required parameters
 	if responseType == "" || clientID == "" || redirectURI == "" {
-		logger.Error("missing required parameters")
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"invalid_request: missing required parameters (response_type, client_id, redirect_uri)",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		logger.Error("missing required oauth parameters")
+		httpErr.SendError(wtr, req, httpErr.Auth.AccessDenied, httpErr.WithDetail("missing required oauth parameters"))
 		return
 	}
 
 	// Only support "code" response type for now
 	if responseType != "code" {
-		logger.Error("unsupported response_type: " + responseType)
-		errors.WriteErrorResponse(
-			wtr,
-			req,
-			http.StatusBadRequest,
-			"unsupported_response_type",
-			errCodes.ERR_INVALID_REQUEST,
-		)
+		logger.Error("unsupported oauth response type: " + responseType)
+		httpErr.SendError(wtr, req, httpErr.Auth.AccessDenied, httpErr.WithDetail("unsupported oauth response type"))
 		return
 	}
 

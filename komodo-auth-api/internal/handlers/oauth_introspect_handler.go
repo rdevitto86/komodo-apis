@@ -3,9 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
+	"time"
 
 	"komodo-forge-apis-go/crypto/jwt"
-	logger "komodo-forge-apis-go/loggers/runtime"
+	logger "komodo-forge-apis-go/logging/runtime"
 )
 
 type IntrospectResponse struct {
@@ -29,62 +31,61 @@ func OAuthIntrospectHandler(wtr http.ResponseWriter, req *http.Request) {
 	tokenString, err := jwt.ExtractTokenFromRequest(req)
 	if err != nil {
 		logger.Error("no token found in request", err)
-		wtr.WriteHeader(http.StatusOK)
+		wtr.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(wtr).Encode(IntrospectResponse{Active: false})
 		return
 	}
 
-	// Verify token signature and parse claims
-	_, claims, err := jwt.VerifyToken(tokenString)
+	// Parse claims from token
+	claims, err := jwt.ParseClaims(tokenString)
 	if err != nil {
-		logger.Error("token verification failed", err)
-		wtr.WriteHeader(http.StatusOK)
+		logger.Error("failed to parse claims", err)
+		wtr.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(wtr).Encode(IntrospectResponse{Active: false})
 		return
 	}
 
 	// Check if token is expired
-	if jwt.IsTokenExpired(claims) {
+	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
 		logger.Info("token is expired")
-		wtr.WriteHeader(http.StatusOK)
+		wtr.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(wtr).Encode(IntrospectResponse{Active: false})
 		return
 	}
 
-	// Extract claims
-	claimValues := jwt.ExtractStringClaims(claims, []string{
-		"client_id", "scope", "jti", "sub", "aud",
-	})
+	// Extract claims from CustomClaims struct
+	scope := ""
+	if len(claims.Scopes) > 0 { scope = strings.Join(claims.Scopes, " ") }
 
-	clientID, _ := claimValues["client_id"].(string)
-	scope, _ := claimValues["scope"].(string)
-	sub, _ := claimValues["sub"].(string)
-	aud, _ := claimValues["aud"].(string)
+	aud := ""
+	if len(claims.Audience) > 0 { aud = claims.Audience[0] }
 
-	exp, _ := claims["exp"].(float64)
-	iat, _ := claims["iat"].(float64)
+	exp := int64(0)
+	if claims.ExpiresAt != nil { exp = claims.ExpiresAt.Unix() }
+
+	iat := int64(0)
+	if claims.IssuedAt != nil { iat = claims.IssuedAt.Unix() }
 
 	// TODO: Check if token is revoked in Elasticache
-	// jti, _ := claimValues["jti"].(string)
-	// if jti != "" && elasticache.Exists("revoked:token:" + jti) {
-	//     logger.Info("token has been revoked: " + jti)
+	// if claims.ID != "" && elasticache.Exists("revoked:token:" + claims.ID) {
+	//     logger.Info("token has been revoked: " + claims.ID)
 	//     wtr.WriteHeader(http.StatusOK)
 	//     json.NewEncoder(wtr).Encode(IntrospectResponse{Active: false})
 	//     return
 	// }
 
-	logger.Info("token introspection successful for client: " + clientID)
+	logger.Info("token introspection successful for subject: " + claims.Subject)
 
 	// Return token metadata per RFC 7662
 	wtr.WriteHeader(http.StatusOK)
 	json.NewEncoder(wtr).Encode(IntrospectResponse{
 		Active:    true,
 		Scope:     scope,
-		ClientID:  clientID,
+		ClientID:  claims.Subject,
 		TokenType: "Bearer",
-		Exp:       int64(exp),
-		Iat:       int64(iat),
-		Sub:       sub,
+		Exp:       exp,
+		Iat:       iat,
+		Sub:       claims.Subject,
 		Aud:       aud,
 	})
 }

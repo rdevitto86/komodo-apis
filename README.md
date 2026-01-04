@@ -52,7 +52,7 @@ A single repo showcasing a complete, production-style backend for a modern e-com
 **Bootstrap**
 ```bash
 git clone <your-fork-url> komodo && cd komodo
-cp .env.example .env
+cp .env
 make bootstrap   # installs toolchains, hooks, and package deps across the monorepo
 ```
 

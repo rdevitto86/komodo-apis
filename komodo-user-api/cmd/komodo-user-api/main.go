@@ -1,80 +1,116 @@
 package main
 
 import (
-	"komodo-forge-apis-go/aws/elasticache"
+	"komodo-forge-apis-go/aws/dynamodb"
+	sm "komodo-forge-apis-go/aws/secrets-manager"
 	"komodo-forge-apis-go/config"
-	"komodo-forge-apis-go/http/common/bootstrap"
-	mw "komodo-forge-apis-go/http/middleware/gin"
+	mw "komodo-forge-apis-go/http/middleware"
 	logger "komodo-forge-apis-go/logging/runtime"
 	"komodo-user-api/internal/handlers"
+	"net/http"
 	"os"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 )
 
 func main() {
-	init := bootstrap.Initialize(bootstrap.Options{
-		AppName: "komodo-user-api",
-		Secrets: []string{
+	// initialize runtime logger
+	logger.Init("komodo-user-api", config.GetConfigValue("LOG_LEVEL"))
+
+	// initialize AWS Secrets Manager
+	err := sm.Init(sm.Config{
+		Region: config.GetConfigValue("AWS_REGION"),
+		SecretPrefix: config.GetConfigValue("SECRET_PREFIX"),
+		BatchSecretName: config.GetConfigValue("BATCH_SECRET_NAME"),
+		SecretKeys: []string{
 			"USER_API_CLIENT_ID",
 			"USER_API_CLIENT_SECRET",
 			"IP_WHITELIST",
 			"IP_BLACKLIST",
 		},
 	})
-	env, port := init.Env, init.Port
-
-	// set gin mode
-	if env == "prod" { gin.SetMode(gin.ReleaseMode) }
-
-	// initialize Elasticache client
-	elasticache.InitElasticacheClient()
-
-	// initialize gin router
-	router := gin.New()
-	// router.Use(mw.Logger()) // TODO remove
-
-	// initialize moxtox response handler
-	if env != "prod" && config.GetConfigValue("USE_MOCKS") == "true" {
-		logger.Info("using mocks in non-production environment")
-		// TODO: moxtox needs Gin adapter
-		// router.Use(moxtox.InitMoxtoxMiddleware(env))
+	if err != nil {
+		logger.Fatal("failed to load aws secrets", err)
+		os.Exit(1)
 	}
 
-	router.GET("/health", handlers.HealthHandler)
+	// initialize DynamoDB client
+	dynamodb.Init(dynamodb.Config{})
 
-	user := router.Group("/users")
-	user.Use(mw.AuthMiddleware())
+	// initialize chi router
+	rtr := chi.NewRouter()
 
-	// User CRUD
-	user.POST("/", handlers.CreateUser)
-	user.GET("/:user_id", handlers.GetUserByID)
-	user.PUT("/:user_id", handlers.UpdateUserByID)
-	user.DELETE("/:user_id", handlers.DeleteUserByID)
+	// Health check endpoint
+	rtr.Get("/health", handlers.HealthHandler)
 
-	me := user.Group("/me")
-	me.Use(mw.IdempotencyMiddleware())
+	rtr.Use(
+		mw.RequestIDMiddleware,
+		mw.SecurityHeadersMiddleware,
+		mw.IPAccessMiddleware,
+		mw.TelemetryMiddleware,
+		mw.CORSMiddleware,
+		mw.NormalizationMiddleware,
+		mw.RuleValidationMiddleware,
+	)
 
-	// Profile management
-	me.POST("/profile", handlers.GetMyProfile)
-	me.PUT("/profile", handlers.UpdateMyProfile)
-	me.DELETE("/", handlers.DeleteMyAccount)
+	// User routes
+	rtr.Route("/users", func(users chi.Router) {
+		users.Use(
+			mw.AuthMiddleware,
+			mw.RateLimiterMiddleware,
+		)
 
-	// Addresses management
-	me.POST("/addresses/query", handlers.GetMyAddresses)
-	me.POST("/addresses", handlers.AddMyAddress)
-	me.PUT("/addresses/:addr_id", handlers.UpdateMyAddress)
-	me.DELETE("/addresses/:addr_id", handlers.DeleteMyAddress)
+		// User CRUD
+		users.Post("/", handlers.CreateUser)
+		users.Route("/{user_id}", func(user chi.Router) {
+			user.Use(mw.SanitizationMiddleware)
+			user.Get("", handlers.GetUserByID)
+			user.Put("", handlers.UpdateUserByID)
+			user.Delete("", handlers.DeleteUserByID)
+		})
 
-	// Preferences management
-	me.GET("/preferences", handlers.GetMyPreferences)
-	me.PUT("/preferences", handlers.UpdateMyPreferences)
+		// Me routes
+		users.Route("/me", func(me chi.Router) {
+			me.Use(
+				mw.IdempotencyMiddleware,
+				mw.CSRFMiddleware,
+			)
 
-	logger.Info("server starting on port " + port)
+			// Profile management
+			me.Post("/profile", handlers.GetProfile)
+			me.Put("/profile", handlers.UpdateProfile)
+			me.Delete("/profile", handlers.DeleteProfile)
+
+			// Addresses management
+			me.Post("/addresses/query", handlers.GetAddresses)
+			me.Post("/addresses", handlers.AddAddress)
+			me.Route("/addresses/{addr_id}", func(addr chi.Router) {
+				addr.Use(mw.SanitizationMiddleware)
+				addr.Put("", handlers.UpdateAddress)
+				addr.Delete("", handlers.DeleteAddress)
+			})
+
+			// Preferences management
+			me.Get("/preferences", handlers.GetPreferences)
+			me.Put("/preferences", handlers.UpdatePreferences)
+		})
+	})
+
+	server := &http.Server{
+		Addr: ":" + config.GetConfigValue("PORT"),
+		Handler: rtr,
+		ReadTimeout: 5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout: 60 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
 
 	// start server
-	if err := router.Run(":" + port); err != nil {
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		logger.Fatal("server failed to start", err)
 		os.Exit(1)
 	}
+	logger.Info("server started successfully")
 }

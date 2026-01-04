@@ -22,7 +22,7 @@ else ifeq ($(ENV),staging)
 else ifeq ($(ENV),dev)
 	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.dev.yaml
 else ifeq ($(ENV),local)
-	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.dev.yaml
+	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.local.yaml
 else
 	$(error Invalid environment: $(ENV). Valid options are: local, dev, staging, prod)
 endif
@@ -44,10 +44,10 @@ help:
 	@echo "  fmt               Run go fmt and go vet"
 	@echo ""
 	@echo "Supported Environments:"
-	@echo "  local    - Local development (no AWS, uses .env.local)"
-	@echo "  dev      - Development (AWS enabled, uses .env.dev)"
-	@echo "  staging  - Staging (AWS enabled, uses .env.staging)"
-	@echo "  prod     - Production (AWS enabled, uses .env.prod)"
+	@echo "  local    - Local development (no AWS)"
+	@echo "  dev      - Development (AWS enabled)"
+	@echo "  staging  - Staging (AWS enabled)"
+	@echo "  prod     - Production (AWS enabled)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make bootstrap               # Default: local"

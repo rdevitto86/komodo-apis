@@ -10,7 +10,6 @@
 # Sensitive
 .env
 .env.*
-*.secrets.*
 *.pem
 /secrets
 /env
@@ -32,6 +31,10 @@ env.bak/
 # Node
 */node_modules
 node_modules/
+
+# LocalStack data
+.localstack/
+volume/
 
 # Tests & Coverage
 coverage/

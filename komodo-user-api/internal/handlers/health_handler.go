@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
-func HealthHandler(g *gin.Context) {
-	g.Header("Content-Type", "application/json")
-	g.JSON(http.StatusOK, gin.H{"status": "OK"})
+func HealthHandler(wtr http.ResponseWriter, req *http.Request) {
+	wtr.Header().Set("Content-Type", "application/json")
+	wtr.WriteHeader(http.StatusOK)
+	json.NewEncoder(wtr).Encode(map[string]string{"status": "OK"})
 }
