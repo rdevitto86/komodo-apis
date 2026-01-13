@@ -7,7 +7,7 @@ import (
 	"io"
 	headers "komodo-forge-apis-go/http/headers/eval"
 	httpReq "komodo-forge-apis-go/http/request"
-	"log/slog"
+	logger "komodo-forge-apis-go/logging/runtime"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -17,36 +17,36 @@ import (
 // Checks if the request complies with all aspects of the provided EvalRule.
 func IsRuleValid(req *http.Request, rule *EvalRule) bool {
 	if req == nil || rule == nil {
-		slog.Error("api request or eval rule is nil")
+		logger.Error("api request or eval rule is nil", fmt.Errorf("request or rule is nil"))
 		return false
 	}
 	if rule.Level == LevelIgnore {
-		slog.Info("rule level is IGNORE - skipping all validations")
+		logger.Info("rule level is IGNORE - skipping all validations")
 		return true
 	}
 
 	if !isValidVersion(req, rule) {
-		slog.Error("validation failed: version check")
+		logger.Error("validation failure: version check", fmt.Errorf("version validation failed"))
 		return false
 	}
 	if !areValidHeaders(req, rule) {
-		slog.Error("validation failed: headers check")
+		logger.Error("validation failure: headers check", fmt.Errorf("headers validation failed"))
 		return false
 	}
 	if !areValidPathParams(req, rule) {
-		slog.Error("validation failed: path params check")
+		logger.Error("validation failure: path params check", fmt.Errorf("path params validation failed"))
 		return false
 	}
 	if !areValidQueryParams(req, rule) {
-		slog.Error("validation failed: query params check")
+		logger.Error("validation failure: query params check", fmt.Errorf("query params validation failed"))
 		return false
 	}
 	if !isValidBody(req, rule) {
-		slog.Error("validation failed: body check")
+		logger.Error("validation failure: body check", fmt.Errorf("body validation failed"))
 		return false
 	}
 	
-	slog.Info("all validations passed")
+	logger.Info("all validations passed")
 	return true
 }
 
@@ -56,33 +56,39 @@ func isValidVersion(req *http.Request, rule *EvalRule) bool {
 	if rule.Level == LevelLenient {
 		versionStr := httpReq.GetAPIVersion(req)
 		if versionStr == "" {
-			slog.Warn("version not provided in request using lenient mode - allowing")
+			logger.Warn("version not provided in request using lenient mode - allowing")
 			return true
 		}
 
 		versionStr = strings.TrimPrefix(versionStr, "/v")
 		version, err := strconv.Atoi(versionStr)
 		if err != nil {
-			slog.Warn(fmt.Sprintf("invalid version format: %s (lenient mode - allowing)", versionStr))
+			logger.Warn(fmt.Sprintf("invalid version format: %s (lenient mode - allowing)", versionStr))
 			return true
 		}
 		if rule.RequiredVersion > 0 && version != rule.RequiredVersion {
-			slog.Warn(fmt.Sprintf("version mismatch: required %d, got %d (lenient mode - allowing)", rule.RequiredVersion, version))
+			logger.Warn(fmt.Sprintf("version mismatch: required %d, got %d (lenient mode - allowing)", rule.RequiredVersion, version))
 			return true
 		}
-		slog.Info(fmt.Sprintf("version validation passed (lenient): v%d", version))
+		logger.Info(fmt.Sprintf("version validation passed (lenient): v%d", version))
 		return true
 	}
 
 	// Strict mode: version is mandatory
 	if rule.RequiredVersion <= 0 {
-		slog.Error("rule configuration error: requiredVersion must be >= 1 for strict validation")
+		logger.Error(
+			"rule configuration error: requiredVersion must be >= 1 for strict validation",
+			fmt.Errorf("invalid requiredVersion"),
+		)
 		return false
 	}
 
 	versionStr := httpReq.GetAPIVersion(req)
 	if versionStr == "" {
-		slog.Error(fmt.Sprintf("version required (v%d) but not found in request", rule.RequiredVersion))
+		logger.Error(
+			fmt.Sprintf("version required (v%d) but not found in request", rule.RequiredVersion), 
+			fmt.Errorf("version not found"),
+		)
 		return false
 	}
 
@@ -90,16 +96,22 @@ func isValidVersion(req *http.Request, rule *EvalRule) bool {
 	versionStr = strings.TrimPrefix(versionStr, "/v")
 	version, err := strconv.Atoi(versionStr)
 	if err != nil {
-		slog.Error(fmt.Sprintf("invalid version format: %s", versionStr))
+		logger.Error(
+			fmt.Sprintf("invalid version format: %s", versionStr),
+			fmt.Errorf("invalid version format"),
+		)
 		return false
 	}
 
 	if version != rule.RequiredVersion {
-		slog.Error(fmt.Sprintf("version mismatch: required %d, got %d", rule.RequiredVersion, version))
+		logger.Error(
+			fmt.Sprintf("version mismatch: required %d, got %d", rule.RequiredVersion, version),
+			fmt.Errorf("version mismatch"),
+		)
 		return false
 	}
 
-	slog.Info(fmt.Sprintf("version validation passed (strict): v%d", version))
+	logger.Info(fmt.Sprintf("version validation passed (strict): v%d", version))
 	return true
 }
 
@@ -110,7 +122,10 @@ func areValidHeaders(req *http.Request, rule *EvalRule) bool {
 
 		// Check if required and missing
 		if spec.Required && val == "" {
-			slog.Error(fmt.Sprintf("header %q is required but missing", hName))
+			logger.Error(
+				fmt.Sprintf("header %q is required but missing", hName),
+				fmt.Errorf("header missing"),
+			)
 			return false
 		}
 		if val == "" { continue }
@@ -121,11 +136,17 @@ func areValidHeaders(req *http.Request, rule *EvalRule) bool {
 			if spec.Value[len(spec.Value)-1] == '*' {
 				prefix := spec.Value[:len(spec.Value)-1]
 				if !strings.HasPrefix(val, prefix) {
-					slog.Error(fmt.Sprintf("header %q value %q does not match required prefix %q", hName, val, prefix))
+					logger.Error(
+						fmt.Sprintf("header %q value %q does not match required prefix %q", hName, val, prefix),
+						fmt.Errorf("header value mismatch"),
+					)
 					return false
 				}
 			} else if val != spec.Value {
-				slog.Error(fmt.Sprintf("header %q value %q does not match required value %q", hName, val, spec.Value))
+				logger.Error(
+					fmt.Sprintf("header %q value %q does not match required value %q", hName, val, spec.Value),
+					fmt.Errorf("header value mismatch"),
+				)
 				return false
 			}
 		}
@@ -134,7 +155,10 @@ func areValidHeaders(req *http.Request, rule *EvalRule) bool {
 		if spec.Pattern != "" {
 			re, err := regexp.Compile(spec.Pattern)
 			if err != nil || !re.MatchString(val) {
-				slog.Error(fmt.Sprintf("header %q value %q does not match pattern %q", hName, val, spec.Pattern))
+				logger.Error(
+					fmt.Sprintf("header %q value %q does not match pattern %q", hName, val, spec.Pattern),
+					fmt.Errorf("header pattern mismatch"),
+				)
 				return false
 			}
 		}
@@ -149,27 +173,39 @@ func areValidHeaders(req *http.Request, rule *EvalRule) bool {
 				}
 			}
 			if !ok {
-				slog.Error(fmt.Sprintf("header %q value %q not in enum %v", hName, val, spec.Enum))
+				logger.Error(
+					fmt.Sprintf("header %q value %q not in enum %v", hName, val, spec.Enum),
+					fmt.Errorf("header enum mismatch"),
+				)
 				return false
 			}
 		}
 
 		// length checks
 		if spec.MinLen > 0 && len(val) < spec.MinLen {
-			slog.Error(fmt.Sprintf("header %q value length %d is less than minLen %d", hName, len(val), spec.MinLen))
+			logger.Error(
+				fmt.Sprintf("header %q value length %d is less than minLen %d", hName, len(val), spec.MinLen),
+				fmt.Errorf("header length mismatch"),
+			)
 			return false
 		}
 		if spec.MaxLen > 0 && len(val) > spec.MaxLen {
-			slog.Error(fmt.Sprintf("header %q value length %d is greater than maxLen %d", hName, len(val), spec.MaxLen))
+			logger.Error(
+				fmt.Sprintf("header %q value length %d is greater than maxLen %d", hName, len(val), spec.MaxLen),
+				fmt.Errorf("header length mismatch"),
+			)
 			return false
 		}
 		// header-specific validation (optional - comment out if causing issues)
 		if ok, err := headers.ValidateHeaderValue(hName, req); !ok || err != nil {
-			slog.Error(fmt.Sprintf("header %q failed ValidateHeaderValue check", hName), "error: ", err)
+			logger.Error(
+				fmt.Sprintf("header %q failed ValidateHeaderValue check", hName),
+				err,
+			)
 			return false
 		}
 	}
-	slog.Info("all headers passed validation")
+	logger.Info("all headers passed validation")
 	return true
 }
 
@@ -183,7 +219,10 @@ func areValidPathParams(req *http.Request, rule *EvalRule) bool {
 			if spec.Required {
 				// required param missing
 				_ = k
-				slog.Error(fmt.Sprintf("path param %q is required but missing", k))
+				logger.Error(
+					fmt.Sprintf("path param %q is required but missing", k),
+					fmt.Errorf("path param missing"),
+				)
 				return false
 			}
 		}
@@ -195,7 +234,10 @@ func areValidPathParams(req *http.Request, rule *EvalRule) bool {
 		val, ok := params[name]
 		if !ok || val == "" {
 			if spec.Required {
-				slog.Error(fmt.Sprintf("path param %q is required but missing", name))
+				logger.Error(
+					fmt.Sprintf("path param %q is required but missing", name),
+					fmt.Errorf("path param missing"),
+				)
 				return false
 			}
 			continue
@@ -205,7 +247,10 @@ func areValidPathParams(req *http.Request, rule *EvalRule) bool {
 		if spec.Pattern != "" {
 			re, err := regexp.Compile(spec.Pattern)
 			if err != nil || !re.MatchString(val) {
-				slog.Error(fmt.Sprintf("path param %q value %q does not match pattern %q", name, val, spec.Pattern))
+				logger.Error(
+					fmt.Sprintf("path param %q value %q does not match pattern %q", name, val, spec.Pattern),
+					fmt.Errorf("path param pattern mismatch"),
+				)
 				return false
 			}
 		}
@@ -217,18 +262,27 @@ func areValidPathParams(req *http.Request, rule *EvalRule) bool {
 				if e == val { okEnum = true; break }
 			}
 			if !okEnum {
-				slog.Error(fmt.Sprintf("path param %q value %q not in enum %v", name, val, spec.Enum))
+				logger.Error(
+					fmt.Sprintf("path param %q value %q not in enum %v", name, val, spec.Enum),
+					fmt.Errorf("path param enum mismatch"),
+				)
 				return false
 			}
 		}
 
 		// length checks
 		if spec.MinLen > 0 && len(val) < spec.MinLen {
-			slog.Error(fmt.Sprintf("path param %q value length %d is less than minLen %d", name, len(val), spec.MinLen))
+			logger.Error(
+				fmt.Sprintf("path param %q value length %d is less than minLen %d", name, len(val), spec.MinLen),
+				fmt.Errorf("path param length mismatch"),
+			)
 			return false
 		}
 		if spec.MaxLen > 0 && len(val) > spec.MaxLen {
-			slog.Error(fmt.Sprintf("path param %q value length %d is greater than maxLen %d", name, len(val), spec.MaxLen))
+			logger.Error(
+				fmt.Sprintf("path param %q value length %d is greater than maxLen %d", name, len(val), spec.MaxLen),
+				fmt.Errorf("path param length mismatch"),
+			)
 			return false
 		}
 
@@ -238,12 +292,18 @@ func areValidPathParams(req *http.Request, rule *EvalRule) bool {
 				// already a string
 			case "int":
 				if _, err := strconv.Atoi(val); err != nil {
-					slog.Error(fmt.Sprintf("path param %q value %q is not a valid int", name, val))
+					logger.Error(
+						fmt.Sprintf("path param %q value %q is not a valid int", name, val),
+						fmt.Errorf("path param type mismatch"),
+					)
 					return false
 				}
 			case "bool":
 				if val != "true" && val != "false" {
-					slog.Error(fmt.Sprintf("path param %q value %q is not a valid bool", name, val))
+					logger.Error(
+						fmt.Sprintf("path param %q value %q is not a valid bool", name, val),
+						fmt.Errorf("path param type mismatch"),
+					)
 					return false
 				}
 			default:
@@ -261,7 +321,10 @@ func areValidQueryParams(req *http.Request, rule *EvalRule) bool {
 		val, ok := params[name]
 		if !ok || val == "" {
 			if spec.Required {
-				slog.Error(fmt.Sprintf("query param %q is required but missing", name))
+				logger.Error(
+					fmt.Sprintf("query param %q is required but missing", name),
+					fmt.Errorf("query param missing"),
+				)
 				return false
 			}
 			continue
@@ -270,7 +333,10 @@ func areValidQueryParams(req *http.Request, rule *EvalRule) bool {
 		if spec.Pattern != "" {
 			re, err := regexp.Compile(spec.Pattern)
 			if err != nil || !re.MatchString(val) {
-				slog.Error(fmt.Sprintf("query param %q value %q does not match pattern %q", name, val, spec.Pattern))
+				logger.Error(
+					fmt.Sprintf("query param %q value %q does not match pattern %q", name, val, spec.Pattern),
+					fmt.Errorf("query param pattern mismatch"),
+				)
 				return false
 			}
 		}
@@ -281,17 +347,26 @@ func areValidQueryParams(req *http.Request, rule *EvalRule) bool {
 				if e == val { okv = true; break }
 			}
 			if !okv {
-				slog.Error(fmt.Sprintf("query param %q value %q not in enum %v", name, val, spec.Enum))
+				logger.Error(
+					fmt.Sprintf("query param %q value %q not in enum %v", name, val, spec.Enum),
+					fmt.Errorf("query param enum mismatch"),
+				)
 				return false
 			}
 		}
 
 		if spec.MinLen > 0 && len(val) < spec.MinLen {
-			slog.Error(fmt.Sprintf("query param %q value length %d is less than minLen %d", name, len(val), spec.MinLen))
+			logger.Error(
+				fmt.Sprintf("query param %q value length %d is less than minLen %d", name, len(val), spec.MinLen),
+				fmt.Errorf("query param length mismatch"),
+			)
 			return false
 		}
 		if spec.MaxLen > 0 && len(val) > spec.MaxLen {
-			slog.Error(fmt.Sprintf("query param %q value length %d is greater than maxLen %d", name, len(val), spec.MaxLen))
+			logger.Error(
+				fmt.Sprintf("query param %q value length %d is greater than maxLen %d", name, len(val), spec.MaxLen),
+				fmt.Errorf("query param length mismatch"),
+			)
 			return false
 		}
 	}
@@ -309,7 +384,7 @@ func isValidBody(req *http.Request, rule *EvalRule) bool {
 	const maxBody = 1 << 20 // 1 MiB
 	bodyBytes, err := io.ReadAll(io.LimitReader(req.Body, maxBody))
 	if err != nil {
-		slog.Error("failed to read request body", "error: ", err)
+		logger.Error("failed to read request body", err)
 		return false
 	}
 
@@ -326,7 +401,7 @@ func isValidBody(req *http.Request, rule *EvalRule) bool {
 	dec.DisallowUnknownFields()
 
 	if err := dec.Decode(&bodyMap); err != nil {
-		slog.Error("failed to decode request body as JSON", "error: ", err)
+		logger.Error("failed to decode request body as JSON", err)
 		return false
 	}
 
@@ -335,7 +410,10 @@ func isValidBody(req *http.Request, rule *EvalRule) bool {
 		v, ok := bodyMap[name]
 		if !ok {
 			if spec.Required {
-				slog.Error(fmt.Sprintf("body field %q is required but missing", name))
+				logger.Error(
+					fmt.Sprintf("body field %q is required but missing", name),
+					fmt.Errorf("body field missing"),
+				)
 				return false
 			}
 			continue
@@ -345,18 +423,27 @@ func isValidBody(req *http.Request, rule *EvalRule) bool {
 		switch spec.Type {
 			case "", "string":
 				if _, ok := v.(string); !ok {
-					slog.Error(fmt.Sprintf("body field %q is not a string", name))
+					logger.Error(
+						fmt.Sprintf("body field %q is not a string", name),
+						fmt.Errorf("body field type mismatch"),
+					)
 					return false
 				}
 			case "int":
 				// JSON numbers are float64 by default
 				if _, ok := v.(float64); !ok {
-					slog.Error(fmt.Sprintf("body field %q is not a number", name))
+					logger.Error(
+						fmt.Sprintf("body field %q is not a number", name),
+						fmt.Errorf("body field type mismatch"),
+					)
 					return false
 				}
 			case "bool":
 				if _, ok := v.(bool); !ok {
-					slog.Error(fmt.Sprintf("body field %q is not a bool", name))
+					logger.Error(
+						fmt.Sprintf("body field %q is not a bool", name),
+						fmt.Errorf("body field type mismatch"),
+					)
 					return false
 				}
 		}

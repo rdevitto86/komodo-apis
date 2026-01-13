@@ -27,7 +27,7 @@ func getItem(
 		return nil, WrapError(err, "getItem")
 	}
 	if result.Item == nil {
-		logger.Error("item not found")
+		logger.Error("item not found", fmt.Errorf("dynamodb item not found"))
 		return nil, WrapError(fmt.Errorf("item not found"), "getItem")
 	}
 	return result.Item, nil
@@ -106,7 +106,7 @@ func batchGetItems(
 			allItems = append(allItems, items...)
 		}
 		if len(result.UnprocessedKeys) > 0 {
-			logger.Error("batch get has unprocessed keys")
+			logger.Error("batch get has unprocessed keys", fmt.Errorf("batch get has unprocessed keys"))
 			return nil, WrapError(fmt.Errorf("batch get has unprocessed keys"), "batchGetItems")
 		}
 	}
@@ -168,7 +168,7 @@ func batchWriteItems(
 			return WrapError(err, "batchWriteItem")
 		}
 		if len(result.UnprocessedItems) > 0 {
-			logger.Error("batch write has unprocessed items")
+			logger.Error("batch write has unprocessed items", fmt.Errorf("batch write has unprocessed items"))
 			return WrapError(fmt.Errorf("batch write has unprocessed items"), "batchWriteItem")
 		}
 	}
@@ -210,7 +210,7 @@ func batchDeleteItems(
 			return WrapError(err, "batchDeleteItem")
 		}
 		if len(result.UnprocessedItems) > 0 {
-			logger.Error("batch delete has unprocessed items")
+			logger.Error("batch delete has unprocessed items", fmt.Errorf("batch delete has unprocessed items"))
 			return WrapError(fmt.Errorf("batch delete has unprocessed items"), "batchDeleteItem")
 		}
 	}

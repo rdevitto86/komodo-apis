@@ -17,8 +17,11 @@ import (
 )
 
 func main() {
-	// initialize runtime logger
-	logger.Init(config.GetConfigValue("APP_NAME"), config.GetConfigValue("LOG_LEVEL"))
+	logger.Init(
+		config.GetConfigValue("APP_NAME"),
+		config.GetConfigValue("LOG_LEVEL"),
+		config.GetConfigValue("ENV"),
+	)
 
 	smCfg := awsSM.Config{
 		Region: config.GetConfigValue("AWS_REGION"),
@@ -37,13 +40,11 @@ func main() {
 		Batch: config.GetConfigValue("AWS_BATCH_SECRET_NAME"),
 	}
 
-	// initialize AWS Secrets Manager
 	if err := awsSM.Bootstrap(smCfg); err != nil {
 		logger.Fatal("failed to initialize aws secrets manager", err)
 		os.Exit(1)
 	}
 
-	// load JWT keys into ENV
 	if err := jwt.InitializeKeys(); err != nil {
 		logger.Fatal("failed to initialize JWT keys", err)
 		os.Exit(1)
@@ -55,7 +56,6 @@ func main() {
 		DB: config.GetConfigValue("AWS_ELASTICACHE_DB"),
 	}
 
-	// initialize elasticache
 	if err := awsEC.Init(ecCfg); err != nil {
 		logger.Fatal("failed to initialize elasticache", err)
 		os.Exit(1)
@@ -63,11 +63,9 @@ func main() {
 
 	rtr := chi.NewRouter()
 
-	// health check (public - no middleware)
 	rtr.Get("/health", handlers.HealthHandler)
 	rtr.Get("/.well-known/jwks.json", handlers.JWKSHandler)
 
-	// OAuth 2.0 endpoints (for client/session-based auth)
 	rtr.Route("/oauth", func(oauth chi.Router) {
 		oauth.Use(
 			mw.ContextMiddleware,
@@ -81,11 +79,9 @@ func main() {
 			mw.RateLimiterMiddleware,
 		)
 		
-		// Public endpoints
 		oauth.Post("/token", handlers.OAuthTokenHandler)
 		oauth.Get("/authorize", handlers.OAuthAuthorizeHandler)
 		
-		// Protected endpoints (require valid OAuth token)
 		oauth.Group(func(protected chi.Router) {
 			protected.Use(mw.ClientTypeMiddleware, mw.AuthMiddleware)
 
@@ -104,7 +100,6 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	// start server
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		logger.Fatal("server failed to start", err)
 		os.Exit(1)

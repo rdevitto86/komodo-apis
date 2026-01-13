@@ -2,6 +2,7 @@ package dynamodb
 
 import (
 	"context"
+	"fmt"
 	logger "komodo-forge-apis-go/logging/runtime"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -47,7 +48,7 @@ type ScanOutput struct {
 // Queries DynamoDB and returns the result.
 func Query(ctx context.Context, input QueryInput) (*QueryOutput, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "Query")
 	}
 
@@ -96,7 +97,7 @@ func Query(ctx context.Context, input QueryInput) (*QueryOutput, error) {
 // Unmarshals the query result into the provided output interface.
 func QueryAs(ctx context.Context, input QueryInput, out interface{}) (*QueryOutput, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "QueryAs")
 	}
 
@@ -117,7 +118,7 @@ func QueryAs(ctx context.Context, input QueryInput, out interface{}) (*QueryOutp
 // Queries DynamoDB and returns all items.
 func QueryAll(ctx context.Context, input QueryInput) ([]map[string]types.AttributeValue, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "QueryAll")
 	}
 
@@ -145,7 +146,7 @@ func QueryAll(ctx context.Context, input QueryInput) ([]map[string]types.Attribu
 // Unmarshals the query result into the provided output interface.
 func QueryAllAs(ctx context.Context, input QueryInput, out interface{}) error {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return WrapError(ErrClientNotInitialized, "QueryAllAs")
 	}
 
@@ -166,7 +167,7 @@ func QueryAllAs(ctx context.Context, input QueryInput, out interface{}) error {
 // Scans DynamoDB and returns the result.
 func Scan(ctx context.Context, input ScanInput) (*ScanOutput, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "Scan")
 	}
 
@@ -210,7 +211,7 @@ func Scan(ctx context.Context, input ScanInput) (*ScanOutput, error) {
 // Unmarshals the scan result into the provided output interface.
 func ScanAs(ctx context.Context, input ScanInput, out interface{}) (*ScanOutput, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "ScanAs")
 	}
 
@@ -231,7 +232,7 @@ func ScanAs(ctx context.Context, input ScanInput, out interface{}) (*ScanOutput,
 // Scans DynamoDB and returns all items.
 func ScanAll(ctx context.Context, input ScanInput) ([]map[string]types.AttributeValue, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "ScanAll")
 	}
 
@@ -259,7 +260,7 @@ func ScanAll(ctx context.Context, input ScanInput) ([]map[string]types.Attribute
 // Unmarshals the scan result into the provided output interface.
 func ScanAllAs(ctx context.Context, input ScanInput, out interface{}) error {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return WrapError(ErrClientNotInitialized, "ScanAllAs")
 	}
 

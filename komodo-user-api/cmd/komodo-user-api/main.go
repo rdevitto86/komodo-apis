@@ -2,7 +2,7 @@ package main
 
 import (
 	"komodo-forge-apis-go/aws/dynamodb"
-	sm "komodo-forge-apis-go/aws/secrets-manager"
+	awsSM "komodo-forge-apis-go/aws/secrets-manager"
 	"komodo-forge-apis-go/config"
 	mw "komodo-forge-apis-go/http/middleware"
 	logger "komodo-forge-apis-go/logging/runtime"
@@ -16,22 +16,24 @@ import (
 
 func main() {
 	// initialize runtime logger
-	logger.Init("komodo-user-api", config.GetConfigValue("LOG_LEVEL"))
+	logger.Init(config.GetConfigValue("APP_NAME"), config.GetConfigValue("LOG_LEVEL"))
 
-	// initialize AWS Secrets Manager
-	err := sm.Init(sm.Config{
+	smCfg := awsSM.Config{
 		Region: config.GetConfigValue("AWS_REGION"),
-		SecretPrefix: config.GetConfigValue("SECRET_PREFIX"),
-		BatchSecretName: config.GetConfigValue("BATCH_SECRET_NAME"),
-		SecretKeys: []string{
+		Endpoint: config.GetConfigValue("AWS_ENDPOINT"),
+		Keys: []string{
 			"USER_API_CLIENT_ID",
 			"USER_API_CLIENT_SECRET",
 			"IP_WHITELIST",
 			"IP_BLACKLIST",
 		},
-	})
-	if err != nil {
-		logger.Fatal("failed to load aws secrets", err)
+		Prefix: config.GetConfigValue("AWS_SECRET_PREFIX"),
+		Batch: config.GetConfigValue("AWS_BATCH_SECRET_NAME"),
+	}
+
+	// initialize AWS Secrets Manager
+	if err := awsSM.Bootstrap(smCfg); err != nil {
+		logger.Fatal("failed to initialize aws secrets manager", err)
 		os.Exit(1)
 	}
 

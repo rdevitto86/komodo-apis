@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"net/http"
 
@@ -35,10 +36,9 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	// Get public key from environment
 	publicKeyPEM := config.GetConfigValue("JWT_PUBLIC_KEY")
 	if publicKeyPEM == "" {
-		logger.Error("JWT_PUBLIC_KEY not configured")
+		logger.Error("JWT_PUBLIC_KEY not configured", fmt.Errorf("JWT_PUBLIC_KEY not configured"))
 		httpErr.SendError(
-			wtr, req, httpErr.Auth.InvalidKey,
-			httpErr.WithDetail("public key not configured"),
+			wtr, req, httpErr.Auth.InvalidKey, httpErr.WithDetail("public key not configured"),
 		)
 		return
 	}
@@ -46,10 +46,9 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	// Parse PEM block
 	block, _ := pem.Decode([]byte(publicKeyPEM))
 	if block == nil {
-		logger.Error("failed to parse PEM block containing public key")
+		logger.Error("failed to parse PEM block containing public key", fmt.Errorf("failed to parse PEM block containing public key"))
 		httpErr.SendError(
-			wtr, req, httpErr.Auth.InvalidKey,
-			httpErr.WithDetail("failed to parse public key"),
+			wtr, req, httpErr.Auth.InvalidKey, httpErr.WithDetail("failed to parse public key"),
 		)
 		return
 	}
@@ -59,8 +58,7 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		logger.Error("failed to parse public key", err)
 		httpErr.SendError(
-			wtr, req, httpErr.Auth.InvalidKey,
-			httpErr.WithDetail("failed to parse public key"),
+			wtr, req, httpErr.Auth.InvalidKey, httpErr.WithDetail("failed to parse public key"),
 		)
 		return
 	}
@@ -68,10 +66,9 @@ func JWKSHandler(wtr http.ResponseWriter, req *http.Request) {
 	// Cast to RSA public key
 	rsaPub, ok := pub.(*rsa.PublicKey)
 	if !ok {
-		logger.Error("public key is not RSA")
+		logger.Error("public key is not RSA", fmt.Errorf("public key is not RSA"))
 		httpErr.SendError(
-			wtr, req, httpErr.Auth.InvalidKey,
-			httpErr.WithDetail("public key is invalid"),
+			wtr, req, httpErr.Auth.InvalidKey, httpErr.WithDetail("public key is invalid"),
 		)
 		return
 	}

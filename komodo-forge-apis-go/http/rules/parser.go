@@ -2,7 +2,7 @@ package rules
 
 import (
 	"fmt"
-	"log/slog"
+	logger "komodo-forge-apis-go/logging/runtime"
 	"os"
 	"regexp"
 	"strings"
@@ -42,14 +42,14 @@ func LoadConfig(path ...string) bool {
 		}
 
 		if err != nil || data == nil {
-			slog.Error("failed to load validation rules from" + source, err)
+			logger.Error("failed to load validation rules from" + source, err)
 			configLoaded = false
 			return
 		}
 
 		rt, patterns, parseErr := parseConfigFromData(data)
 		if parseErr != nil {
-			slog.Error("failed to parse validation rules", parseErr)
+			logger.Error("failed to parse validation rules", parseErr)
 			configLoaded = false
 			return
 		}
@@ -58,7 +58,7 @@ func LoadConfig(path ...string) bool {
 		patternRoutes = patterns
 		configLoaded = true
 
-		slog.Info("successfully loaded validation rules from: " + source)
+		logger.Info("successfully loaded validation rules from: " + source)
 	})
 	return configLoaded
 }
@@ -68,7 +68,7 @@ func LoadConfigWithData(data []byte) {
 	loadOnce.Do(func() {
 		rt, patterns, err := parseConfigFromData(data)
 		if err != nil {
-			slog.Error("failed to parse validation rules from embedded config", err)
+			logger.Error("failed to parse validation rules from embedded config", err)
 			configLoaded = false
 			return
 		}
@@ -77,15 +77,13 @@ func LoadConfigWithData(data []byte) {
 		patternRoutes = patterns
 		configLoaded = true
 
-		slog.Info("successfully loaded validation rules from embedded config")
+		logger.Info("successfully loaded validation rules from embedded config")
 	})
 }
 	
 
-// Returns true if the config has been successfully loaded
 func IsConfigLoaded() bool { return configLoaded && ruleMap != nil }
 
-// Returns the EvalRule for a given request path and method.
 func GetRule(pKey string, method string) *EvalRule {
 	if pKey == "" || method == "" || ruleMap == nil {
 		return nil
@@ -100,7 +98,6 @@ func GetRule(pKey string, method string) *EvalRule {
 		}
 	}
 
-	// Pattern matches
 	for _, rp := range patternRoutes {
 		if rp.re.MatchString(np) {
 			if rule, exists := rp.methods[method]; exists {
@@ -111,15 +108,11 @@ func GetRule(pKey string, method string) *EvalRule {
 	return nil
 }
 
-// Returns the full rule map as loaded from config.
 func GetRules() RuleConfig { return ruleMap }
 
-// Validates and normalizes the configuration:
 func validateAndNormalizeConfig(cfg RuleConfig) error {
 	for _, methods := range cfg {
 		for method, rule := range methods {
-			// Ensure empty maps are initialized (not nil) - YAML unmarshalling may leave them nil
-			// This allows safe iteration even when fields are omitted from the config
 			if rule.Headers == nil {
 				rule.Headers = make(Headers)
 			}
@@ -132,8 +125,7 @@ func validateAndNormalizeConfig(cfg RuleConfig) error {
 			if rule.Body == nil {
 				rule.Body = make(Body)
 			}
-			
-			// Update the rule back in the config
+
 			methods[method] = rule
 		}
 	}
@@ -147,7 +139,7 @@ func parseConfigFromData(data []byte) (map[string]map[string]EvalRule, []routePa
 	}
 
 	if err := yaml.Unmarshal(data, &root); err != nil {
-		slog.Error("failed to parse validation rules from embedded config", err)
+		logger.Error("failed to parse validation rules from embedded config", err)
 		return nil, nil, fmt.Errorf("invalid yaml: %w", err)
 	}
 
@@ -155,7 +147,7 @@ func parseConfigFromData(data []byte) (map[string]map[string]EvalRule, []routePa
 	
 	// Validate and normalize the configuration
 	if err := validateAndNormalizeConfig(cfg); err != nil {
-		slog.Error("validation rules configuration is invalid", err)
+		logger.Error("validation rules configuration is invalid", err)
 		return nil, nil, err
 	}
 	
@@ -167,7 +159,7 @@ func parseConfigFromData(data []byte) (map[string]map[string]EvalRule, []routePa
 			reStr, keys := templateToRegex(tpl)
 			re, err := regexp.Compile("^" + reStr + "$")
 			if err != nil {
-				slog.Error("invalid route pattern " + tpl, err)
+				logger.Error("invalid route pattern " + tpl, err)
 				return nil, nil, fmt.Errorf("invalid route pattern %s: %w", tpl, err)
 			}
 

@@ -1,10 +1,10 @@
 package telemetry
 
 import (
+	"fmt"
 	httpErr "komodo-forge-apis-go/http/errors"
 	logger "komodo-forge-apis-go/logging/runtime"
 	"net/http"
-	"runtime/debug"
 	"time"
 
 	chimw "github.com/go-chi/chi/v5/middleware"
@@ -20,7 +20,6 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 
 			// Recover from panics and ensure a 500 is sent if nothing written.
 			if rec := recover(); rec != nil {
-				// Get request ID safely
 				reqID := chimw.GetReqID(req.Context())
 				if reqID == "" { reqID = "unknown" }
 				
@@ -30,15 +29,13 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 					status = resWtr.Status()
 				}
 				if status == 0 {
-					httpErr.SendError(wtr, req, httpErr.Global.Internal, httpErr.WithDetail("error occured while logging telemetry"))
+					httpErr.SendError(
+						wtr, req, httpErr.Global.Internal, httpErr.WithDetail("error occured while logging telemetry"),
+					)
 				}
 				
-				logger.Error("telemetry panicked!", map[string]any{
-					"request_id": reqID,
-					"err":        rec,
-					"stack":      string(debug.Stack()),
-				})
-				return // Don't continue after panic
+				logger.Error("telemetry panicked!", fmt.Errorf("telemetry panicked: %v", rec))
+				return
 			}
 
 			status := 0
@@ -73,9 +70,9 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 			}
 
 			if status >= 400 {
-				logger.Error("telemetry request failed", payload)
+				logger.Error("telemetry request failed", fmt.Errorf("telemetry request failed: %v", payload))
 			} else {
-				logger.Info("telemetry request completed", payload)
+				logger.Info("telemetry request completed")
 			}
 		}()
 

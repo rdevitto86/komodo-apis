@@ -30,6 +30,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/lmittmann/tint v1.1.2 // indirect
 	github.com/redis/go-redis/v9 v9.17.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

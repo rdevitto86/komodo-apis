@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -25,13 +26,17 @@ func OAuthRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 	var reqBody RevokeRequest
 	if err := json.NewDecoder(req.Body).Decode(&reqBody); err != nil {
 		logger.Error("failed to parse request body", err)
-		httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("failed to parse request body"))
+		httpErr.SendError(
+			wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("failed to parse request body"),
+		)
 		return
 	}
 
 	if reqBody.Token == "" {
-		logger.Error("missing token parameter")
-		httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("missing token parameter"))
+		logger.Error("missing token parameter", fmt.Errorf("missing token parameter"))
+		httpErr.SendError(
+			wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("missing token parameter"),
+		)
 		return
 	}
 
@@ -40,7 +45,7 @@ func OAuthRevokeHandler(wtr http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		// Per RFC 7009, return 200 OK even if token is invalid
 		// (prevents information disclosure about token validity)
-		logger.Warn("invalid token submitted for revocation", err)
+		logger.Warn("invalid token submitted for revocation")
 		wtr.WriteHeader(http.StatusOK)
 		json.NewEncoder(wtr).Encode(map[string]bool{"revoked": true})
 		return

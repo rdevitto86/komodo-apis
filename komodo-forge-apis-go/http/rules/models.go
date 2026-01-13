@@ -52,7 +52,7 @@ type EvalRule struct {
 	PathParams   		PathParams   	`yaml:"params,omitempty"`
 	QueryParams  		QueryParams  	`yaml:"query,omitempty"`
 	Body         		Body         	`yaml:"body,omitempty"`
-	RequiredVersion int					`yaml:"requiredVersion,omitempty"`
+	RequiredVersion int						`yaml:"requiredVersion,omitempty"`
 }
 
 type RuleConfig map[string]map[string]EvalRule

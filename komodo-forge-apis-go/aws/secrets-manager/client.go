@@ -26,7 +26,7 @@ type Config struct {
 // Initialize AWS Secrets Manager and load secrets in one call
 func Bootstrap(cfg Config) error {
 	if cfg.Region == "" {
-		logger.Error("region not provided")
+		logger.Error("region not provided", fmt.Errorf("aws region not provided for secrets manager"))
 		return fmt.Errorf("aws region not provided for secrets manager")
 	}
 
@@ -71,13 +71,17 @@ func Bootstrap(cfg Config) error {
 
 // Retrieves a single secret
 func GetSecret(key string, prefix string) (string, error) {
+	var err error
+
 	if secretsManagerClient == nil {
-		logger.Error("aws secrets manager client not initialized")
-		return "", fmt.Errorf("aws secrets manager client not initialized")
+		err = fmt.Errorf("aws secrets manager client not initialized")
+		logger.Error("aws secrets manager client not initialized", err)
+		return "", err
 	}
 	if prefix == "" {
-		logger.Error("secret prefix not initialized")
-		return "", fmt.Errorf("secret prefix not initialized")
+		err = fmt.Errorf("secret prefix not initialized")
+		logger.Error("secret prefix not initialized", err)
+		return "", err
 	}
 
 	secretPath := prefix + key // e.g., "some-api/prod/JWT_PRIVATE_KEY"
@@ -91,7 +95,9 @@ func GetSecret(key string, prefix string) (string, error) {
 		return "", err
 	}
 	if result.SecretString == nil {
-		return "", fmt.Errorf("secret %s has no string value", secretPath)
+		err = fmt.Errorf("secret %s has no string value", secretPath)
+		logger.Error(fmt.Sprintf("secret %s has no string value", secretPath), err)
+		return "", err
 	}
 
 	logger.Info(fmt.Sprintf("successfully retrieved secret %s from AWS", key))
@@ -101,21 +107,27 @@ func GetSecret(key string, prefix string) (string, error) {
 
 // Retrieves multiple secrets using AWS batch call
 func GetSecrets(keys []string, prefix string, batchId	string) (map[string]string, error) {
+	var err error
+
 	if secretsManagerClient == nil {
-		logger.Error("aws secrets manager client not initialized")
-		return nil, fmt.Errorf("aws secrets manager client not initialized")
+		err = fmt.Errorf("aws secrets manager client not initialized")
+		logger.Error("aws secrets manager client not initialized", err)
+		return nil, err
 	}
 	if len(keys) == 0 {
-		logger.Warn("no secrets to load")
-		return nil, fmt.Errorf("no keys provided for secret retrieval")
+		err = fmt.Errorf("no keys provided for secret retrieval")
+		logger.Warn("no secrets to load", err)
+		return nil, err
 	}
 	if prefix == "" {
-		logger.Error("secret prefix not initialized")
-		return nil, fmt.Errorf("secret prefix not initialized")
+		err = fmt.Errorf("secret prefix not initialized")
+		logger.Error("secret prefix not initialized", err)
+		return nil, err
 	}
 	if batchId == "" {
-		logger.Error("batch secret name not initialized")
-		return nil, fmt.Errorf("batch secret name not initialized")
+		err = fmt.Errorf("batch secret name not initialized")
+		logger.Error("batch secret name not initialized", err)
+		return nil, err
 	}
 
 	secretPath := prefix + batchId // e.g., "some-api/prod/all-secrets"
@@ -129,8 +141,9 @@ func GetSecrets(keys []string, prefix string, batchId	string) (map[string]string
 		return nil, err
 	}
 	if result.SecretString == nil {
-		logger.Error(fmt.Sprintf("batch secret %s has no string value", secretPath))
-		return nil, fmt.Errorf("batch secret %s has no string value", secretPath)
+		err = fmt.Errorf("batch secret %s has no string value", secretPath)
+		logger.Error(fmt.Sprintf("batch secret %s has no string value", secretPath), err)
+		return nil, err
 	}
 
 	// Parse JSON string

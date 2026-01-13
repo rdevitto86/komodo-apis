@@ -37,13 +37,13 @@ rules:
         "Referer":
           type: "string"
       body:
-        "client_id":
+        "clientId":
           required: true
           type: "string"
-        "client_secret":
+        "clientSecret":
           required: true
           type: "string"
-        "grant_type":
+        "grantType":
           required: true
           type: "string"
       requiredVersion: 1
@@ -51,13 +51,13 @@ rules:
     GET:
       level: "lenient"
       query:
-        "response_type":
+        "responseType":
           required: true
           type: "string"
-        "client_id":
+        "clientId":
           required: true
           type: "string"
-        "redirect_uri":
+        "redirectUri":
           required: true
           type: "string"
       requiredVersion: 1

@@ -33,7 +33,7 @@ type Config struct {
 func Init(config Config) error {
 	once.Do(func() {
 		if config.Region == "" {
-			logger.Error("dynamodb region is required")
+			logger.Error("dynamodb region is required", fmt.Errorf("dynamodb region is required"))
 			initErr = fmt.Errorf("dynamodb region is required")
 			return
 		}
@@ -97,7 +97,7 @@ func GetItem(
 	keys []map[string]types.AttributeValue,
 ) (interface{}, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "GetItem")
 	}
 	if batch {
@@ -116,7 +116,7 @@ func GetItemAs(
 	out interface{},
 ) error {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return WrapError(ErrClientNotInitialized, "GetItemAs")
 	}
 
@@ -148,7 +148,7 @@ func WriteItem(
 	condition *string,
 ) error {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return WrapError(ErrClientNotInitialized, "WriteItem")
 	}
 	if batch {
@@ -167,7 +167,7 @@ func WriteItemFrom(
 	condition *string,
 ) error {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return WrapError(ErrClientNotInitialized, "WriteItemFrom")
 	}
 
@@ -210,7 +210,7 @@ func UpdateItem(
 	condition *string,
 ) (map[string]types.AttributeValue, error) {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return nil, WrapError(ErrClientNotInitialized, "UpdateItem")
 	}
 
@@ -253,7 +253,7 @@ func UpdateItemAs(
 	out interface{},
 ) error {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return WrapError(ErrClientNotInitialized, "UpdateItemAs")
 	}
 
@@ -280,7 +280,7 @@ func DeleteItem(
 	condition *string,
 ) error {
 	if client == nil {
-		logger.Error("dynamodb client not initialized")
+		logger.Error("dynamodb client not initialized", fmt.Errorf("dynamodb client not initialized"))
 		return WrapError(ErrClientNotInitialized, "DeleteItem")
 	}
 	if batch {

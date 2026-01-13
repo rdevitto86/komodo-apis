@@ -13,8 +13,8 @@ import (
 type IntrospectResponse struct {
 	Active    bool   `json:"active"`
 	Scope     string `json:"scope,omitempty"`
-	ClientID  string `json:"client_id,omitempty"`
-	TokenType string `json:"token_type,omitempty"`
+	ClientID  string `json:"clientId,omitempty"`
+	TokenType string `json:"tokenType,omitempty"`
 	Exp       int64  `json:"exp,omitempty"`
 	Iat       int64  `json:"iat,omitempty"`
 	Sub       string `json:"sub,omitempty"`

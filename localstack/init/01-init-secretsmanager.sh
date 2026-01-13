@@ -20,7 +20,7 @@ data = {
   'JWT_KID': 'test-kid',
   'JWT_ISSUER': 'test-issuer',
   'JWT_AUDIENCE': 'test-audience',
-  'IP_WHITELIST': '127.0.0.1,localhost,172.0.0.0/8',
+  'IP_WHITELIST': '',
   'IP_BLACKLIST': '',
   'AWS_ELASTICACHE_PASSWORD': 'test-password'
 }
@@ -39,7 +39,7 @@ awslocal secretsmanager create-secret \
   --secret-string '{
     "USER_API_CLIENT_ID": "test-user-api-client-id",
     "USER_API_CLIENT_SECRET": "test-user-api-client-secret",
-    "IP_WHITELIST": "127.0.0.1,localhost,172.0.0.0/8",
+    "IP_WHITELIST": "",
     "IP_BLACKLIST": ""
   }' 2>/dev/null || echo "User API secret already exists"
 

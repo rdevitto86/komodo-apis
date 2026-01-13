@@ -29,7 +29,7 @@ func Init(cfg Config) error {
 		logger.Info("initializing elasticache client")
 
 		if cfg.Endpoint == "" {
-			logger.Error("elasticache endpoint not provided")
+			logger.Error("elasticache endpoint not provided", fmt.Errorf("elasticache endpoint not provided"))
 			initErr = fmt.Errorf("elasticache endpoint not provided")
 			return
 		}
@@ -59,7 +59,7 @@ func Init(cfg Config) error {
 // Get retrieves the string value stored at key
 func Get(key string) (string, error) {
 	if client == nil {
-		logger.Error("elasticache client not initialized")
+		logger.Error("elasticache client not initialized", fmt.Errorf("elasticache client not initialized"))
 		return "", fmt.Errorf("elasticache client not initialized")
 	}
 
@@ -81,7 +81,7 @@ func Get(key string) (string, error) {
 // Set stores a value with the provided TTL (in seconds). Use ttl=0 for no expiration
 func Set(key string, value string, ttl int64) error {
 	if client == nil {
-		logger.Error("elasticache client not initialized")
+		logger.Error("elasticache client not initialized", fmt.Errorf("elasticache client not initialized"))
 		return fmt.Errorf("elasticache client not initialized")
 	}
 
@@ -103,7 +103,7 @@ func Set(key string, value string, ttl int64) error {
 // Delete removes a key from the cache
 func Delete(key string) error {
 	if client == nil {
-		logger.Error("elasticache client not initialized")
+		logger.Error("elasticache client not initialized", fmt.Errorf("elasticache client not initialized"))
 		return fmt.Errorf("elasticache client not initialized")
 	}
 
@@ -167,7 +167,7 @@ return {allowed, tostring(wait_ms)}
 // Returns (allowed, retryAfter, error)
 func AllowDistributed(ctx context.Context, key string, rate, burst float64, ttlSec int) (bool, time.Duration, error) {
 	if client == nil {
-		logger.Error("elasticache client not initialized")
+		logger.Error("elasticache client not initialized", fmt.Errorf("elasticache client not initialized"))
 		return false, 0, fmt.Errorf("elasticache client not initialized")
 	}
 
@@ -181,7 +181,7 @@ func AllowDistributed(ctx context.Context, key string, rate, burst float64, ttlS
 	// Script returns [allowed, wait_ms]
 	arr, ok := res.([]interface{})
 	if !ok || len(arr) < 2 {
-		logger.Error("unexpected script result", res)
+		logger.Error("unexpected script result", fmt.Errorf("unexpected result: %v", res))
 		return false, 0, fmt.Errorf("unexpected script result")
 	}
 

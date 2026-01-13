@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -13,28 +14,26 @@ import (
 )
 
 type TokenRequest struct {
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	GrantType    string `json:"grant_type"`
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+	GrantType    string `json:"grantType"`
 	Scope        string `json:"scope,omitempty"`
-	RefreshToken string `json:"refresh_token,omitempty"` // For refresh_token grant
+	RefreshToken string `json:"refreshToken,omitempty"` // For refresh_token grant
 	Code         string `json:"code,omitempty"`          // For authorization_code grant
-	RedirectURI  string `json:"redirect_uri,omitempty"`  // For authorization_code grant
+	RedirectURI  string `json:"redirectUri,omitempty"`  // For authorization_code grant
 	Username     string `json:"username,omitempty"`      // For password grant
 	Password     string `json:"password,omitempty"`      // For password grant
 }
 
 type TokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	TokenType    string `json:"token_type"`
-	ExpiresIn    int    `json:"expires_in"`
-	RefreshToken string `json:"refresh_token,omitempty"`
+	AccessToken  string `json:"accessToken"`
+	TokenType    string `json:"tokenType"`
+	ExpiresIn    int    `json:"expiresIn"`
+	RefreshToken string `json:"refreshToken,omitempty"`
 	Scope        string `json:"scope,omitempty"`
 }
 
 // Unified OAuth 2.0 token endpoint (RFC 6749 Section 3.2).
-// Handles all grant types: client_credentials, refresh_token, authorization_code, password.
-// All tokens issued are JWTs
 func OAuthTokenHandler(wtr http.ResponseWriter, req *http.Request) {
 	wtr.Header().Set("Content-Type", "application/json")
 	wtr.Header().Set("Cache-Control", "no-store")
@@ -42,18 +41,24 @@ func OAuthTokenHandler(wtr http.ResponseWriter, req *http.Request) {
 	var reqBody TokenRequest
 	if err := json.NewDecoder(req.Body).Decode(&reqBody); err != nil {
 		logger.Error("failed to parse request body", err)
-		httpErr.SendError(wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("failed to parse request body"))
+		httpErr.SendError(
+			wtr, req, httpErr.Global.BadRequest, httpErr.WithDetail("failed to parse request body"),
+		)
 		return
 	}
 
 	if reqBody.GrantType == "" {
-		logger.Error("missing grant type")
-		httpErr.SendError(wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("missing grant type"))
+		logger.Error("missing grant type", fmt.Errorf("missing grant type"))
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("missing grant type"),
+		)
 		return
 	}
 	if !oauth.IsValidGrantType(reqBody.GrantType) {
-		logger.Error("unsupported grant type: " + reqBody.GrantType)
-		httpErr.SendError(wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("unsupported grant type"))
+		logger.Error("unsupported grant type: " + reqBody.GrantType, fmt.Errorf("unsupported grant type"))
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("unsupported grant type"),
+		)
 		return
 	}
 
@@ -66,8 +71,10 @@ func OAuthTokenHandler(wtr http.ResponseWriter, req *http.Request) {
 		case "authorization_code":
 			handleAuthorizationCode(wtr, req, &reqBody)
 		default:
-			logger.Error("unsupported grant type: " + reqBody.GrantType)
-			httpErr.SendError(wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("unsupported grant type"))
+			logger.Error("unsupported grant type: " + reqBody.GrantType, fmt.Errorf("unsupported grant type"))
+			httpErr.SendError(
+				wtr, req, httpErr.Auth.UnsupportedGrantType, httpErr.WithDetail("unsupported grant type"),
+			)
 	}
 }
 
@@ -75,20 +82,26 @@ func OAuthTokenHandler(wtr http.ResponseWriter, req *http.Request) {
 func handleClientCredentials(wtr http.ResponseWriter, req *http.Request, reqBody *TokenRequest) {
 	// Validate client credentials
 	if reqBody.ClientID == "" || reqBody.ClientSecret == "" {
-		logger.Error("missing client credentials")
-		httpErr.SendError(wtr, req, httpErr.Auth.InvalidClientCredentials, httpErr.WithDetail("missing client credentials"))
+		logger.Error("missing client credentials", fmt.Errorf("missing client credentials"))
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.InvalidClientCredentials, httpErr.WithDetail("missing client credentials"),
+		)
 		return
 	}
 
-	// TODO: Validate client_id and client_secret against database/secrets store
+	// TODO: Validate clientId and clientSecret against database/secrets store
 	if reqBody.ClientID != "test-client" || reqBody.ClientSecret != "test-secret" {
-		logger.Error("invalid client credentials")
-		httpErr.SendError(wtr, req, httpErr.Auth.InvalidClientCredentials, httpErr.WithDetail("invalid client credentials"))
+		logger.Error("invalid client credentials", fmt.Errorf("invalid client credentials"))
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.InvalidClientCredentials, httpErr.WithDetail("invalid client credentials"),
+		)
 		return
 	}
 	if reqBody.Scope != "" && !oauth.IsValidScope(reqBody.Scope) {
-		logger.Error("invalid grant scope: " + reqBody.Scope)
-		httpErr.SendError(wtr, req, httpErr.Auth.InvalidScope, httpErr.WithDetail("invalid grant scope"))
+		logger.Error("invalid grant scope: " + reqBody.Scope, fmt.Errorf("invalid grant scope"))
+		httpErr.SendError(
+			wtr, req, httpErr.Auth.InvalidScope, httpErr.WithDetail("invalid grant scope"),
+		)
 		return
 	}
 
@@ -145,7 +158,7 @@ func handleRefreshToken(wtr http.ResponseWriter, req *http.Request, reqBody *Tok
 
 	// Check if token is expired
 	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
-		logger.Error("refresh token is expired")
+		logger.Error("refresh token is expired", fmt.Errorf("refresh token is expired"))
 		httpErr.SendError(wtr, req, httpErr.Auth.InvalidToken, httpErr.WithDetail("refresh token is expired"))
 		return
 	}
@@ -171,7 +184,9 @@ func handleRefreshToken(wtr http.ResponseWriter, req *http.Request, reqBody *Tok
 	)
 	if err != nil {
 		logger.Error("failed to sign access token", err)
-		httpErr.SendError(wtr, req, httpErr.Global.Internal, httpErr.WithDetail("failed to sign access token"))
+		httpErr.SendError(
+			wtr, req, httpErr.Global.Internal, httpErr.WithDetail("failed to sign access token"),
+		)
 		return
 	}
 
@@ -196,5 +211,7 @@ func handleAuthorizationCode(wtr http.ResponseWriter, req *http.Request, reqBody
 	// 4. Issue access + refresh tokens
 	// 5. Delete used authorization code
 
-	httpErr.SendError(wtr, req, httpErr.Global.NotImplemented, httpErr.WithDetail("authorizationcode grant not yet implemented"))
+	httpErr.SendError(
+		wtr, req, httpErr.Global.NotImplemented, httpErr.WithDetail("authorizationcode grant not yet implemented"),
+	)
 }

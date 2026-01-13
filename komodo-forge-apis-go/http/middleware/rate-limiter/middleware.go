@@ -1,6 +1,7 @@
 package ratelimiting
 
 import (
+	"fmt"
 	httpErr "komodo-forge-apis-go/http/errors"
 	httpReq "komodo-forge-apis-go/http/request"
 	rl "komodo-forge-apis-go/http/services/rate_limiter"
@@ -16,20 +17,23 @@ func RateLimiterMiddleware(next http.Handler) http.Handler {
 		allowed, wait, err := rl.Allow(req.Context(), key)
 
 		if err != nil {
-			logger.Error("rate limiter error" + err.Error())
-
 			if rl.ShouldFailOpen() {
-				logger.Error("rate limiter failing open for client: " + key)
+				logger.Error("rate limiter failing open for client: " + key, err)
 			} else {
-				httpErr.SendError(wtr, req, httpErr.Global.Internal, httpErr.WithDetail("internal rate limiter error"))
+				logger.Error("rate limiter failed for client: " + key, err)
+				httpErr.SendError(
+					wtr, req, httpErr.Global.Internal, httpErr.WithDetail("internal rate limiter error"),
+				)
 				return
 			}
 		} else if !allowed {
 			if wait > 0 {
 				wtr.Header().Set("Retry-After", strconv.Itoa(int(wait.Seconds() + 0.5)))
 			}
-			logger.Error("rate limit exceeded for client: " + key)
-			httpErr.SendError(wtr, req, httpErr.Global.TooManyRequests, httpErr.WithDetail("rate limit exceeded"))
+			logger.Error("rate limit exceeded for client: " + key, fmt.Errorf("rate limit exceeded"))
+			httpErr.SendError(
+				wtr, req, httpErr.Global.TooManyRequests, httpErr.WithDetail("rate limit exceeded"),
+			)
 			return
 		}
 
