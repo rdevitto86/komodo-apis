@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  ssr-api:
+    build: .
+    ports:
+      - "7010:7010"
+    environment:
+      PORT: 7010
+      NODE_ENV: development
+      AWS_REGION: us-east-1
+      S3_CONTENT_BUCKET: ${S3_CONTENT_BUCKET}
+      CLOUDFRONT_DISTRIBUTION_ID: ${CLOUDFRONT_DISTRIBUTION_ID}
+    secrets:
+      - aws_access_key
+      - aws_secret_key
+
+secrets:
+  aws_access_key:
+    file: ./secrets/aws_access_key.txt
+  aws_secret_key:
+    file: ./secrets/aws_secret_key.txt

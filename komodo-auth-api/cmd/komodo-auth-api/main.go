@@ -2,42 +2,51 @@ package main
 
 import (
 	"komodo-auth-api/internal/handlers"
-	awsEC "komodo-forge-apis-go/aws/elasticache"
-	awsSM "komodo-forge-apis-go/aws/secrets-manager"
-	"komodo-forge-apis-go/config"
-	"komodo-forge-apis-go/crypto/jwt"
-	mw "komodo-forge-apis-go/http/middleware"
+	awsEC "komodo-forge-sdk-go/aws/elasticache"
+	awsSM "komodo-forge-sdk-go/aws/secrets-manager"
+	"komodo-forge-sdk-go/config"
+	"komodo-forge-sdk-go/crypto/jwt"
+	mw "komodo-forge-sdk-go/http/middleware"
 	"net/http"
 	"os"
 	"time"
 
-	logger "komodo-forge-apis-go/logging/runtime"
+	logger "komodo-forge-sdk-go/logging/runtime"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func main() {
+func init() {
 	logger.Init(
 		config.GetConfigValue("APP_NAME"),
 		config.GetConfigValue("LOG_LEVEL"),
 		config.GetConfigValue("ENV"),
 	)
+}
 
+func main() {
 	smCfg := awsSM.Config{
 		Region: config.GetConfigValue("AWS_REGION"),
 		Endpoint: config.GetConfigValue("AWS_ENDPOINT"),
+		Prefix: config.GetConfigValue("AWS_SECRET_PREFIX"),
+		Batch: config.GetConfigValue("AWS_SECRET_BATCH"),
 		Keys: []string{
+			"AWS_ELASTICACHE_ENDPOINT",
+			"AWS_ELASTICACHE_PASSWORD",
+			"AWS_ELASTICACHE_DB",
 			"JWT_PUBLIC_KEY",
 			"JWT_PRIVATE_KEY",
 			"JWT_AUDIENCE",
 			"JWT_ISSUER",
 			"JWT_KID",
-			"AWS_ELASTICACHE_PASSWORD",
 			"IP_WHITELIST",
 			"IP_BLACKLIST",
+			"MAX_CONTENT_LENGTH",
+			"IDEMPOTENCY_TTL_SEC",
+			"RATE_LIMIT_RPS",
+			"RATE_LIMIT_BURST",
+			"BUCKET_TTL_SECOND",
 		},
-		Prefix: config.GetConfigValue("AWS_SECRET_PREFIX"),
-		Batch: config.GetConfigValue("AWS_BATCH_SECRET_NAME"),
 	}
 
 	if err := awsSM.Bootstrap(smCfg); err != nil {
@@ -62,21 +71,19 @@ func main() {
 	}
 
 	rtr := chi.NewRouter()
-
 	rtr.Get("/health", handlers.HealthHandler)
 	rtr.Get("/.well-known/jwks.json", handlers.JWKSHandler)
 
 	rtr.Route("/oauth", func(oauth chi.Router) {
 		oauth.Use(
-			mw.ContextMiddleware,
-			mw.SecurityHeadersMiddleware,
 			mw.RequestIDMiddleware,
 			mw.TelemetryMiddleware,
+			mw.RateLimiterMiddleware,
 			mw.IPAccessMiddleware,
+			mw.SecurityHeadersMiddleware,
 			mw.NormalizationMiddleware,
 			mw.SanitizationMiddleware,
 			mw.RuleValidationMiddleware,
-			mw.RateLimiterMiddleware,
 		)
 		
 		oauth.Post("/token", handlers.OAuthTokenHandler)
@@ -84,7 +91,6 @@ func main() {
 		
 		oauth.Group(func(protected chi.Router) {
 			protected.Use(mw.ClientTypeMiddleware, mw.AuthMiddleware)
-
 			protected.Post("/introspect", handlers.OAuthIntrospectHandler)
 			protected.Post("/revoke", handlers.OAuthRevokeHandler)
 		})

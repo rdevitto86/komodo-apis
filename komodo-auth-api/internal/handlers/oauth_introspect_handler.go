@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"komodo-forge-apis-go/crypto/jwt"
-	logger "komodo-forge-apis-go/logging/runtime"
+	"komodo-forge-sdk-go/crypto/jwt"
+	logger "komodo-forge-sdk-go/logging/runtime"
 )
 
 type IntrospectResponse struct {

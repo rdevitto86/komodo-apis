@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	ctxKeys "komodo-forge-apis-go/http/context"
-	httpReq "komodo-forge-apis-go/http/request"
-	httpRes "komodo-forge-apis-go/http/response"
+	ctxKeys "komodo-forge-sdk-go/http/context"
+	httpReq "komodo-forge-sdk-go/http/request"
+	httpRes "komodo-forge-sdk-go/http/response"
 	"net/http"
 )
 

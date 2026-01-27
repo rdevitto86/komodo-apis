@@ -110,145 +110,21 @@ Services are allocated port ranges by business domain, with highest-priority/mos
 
 | Port Range | Domain | Priority | Description |
 |------------|--------|----------|-------------|
-| 7001–7020 | Authentication & Authorization | CRITICAL | Core auth services |
-| 7021–7040 | User Services | HIGH | User profiles & preferences |
-| 7041–7080 | Order & Payments | HIGH | Transaction services |
-| 7081–7120 | Catalog & Inventory | HIGH | Product discovery |
-| 7121–7160 | Core Platform | MEDIUM | Platform infrastructure |
-| 7161–7200 | Customer Engagement | MEDIUM | Support & communications |
-| 7201–7220 | Reviews & Loyalty | MEDIUM | Social & retention |
-| 7221–7250 | GenAI & Automation | LOW | AI features |
-| 7251–7290 | Analytics & Observability | LOW | Monitoring & metrics |
-| 7291–7300 | SSR & Rendering | LOW | Server-side rendering |
+| 7001–7019 | Infrastructure & Mesh | CRITICAL | Sidecars, Service Discovery, and Config management. |
+| 7020–7049 | Identity & Security | CRITICAL | Auth, IAM, Secret management (Vault), and Token validation. |
+| 7050–7149 | Core Business Logic | HIGH | Orders, Payments, and Inventory |
+| 7150–7249 | User & Engagement | MEDIUM | Profiles, Social, Loyalty, and Communications. |
+| 7250–7349 | Emerging Tech & AI | MEDIUM | GenAI, LLM Orchestration, and Vector DB interfaces. |
+| 7350–7449 | Observability & Ops | LOW | Logging exporters, health checks, and logging agents. |
 
 ---
 
-### 7001–7020: Authentication & Authorization
-**Priority: CRITICAL** - Core authentication/authorization services that all other services depend on
-- **7001** - `komodo-auth-api` - OAuth 2.0 flows
-- **7002-7020** - Reserved for future auth services
+### 7020–7049: Identity & Security
+- **7020** - `komodo-auth-api` - OAuth 2.0 flows
+- **7021-7049** - Reserved for future auth services
 
 ---
 
-### 7021–7040: User Services
-**Priority: HIGH** - User profile and account management
-
-- **7021** - `komodo-user-api` - Core user profiles, preferences
-- **7022** - `komodo-user-personalize-api` - Personalization, recommendations
-- **7023-7040** - Reserved for future user services
-
----
-
-### 7041–7080: Order & Payments
-**Priority: HIGH** - Revenue-generating transaction services
-
-#### Order Services (7041–7060)
-- **7041** - `komodo-order-manage-api` - Create, update orders
-- **7042** - `komodo-order-lookup-api` - Order history, tracking
-- **7043** - `komodo-order-discounts-api` - Promo codes, discounts
-- **7044** - `komodo-order-returns-api` - Returns, refunds
-- **7045** - `komodo-order-shipping-api` - Shipping calculations, tracking
-- **7046-7060** - Reserved for future order services
-
-#### Payment Services (7061–7080)
-- **7061** - `komodo-payments-intents-api` - Payment intents, checkout
-- **7062** - `komodo-payments-transactions-api` - Transaction processing
-- **7063** - `komodo-payments-methods-api` - Stored payment methods
-- **7064** - `komodo-payments-ledger-api` - Financial ledger, reconciliation
-- **7065-7080** - Reserved for future payment services
-
----
-
-### 7081–7120: Catalog & Inventory
-**Priority: HIGH** - Product discovery and availability
-
-#### Catalog Services (7081–7100)
-- **7081** - `komodo-catalog-items-read-api` - Product listings, details
-- **7082** - `komodo-catalog-items-manage-api` - Product CRUD
-- **7083** - `komodo-catalog-items-suggestion-api` - AI-powered suggestions
-- **7084** - `komodo-catalog-inventory-read-api` - Stock levels
-- **7085** - `komodo-catalog-inventory-manage-api` - Inventory updates
-- **7086-7100** - Reserved for future catalog services
-
-#### Search Services (7101–7120)
-- **7101** - `komodo-search-api` - Product search, filtering
-- **7102** - `komodo-search-suggestions-api` - Autocomplete, typeahead
-- **7103-7120** - Reserved for future search services
-
----
-
-### 7121–7160: Core Platform Services
-**Priority: MEDIUM** - Essential platform capabilities
-
-#### Entitlements & Features (7121–7130)
-- **7121** - `komodo-core-entitlements-api` - User permissions, access control
-- **7122** - `komodo-core-features-api` - Feature flags, A/B testing
-- **7123** - `komodo-core-events-api` - Event bus, pub/sub
-- **7124-7130** - Reserved for future core services
-
-#### Content & Media (7131–7140)
-- **7131** - `komodo-content-cdn-api` - CDN management, media delivery
-- **7132-7140** - Reserved for future content services
-
-#### Address & Location (7141–7150)
-- **7141** - `komodo-address-api` - Address validation, geocoding
-- **7142-7150** - Reserved for future location services
-
----
-
-### 7161–7200: Customer Engagement
-**Priority: MEDIUM** - Customer support and communication
-
-#### Support Services (7161–7180)
-- **7161** - `komodo-support-cases-api` - Support tickets, cases
-- **7162** - `komodo-support-agent-chat-api` - Live agent chat
-- **7163** - `komodo-support-knowledge-api` - KB articles, FAQs
-- **7164** - `komodo-support-feedback-api` - Customer feedback, surveys
-- **7165-7180** - Reserved for future support services
-
-#### Communications (7181–7200)
-- **7181** - `komodo-comms-messaging-api` - Email, SMS, push notifications
-- **7182** - `komodo-comms-preferences-api` - Notification preferences
-- **7183-7200** - Reserved for future comms services
-
----
-
-### 7201–7220: Reviews & Loyalty
-**Priority: MEDIUM** - Social proof and retention
-
-#### Reviews (7201–7210)
-- **7201** - `komodo-reviews-read-api` - Read reviews, ratings
-- **7202** - `komodo-reviews-submit-api` - Submit reviews
-- **7203** - `komodo-reviews-moderation-api` - Moderation, flagging
-- **7204-7210** - Reserved for future review services
-
-#### Loyalty (7211–7220)
-- **7211** - `komodo-loyalty-rewards-api` - Points, rewards, tiers
-- **7212-7220** - Reserved for future loyalty services
-
----
-
-### 7221–7250: GenAI & Automation
-**Priority: LOW** - AI-powered features and automation
-
-- **7221** - `komodo-genai-agent-chat-api` - AI chatbot, customer service
-- **7222** - `komodo-genai-summary-api` - AI summaries, descriptions
-- **7223-7250** - Reserved for future AI services
-
----
-
-### 7251–7290: Analytics & Observability
-**Priority: LOW** - Monitoring, metrics, and analytics
-
-- **7251** - `komodo-analytics-interaction-api` - User interactions, clickstream
-- **7252** - `komodo-analytics-logs-api` - Centralized logging
-- **7253** - `komodo-analytics-telemetry-api` - Metrics, traces
-- **7254-7290** - Reserved for future analytics services
-
----
-
-### 7291–7300: SSR & Rendering
-**Priority: LOW** - Server-side rendering engines
-
-- **7291** - `komodo-ssr-engine` - React/Next.js SSR
-- **7292-7300** - Reserved for future rendering services
+### 7150–7249: User Services
+- **7150** - `komodo-user-api` - Core user profiles, preferences
+- **7151-7249** - Reserved for future user services

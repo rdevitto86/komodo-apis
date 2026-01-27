@@ -4,10 +4,10 @@ go 1.25
 
 require (
 	github.com/go-chi/chi/v5 v5.2.3
-	komodo-forge-apis-go v0.1.0
+	komodo-forge-sdk-go v0.1.0
 )
 
-replace komodo-forge-apis-go => ../komodo-forge-apis-go
+replace komodo-forge-sdk-go => ../komodo-forge-sdk-go
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.0 // indirect

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"komodo-forge-apis-go/crypto/jwt"
-	"komodo-forge-apis-go/crypto/oauth"
-	httpErr "komodo-forge-apis-go/http/errors"
-	logger "komodo-forge-apis-go/logging/runtime"
+	"komodo-forge-sdk-go/crypto/jwt"
+	"komodo-forge-sdk-go/crypto/oauth"
+	httpErr "komodo-forge-sdk-go/http/errors"
+	logger "komodo-forge-sdk-go/logging/runtime"
 )
 
 type TokenRequest struct {

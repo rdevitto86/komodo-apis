@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	httpErr "komodo-forge-apis-go/http/errors"
-	logger "komodo-forge-apis-go/logging/runtime"
+	httpErr "komodo-forge-sdk-go/http/errors"
+	logger "komodo-forge-sdk-go/logging/runtime"
 )
 
 // Handles OAuth 2.0 authorization endpoint (RFC 6749 Section 3.1).

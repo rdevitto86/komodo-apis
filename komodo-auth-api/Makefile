@@ -1,33 +1,37 @@
-# Default to Docker-first workflow
 .DEFAULT_GOAL := bootstrap
 
-# === Service metadata ===
-APP := komodo-auth-api
-
-# Map environments to compose files
-# local, dev, staging -> nonprod compose file
-# prod -> prod compose file
+APP_NAME := komodo-auth-api
 ENV ?= local
 ENV := $(strip $(ENV))
 TAG ?= $(ENV)
 
-# Paths
-BUILD_DIR := build
+DOCKERFILE := Dockerfile
+COMPOSE_FILE := docker-compose.yaml
+AWS_REGION ?= us-east-1
+VERSION ?= latest
+AWS_SECRET_PREFIX := komodo-auth-api/$(ENV)
+AWS_SECRET_BATCH := /all-secrets
+MEM_LIMIT ?= 512M
+LOG_LEVEL ?= error
+RESTART_POLICY ?= unless-stopped
 
-# Determine which compose file to use
 ifeq ($(ENV),prod)
-	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.prod.yaml
+  AWS_ENDPOINT := http://host.docker.internal:4566
+  RESTART_POLICY := always
+	MEM_LIMIT := 1g
 else ifeq ($(ENV),staging)
-	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.staging.yaml
+  AWS_ENDPOINT := http://host.docker.internal:4566
+	MEM_LIMIT := 1g
 else ifeq ($(ENV),dev)
-	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.dev.yaml
-else ifeq ($(ENV),local)
-	COMPOSE_FILE := $(BUILD_DIR)/docker-compose.local.yaml
-else
-	$(error Invalid environment: $(ENV). Valid options are: local, dev, staging, prod)
+  AWS_ENDPOINT := http://host.docker.internal:4566
+	LOG_LEVEL := info
+else 
+  AWS_ENDPOINT := http://host.docker.internal:4566
+  RESTART_POLICY := no
+	LOG_LEVEL := debug
 endif
 
-.PHONY: help build run bootstrap stop restart clean test_all test_unit test_int test_e2e fmt
+.PHONY: build run bootstrap stop restart clean test_all test_unit test_e2e
 
 help:
 	@echo "Targets:"
@@ -37,11 +41,9 @@ help:
 	@echo "  stop              Stop and remove container stack"
 	@echo "  restart           Restart container stack"
 	@echo "  clean             Prune Docker and remove local build artifacts"
-	@echo "  test_all          Run all tests"
+	@echo "  test              Run all tests"
 	@echo "  test_unit         Run unit tests"
-	@echo "  test_int          Run integration tests"
 	@echo "  test_e2e          Run end-to-end tests"
-	@echo "  fmt               Run go fmt and go vet"
 	@echo ""
 	@echo "Supported Environments:"
 	@echo "  local    - Local development (no AWS)"
@@ -58,36 +60,36 @@ help:
 	@echo "  make stop ENV=dev"
 	@echo "  make restart ENV=staging"
 
-# Build Docker image
 build:
-	@echo "Building $(APP):$(TAG) for ENV=$(ENV)"
+	@echo "Building $(APP_NAME):$(TAG) for ENV=$(ENV)"
 	@docker build \
-		-f $(BUILD_DIR)/Dockerfile \
-		-t $(APP):$(TAG) \
+		-f $(DOCKERFILE) \
+		-t $(APP_NAME):$(TAG) \
 		--build-arg ENV=$(ENV) \
 		..
 
-# Run container with docker-compose
 run:
-	@echo "Starting $(APP) for ENV=$(ENV) using $(COMPOSE_FILE)"
-	@ENV=$(ENV) docker compose -f $(COMPOSE_FILE) up -d
+	@echo "Starting $(APP_NAME) for ENV=$(ENV)"
+	@ENV=$(ENV) \
+	APP_NAME=$(APP_NAME) \
+	VERSION=$(VERSION) \
+	LOG_LEVEL=$(LOG_LEVEL) \
+	AWS_REGION=$(AWS_REGION) \
+	AWS_ENDPOINT=$(AWS_ENDPOINT) \
+	AWS_SECRET_PREFIX=$(AWS_SECRET_PREFIX) \
+	AWS_SECRET_BATCH=$(AWS_SECRET_BATCH) \
+	RESTART_POLICY=$(RESTART_POLICY) \
+	MEM_LIMIT=$(MEM_LIMIT) \
+	docker compose -p $(APP_NAME)-$(ENV) -f $(COMPOSE_FILE) up -d
 
-# Stop container
 stop:
-	@echo "Stopping $(APP) for ENV=$(ENV)"
+	@echo "Stopping $(APP_NAME) for ENV=$(ENV)"
 	ENV=$(ENV) docker compose -f $(COMPOSE_FILE) down --remove-orphans
 
-# Bootstrap: build + run
-bootstrap:
-	$(MAKE) build ENV=$(ENV)
-	$(MAKE) run ENV=$(ENV)
+bootstrap: build run
 
-# Restart container
-restart:
-	$(MAKE) stop ENV=$(ENV)
-	$(MAKE) run ENV=$(ENV)
+restart: stop run
 
-# Clean up Docker resources
 clean:
 	docker container prune -f
 	docker image prune -f
@@ -95,31 +97,8 @@ clean:
 	docker volume prune -f
 	rm -rf bin
 
-# Deployment shortcuts
-deploy-local:
-	$(MAKE) bootstrap ENV=local
+test: go test ./... -race
 
-deploy-dev:
-	$(MAKE) bootstrap ENV=dev
+test_unit: go test -short ./...
 
-deploy-staging:
-	$(MAKE) bootstrap ENV=staging
-
-deploy-prod:
-	$(MAKE) bootstrap ENV=prod
-
-# Test Commands
-test_all:
-	go test ./... -race
-
-test_unit:
-	go test -short ./...
-
-test_int:
-	go test -tags=integration ./...
-
-test_e2e:
-	go test -tags=e2e ./...
-
-fmt:
-	go fmt ./... && go vet ./...
+test_e2e: go test -tags=e2e ./...

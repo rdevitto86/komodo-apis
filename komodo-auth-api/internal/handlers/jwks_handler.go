@@ -10,9 +10,9 @@ import (
 	"math/big"
 	"net/http"
 
-	"komodo-forge-apis-go/config"
-	httpErr "komodo-forge-apis-go/http/errors"
-	logger "komodo-forge-apis-go/logging/runtime"
+	"komodo-forge-sdk-go/config"
+	httpErr "komodo-forge-sdk-go/http/errors"
+	logger "komodo-forge-sdk-go/logging/runtime"
 )
 
 type JWK struct {
