@@ -3,16 +3,15 @@ package telemetry
 import (
 	"fmt"
 	httpErr "komodo-forge-sdk-go/http/errors"
+	httpUtils "komodo-forge-sdk-go/http/utils"
 	logger "komodo-forge-sdk-go/logging/runtime"
 	"net/http"
 	"time"
-
-	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
 func TelemetryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wtr http.ResponseWriter, req *http.Request) {
-		resWtr := chimw.NewWrapResponseWriter(wtr, req.ProtoMajor)
+		resWtr := &httpUtils.ResponseWriter{ResponseWriter: wtr}
 		start := time.Now()
 
 		defer func() {
@@ -20,14 +19,11 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 
 			// Recover from panics and ensure a 500 is sent if nothing written.
 			if rec := recover(); rec != nil {
-				reqID := chimw.GetReqID(req.Context())
-				if reqID == "" { reqID = "unknown" }
+				reqID := httpUtils.GetRequestID(req)
+				_ = reqID
 				
 				// Safely check status
-				status := 0
-				if resWtr != nil {
-					status = resWtr.Status()
-				}
+				status := resWtr.Status
 				if status == 0 {
 					httpErr.SendError(
 						wtr, req, httpErr.Global.Internal, httpErr.WithDetail("error occured while logging telemetry"),
@@ -38,19 +34,14 @@ func TelemetryMiddleware(next http.Handler) http.Handler {
 				return
 			}
 
-			status := 0
-			bytesWritten := 0
-			if resWtr != nil {
-				status = resWtr.Status()
-				bytesWritten = resWtr.BytesWritten()
-			}
+			status := resWtr.Status
+			bytesWritten := resWtr.BytesWritten
 			if status == 0 {
 				status = http.StatusOK
 			}
 
 			// Get request ID safely
-			reqID := chimw.GetReqID(req.Context())
-			if reqID == "" { reqID = "unknown" }
+			reqID := httpUtils.GetRequestID(req)
 
 			payload := map[string]any{
 				"request_id": reqID,

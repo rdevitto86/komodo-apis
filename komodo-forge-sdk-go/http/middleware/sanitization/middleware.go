@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 )
 
 // Sanitizes HTTP requests from malicious content
@@ -38,13 +36,21 @@ func sanitizeHeaders(req *http.Request) {
 	}
 }
 
-// Sanitizes Chi URL parameters
+// Sanitizes URL path parameters using stdlib routing (Go 1.22+)
 func sanitizePathParams(req *http.Request) {
-	ctx := chi.RouteContext(req.Context())
-	if ctx == nil { return }
+	pattern := req.Pattern
+	if pattern == "" { return }
 
-	for i, param := range ctx.URLParams.Values {
-		ctx.URLParams.Values[i] = sanitizeString(param)
+	// Extract wildcard names from the pattern (e.g. "GET /item/{sku}" -> ["sku"])
+	for _, seg := range strings.Split(pattern, "/") {
+		if len(seg) > 2 && seg[0] == '{' && seg[len(seg)-1] == '}' {
+			name := seg[1 : len(seg)-1]
+			// Strip trailing ... for catch-all wildcards
+			name = strings.TrimSuffix(name, "...")
+			if val := req.PathValue(name); val != "" {
+				req.SetPathValue(name, sanitizeString(val))
+			}
+		}
 	}
 }
 

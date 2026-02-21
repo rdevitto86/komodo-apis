@@ -5,8 +5,6 @@ import (
 	ctxKeys "komodo-forge-sdk-go/http/context"
 	httpReq "komodo-forge-sdk-go/http/request"
 	"net/http"
-
-	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
 // Ensures each request has a unique X-Request-ID in both header and context
@@ -16,15 +14,14 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 		var reqID string
 		if rid := req.Header.Get("X-Request-ID"); rid != "" {
 			reqID = rid
-		} else if rid := chimw.GetReqID(req.Context()); rid != "" {
+		} else if rid, ok := req.Context().Value(ctxKeys.REQUEST_ID_KEY).(string); ok && rid != "" {
 			reqID = rid
 		} else {
 			reqID = httpReq.GenerateRequestId()
 		}
 
 		req.Header.Set("X-Request-ID", reqID)
-		ctx := context.WithValue(req.Context(), chimw.RequestIDKey, reqID)
-		ctx = context.WithValue(ctx, ctxKeys.REQUEST_ID_KEY, reqID)
+		ctx := context.WithValue(req.Context(), ctxKeys.REQUEST_ID_KEY, reqID)
 		wtr.Header().Set("X-Request-ID", reqID)
 
 		next.ServeHTTP(wtr, req.WithContext(ctx))

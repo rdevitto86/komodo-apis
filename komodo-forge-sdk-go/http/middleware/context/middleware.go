@@ -6,8 +6,6 @@ import (
 	httpReq "komodo-forge-sdk-go/http/request"
 	"net/http"
 	"time"
-
-	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
 // Enriches request context with common values
@@ -18,15 +16,12 @@ func ContextMiddleware(next http.Handler) http.Handler {
 		var reqID string
 		if rid := req.Header.Get("X-Request-ID"); rid != "" {
 			reqID = rid
-		} else if rid := chimw.GetReqID(ctx); rid != "" {
-			reqID = rid
 		} else if rid, ok := ctx.Value(ctxKeys.REQUEST_ID_KEY).(string); ok && rid != "" {
 			reqID = rid
 		} else {
 			reqID = httpReq.GenerateRequestId()
 		}
 
-		ctx = context.WithValue(ctx, chimw.RequestIDKey, reqID)
 		ctx = context.WithValue(ctx, ctxKeys.REQUEST_ID_KEY, reqID)
 		req.Header.Set("X-Request-ID", reqID)
 		wtr.Header().Set("X-Request-ID", reqID)

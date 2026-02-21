@@ -158,3 +158,20 @@ var Payment = PaymentErrors{
 	RefundFailed:      ErrorCode{ID: "120005", Status: http.StatusInternalServerError, Message: "Refund failed"},
 	ProviderError:     ErrorCode{ID: "120006", Status: http.StatusBadGateway, Message: "Payment provider error"},
 }
+
+// 60xxx errors
+type ShopItemErrors struct {
+	ItemNotFound         ErrorCode
+	InventoryUnavailable ErrorCode
+	InvalidSKU           ErrorCode
+	SuggestionFailed     ErrorCode
+	StorageError         ErrorCode
+}
+
+var ShopItem = ShopItemErrors{
+	ItemNotFound:         ErrorCode{ID: "60001", Status: http.StatusNotFound, Message: "Shop item not found"},
+	InventoryUnavailable: ErrorCode{ID: "60002", Status: http.StatusServiceUnavailable, Message: "Inventory data unavailable"},
+	InvalidSKU:           ErrorCode{ID: "60003", Status: http.StatusBadRequest, Message: "Invalid SKU format"},
+	SuggestionFailed:     ErrorCode{ID: "60004", Status: http.StatusInternalServerError, Message: "Failed to generate suggestions"},
+	StorageError:         ErrorCode{ID: "60005", Status: http.StatusInternalServerError, Message: "Storage retrieval error"},
+}
