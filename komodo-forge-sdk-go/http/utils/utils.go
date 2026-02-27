@@ -13,25 +13,23 @@ type ResponseWriter struct {
 	WroteHeader  bool
 }
 
-func (rw *ResponseWriter) WriteHeader(code int) {
-	if !rw.WroteHeader {
-		rw.Status = code
-		rw.WroteHeader = true
+func (wtr *ResponseWriter) WriteHeader(code int) {
+	if !wtr.WroteHeader {
+		wtr.Status = code
+		wtr.WroteHeader = true
 	}
-	rw.ResponseWriter.WriteHeader(code)
+	wtr.ResponseWriter.WriteHeader(code)
 }
 
-func (rw *ResponseWriter) Write(b []byte) (int, error) {
-	if !rw.WroteHeader {
-		rw.WriteHeader(http.StatusOK)
-	}
-	n, err := rw.ResponseWriter.Write(b)
-	rw.BytesWritten += n
-	return n, err
+func (wtr *ResponseWriter) Write(b []byte) (int, error) {
+	if !wtr.WroteHeader { wtr.WriteHeader(http.StatusOK) }
+	num, err := wtr.ResponseWriter.Write(b)
+	wtr.BytesWritten += num
+	return num, err
 }
 
-func (rw *ResponseWriter) Unwrap() http.ResponseWriter {
-	return rw.ResponseWriter
+func (wtr *ResponseWriter) Unwrap() http.ResponseWriter {
+	return wtr.ResponseWriter
 }
 
 func GetRequestID(req *http.Request) string {

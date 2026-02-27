@@ -48,8 +48,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && pnpm run copy-types",
-    "copy-types": "mkdir -p dist/shared/types && cp src/shared/types/*.d.ts dist/shared/types/",
+    "build": "tsc",
     "clean": "rm -rf dist",
     "rebuild": "pnpm run clean && pnpm run build",
     "prepublishOnly": "pnpm run rebuild",
@@ -69,12 +68,12 @@
   "author": "Komodo Future Solutions",
   "license": "ISC",
   "devDependencies": {
-    "@eslint/json": "^0.14.0",
-    "@types/node": "^25.0.2",
-    "eslint": "^9.39.2",
-    "globals": "^16.5.0",
+    "@eslint/json": "^1.0.1",
+    "@types/node": "^25.3.0",
+    "eslint": "^10.0.2",
+    "globals": "^17.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.50.0"
+    "typescript-eslint": "^8.56.1"
   }
 }

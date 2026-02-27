@@ -1,21 +1,35 @@
-version: '3.8'
+name: komodo-ssr-engine-svelte
+
 services:
   ssr-api:
-    build: .
-    ports:
-      - "7010:7010"
+    image: ${APP_NAME}:${VERSION:-latest}
+    build:
+      context: ..
+      dockerfile: komodo-ssr-engine-svelte/Dockerfile
+    restart: ${RESTART_POLICY:-no}
+    deploy:
+      resources:
+        limits:
+          memory: ${MEM_LIMIT:-512M}
     environment:
-      PORT: 7010
-      NODE_ENV: development
-      AWS_REGION: us-east-1
+      PORT: 7001
+      NODE_ENV: ${NODE_ENV:-development}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ENDPOINT: ${AWS_ENDPOINT}
       S3_CONTENT_BUCKET: ${S3_CONTENT_BUCKET}
       CLOUDFRONT_DISTRIBUTION_ID: ${CLOUDFRONT_DISTRIBUTION_ID}
-    secrets:
-      - aws_access_key
-      - aws_secret_key
-
-secrets:
-  aws_access_key:
-    file: ./secrets/aws_access_key.txt
-  aws_secret_key:
-    file: ./secrets/aws_secret_key.txt
+    ports:
+      - "7001:7001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:7001/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - komodo-network
+networks:
+  komodo-network:
+    external: true

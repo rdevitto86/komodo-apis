@@ -1,11 +1,11 @@
-name: komodo-user-api
+name: komodo-communications-api
 
 services:
-  user-api:
+  communications-api:
     image: ${APP_NAME}:${VERSION:-latest}
     build:
       context: ..
-      dockerfile: komodo-user-api/Dockerfile
+      dockerfile: komodo-communications-api/Dockerfile
       args:
         ENV: ${ENV:-local}
     restart: ${RESTART_POLICY:-no}
@@ -16,7 +16,7 @@ services:
     environment:
       APP_NAME: ${APP_NAME}
       ENV: ${ENV}
-      PORT: 7150
+      PORT: 7081
       VERSION: ${VERSION}
       AWS_REGION: ${AWS_REGION}
       AWS_ENDPOINT: ${AWS_ENDPOINT}
@@ -24,11 +24,11 @@ services:
       AWS_SECRET_BATCH: ${AWS_SECRET_BATCH}
       EVAL_RULES_PATH: /app/config/validation_rules.yml
     ports:
-      - "7150:7150"
+      - "7081:7081"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:7150/health"]
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:7081/health"]
       interval: 30s
       timeout: 5s
       retries: 3

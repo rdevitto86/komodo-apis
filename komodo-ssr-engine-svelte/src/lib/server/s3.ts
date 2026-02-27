@@ -1,30 +1,21 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { logger } from '../logger';
+import { getCachedTemplate, setCachedTemplate } from './cache';
 
 const BUCKET = process.env.S3_CONTENT_BUCKET!;
-
-interface CachedContent {
-  data: any;
-  expires: number;
-}
-
-const contentCache = new Map<string, CachedContent>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION || "us-east-1"
 });
 
 export async function getPageContentFromS3(pageKey: string) {
-  const cached = contentCache.get(pageKey);
+  // L1 (LRU) → L2 (SQLite read-only) — handled inside getCachedTemplate
+  const cached = getCachedTemplate(pageKey);
+  if (cached) return cached.content;
 
-  if (cached && cached.expires > Date.now()) {
-    logger.info(`[Cache HIT] ${pageKey}`);
-    return cached.data;
-  }
+  // L3: Fetch from S3
+  logger.info(`[S3 Fetch] ${pageKey}`);
 
-  logger.info(`[Cache MISS] Fetching ${pageKey} from S3`);
-  
   try {
     const command = new GetObjectCommand({
       Bucket: BUCKET,
@@ -33,26 +24,41 @@ export async function getPageContentFromS3(pageKey: string) {
 
     const response = await s3.send(command);
     const bodyString = await response.Body?.transformToString();
-    
+
     if (!bodyString) {
       throw new Error(`Empty response for ${pageKey}`);
     }
 
     const content = JSON.parse(bodyString);
 
-    contentCache.set(pageKey, {
-      data: content,
-      expires: Date.now() + CACHE_TTL
-    });
+    // Store in SQLite cache for subsequent requests
+    setCachedTemplate(pageKey, content);
 
     return content;
   } catch (error) {
     logger.error(`Failed to fetch ${pageKey} from S3:`, error as Error);
-    
-    if (cached) {
-      logger.info(`[Fallback] Using stale cache for ${pageKey}`);
-      return cached.data;
-    }
     throw error;
+  }
+}
+
+export async function fetchAndCacheFromS3(pageKey: string, isPreloaded: boolean = false): Promise<void> {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: BUCKET,
+      Key: `pages/${pageKey}.json`
+    });
+
+    const response = await s3.send(command);
+    const bodyString = await response.Body?.transformToString();
+
+    if (!bodyString) {
+      logger.error(`[Warmup] Empty response for ${pageKey}`);
+      return;
+    }
+
+    const content = JSON.parse(bodyString);
+    setCachedTemplate(pageKey, content, { isPreloaded, ttlMs: isPreloaded ? 24 * 60 * 60 * 1000 : undefined });
+  } catch (error) {
+    logger.error(`[Warmup] Failed to fetch ${pageKey}:`, error as Error);
   }
 }
